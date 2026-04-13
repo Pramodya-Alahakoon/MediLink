@@ -123,17 +123,17 @@ function SignIn() {
   return (
     <div className="w-full flex lg:flex-row flex-col min-h-screen bg-gradient-to-br from-slate-50 to-white">
       {/* Hero Image Section - Left Side */}
-      <div className="lg:w-1/2 lg:block hidden relative overflow-hidden bg-gradient-to-br from-blue-500 to-indigo-600">
+      <div className="lg:w-1/2 lg:block hidden relative overflow-hidden bg-gradient-to-br from-primary to-tertiary">
         <img
           src={hero}
           alt="Medical Background"
-          className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity duration-300"
+          className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity duration-300"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-tertiary/60 via-transparent to-transparent"></div>
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-white text-center px-8">
+          <div className="text-white text-center px-8 font-manrope">
             <h2 className="text-4xl font-bold mb-4">Welcome Back</h2>
-            <p className="text-lg opacity-90">Access your medical records and appointments</p>
+            <p className="text-lg opacity-90 font-inter">Access your medical records and appointments</p>
           </div>
         </div>
       </div>
@@ -148,9 +148,9 @@ function SignIn() {
         {/* Sign In Container */}
         <div className="max-w-md w-full">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-3">Sign In</h1>
-            <p className="text-gray-600 text-base leading-relaxed">
+          <div className="mb-8 font-manrope">
+            <h1 className="text-4xl font-bold text-tertiary mb-3">Sign In</h1>
+            <p className="text-neutral text-base leading-relaxed font-inter">
               Enter your credentials to access your account
             </p>
           </div>
@@ -170,7 +170,7 @@ function SignIn() {
                 className={`w-full px-4 py-3 text-base font-medium placeholder-gray-400 bg-white border-2 rounded-lg transition-all duration-300 focus:outline-none ${
                   touched.email && emailError
                     ? "border-red-500 focus:border-red-600 focus:ring-2 focus:ring-red-200"
-                    : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 group-hover:border-gray-400"
+                    : "border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 group-hover:border-neutral/30 font-inter"
                 }`}
               />
               {touched.email && emailError && (
@@ -200,7 +200,7 @@ function SignIn() {
                 className={`w-full px-4 py-3 text-base font-medium placeholder-gray-400 bg-white border-2 rounded-lg transition-all duration-300 focus:outline-none pr-12 ${
                   touched.password && passwordError
                     ? "border-red-500 focus:border-red-600 focus:ring-2 focus:ring-red-200"
-                    : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 group-hover:border-gray-400"
+                    : "border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 group-hover:border-neutral/30 font-inter"
                 }`}
               />
               <button
@@ -227,7 +227,7 @@ function SignIn() {
           <div className="flex justify-end mb-8">
             <Link
               to="/forgot-password"
-              className="text-blue-600 text-sm font-semibold hover:text-blue-700 hover:underline transition-colors"
+              className="text-primary text-sm font-semibold hover:text-primary/80 hover:underline transition-colors font-inter"
             >
               Forgot password?
             </Link>
@@ -237,7 +237,7 @@ function SignIn() {
           <button
             onClick={handleFormSubmit}
             disabled={isLoading}
-            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:hover:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+            className="w-full bg-primary hover:bg-primary/90 disabled:bg-neutral/40 text-white font-bold py-4 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-95 disabled:hover:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl font-manrope uppercase tracking-wider"
           >
             {isLoading && (
               <svg
@@ -264,13 +264,13 @@ function SignIn() {
           </button>
 
           {/* Sign Up Link */}
-          <p className="text-center text-gray-600 text-sm font-medium mt-6">
+          <p className="text-center text-neutral text-sm font-medium mt-8 font-inter">
             Don't have an account?{" "}
             <button
               onClick={() => navigate("/signup")}
-              className="text-blue-600 font-semibold hover:text-blue-700 hover:underline transition-colors"
+              className="text-primary font-bold hover:text-primary/80 transition-colors"
             >
-              Sign Up
+              Sign Up Join Us
             </button>
           </p>
 

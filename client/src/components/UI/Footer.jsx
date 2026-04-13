@@ -1,138 +1,126 @@
-import {
-  FaFacebookF,
-  FaTwitter,
-  FaInstagram,
-  FaLinkedinIn,
-} from "react-icons/fa";
-import Logo from "@/components/UI/Logo";
+import { Link } from "react-router-dom";
+import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from "react-icons/fa";
+import { FiMail, FiPhone, FiMapPin } from "react-icons/fi";
+
+const quickLinks = [
+  { label: "Home", path: "/" },
+  { label: "Appointments", path: "/appointments" },
+  { label: "About Us", path: "/about" },
+  { label: "Contact", path: "/contact" },
+];
+
+const legalLinks = [
+  { label: "Privacy Policy", path: "/privacy" },
+  { label: "Terms of Service", path: "/terms" },
+];
+
+const socials = [
+  { icon: FaFacebookF, href: "https://facebook.com", label: "Facebook" },
+  { icon: FaTwitter, href: "https://twitter.com", label: "Twitter" },
+  { icon: FaInstagram, href: "https://instagram.com", label: "Instagram" },
+  { icon: FaLinkedinIn, href: "https://linkedin.com", label: "LinkedIn" },
+];
+
+const contactInfo = [
+  { icon: FiMapPin, text: "123 Healthcare Way, Colombo 03, Sri Lanka" },
+  { icon: FiPhone, text: "+94 11 234 5678" },
+  { icon: FiMail, text: "support@medilink.cloud" },
+];
 
 function Footer() {
+  const year = new Date().getFullYear();
+
   return (
-    <footer className="bg-event-navy text-event-white w-full">
-      <div className="w-full px-6 md:px-8 lg:px-12 py-12">
-        {/* Top Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Logo and Description */}
-          <div className="space-y-4">
-            <div className="h-12 w-auto">
-              <Logo className="w-12 h-12" />
-            </div>
-            <p className="text-event-gray text-sm mt-4 max-w-[300px]">
-              Creating unforgettable experiences with world-class facilities and
-              expert support.
+    <footer className="bg-tertiary text-white w-full font-inter">
+      <div className="container mx-auto px-5 sm:px-8 lg:px-16 xl:px-20 pt-16 pb-8">
+
+        {/* ── TOP GRID ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+
+          {/* Brand column */}
+          <div className="sm:col-span-2 lg:col-span-1">
+            <Link to="/" className="inline-flex items-center gap-2.5 mb-5 group">
+              <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/40">
+                <span className="text-white font-black text-base font-manrope">M</span>
+              </div>
+              <span className="font-bold text-lg text-white font-manrope tracking-tight">
+                Medi<span className="text-primary">Link</span>
+              </span>
+            </Link>
+            <p className="text-white/50 text-sm leading-relaxed mb-6 max-w-xs">
+              An AI-enabled distributed healthcare appointment system. Connecting patients with world-class care — instantly.
             </p>
+            {/* Social icons */}
+            <div className="flex gap-3">
+              {socials.map((s) => {
+                const Icon = s.icon;
+                return (
+                  <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label}
+                    className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:bg-primary hover:text-white hover:border-primary transition-all duration-300"
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                  </a>
+                );
+              })}
+            </div>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-bold mb-4">Quick Links</h3>
-            <ul className="space-y-2">
-              <li>
-                <a
-                  href="/"
-                  className="text-event-gray hover:text-white transition-colors hover:text-underline"
-                >
-                  Home
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/about"
-                  className="text-event-gray hover:text-white transition-colors"
-                >
-                  About
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/events"
-                  className="text-event-gray hover:text-white transition-colors"
-                >
-                  Events
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/contact"
-                  className="text-event-gray hover:text-white transition-colors"
-                >
-                  Contact
-                </a>
-              </li>
+            <h3 className="text-xs font-bold uppercase tracking-widest text-white/40 mb-5">Platform</h3>
+            <ul className="space-y-3">
+              {quickLinks.map((l) => (
+                <li key={l.label}>
+                  <Link to={l.path} className="text-white/60 hover:text-white text-sm transition-colors duration-200">
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-widest text-white/40 mb-5">Legal</h3>
+            <ul className="space-y-3">
+              {legalLinks.map((l) => (
+                <li key={l.label}>
+                  <Link to={l.path} className="text-white/60 hover:text-white text-sm transition-colors duration-200">
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           {/* Contact Info */}
           <div>
-            <h3 className="text-lg font-bold mb-4">Contact Us</h3>
-            <ul className="space-y-2 text-event-gray">
-              <li>123 Event Street</li>
-              <li>Colombo, Sri Lanka</li>
-              <li>Phone: +94 123 456 789</li>
-              <li>Email: info@eventpro.com</li>
+            <h3 className="text-xs font-bold uppercase tracking-widest text-white/40 mb-5">Contact</h3>
+            <ul className="space-y-4">
+              {contactInfo.map((c, i) => {
+                const Icon = c.icon;
+                return (
+                  <li key={i} className="flex items-start gap-3">
+                    <Icon className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                    <span className="text-white/60 text-sm leading-relaxed">{c.text}</span>
+                  </li>
+                );
+              })}
             </ul>
-          </div>
-
-          {/* Social Media */}
-          <div>
-            <h3 className="text-lg font-bold mb-4">Follow Us</h3>
-            <div className="flex space-x-4">
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-event-white/10 p-2 rounded-full hover:bg-event-red transition-colors"
-              >
-                <FaFacebookF className="w-5 h-5" />
-              </a>
-              <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-event-white/10 p-2 rounded-full hover:bg-event-red transition-colors"
-              >
-                <FaTwitter className="w-5 h-5" />
-              </a>
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-event-white/10 p-2 rounded-full hover:bg-event-red transition-colors"
-              >
-                <FaInstagram className="w-5 h-5" />
-              </a>
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-event-white/10 p-2 rounded-full hover:bg-event-red transition-colors"
-              >
-                <FaLinkedinIn className="w-5 h-5" />
-              </a>
-            </div>
           </div>
         </div>
 
-        {/* Bottom Section */}
-        <div className="border-t border-event-white/10 mt-12 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-event-gray text-sm">
-              © {new Date().getFullYear()} EventPro. All rights reserved.
-            </p>
-            <div className="flex space-x-4 mt-4 md:mt-0">
-              <a
-                href="/privacy"
-                className="text-event-gray hover:text-white text-sm transition-colors"
-              >
-                Privacy Policy
-              </a>
-              <a
-                href="/terms"
-                className="text-event-gray hover:text-white text-sm transition-colors"
-              >
-                Terms of Service
-              </a>
-            </div>
+        {/* ── DIVIDER ── */}
+        <div className="border-t border-white/10 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <p className="text-white/30 text-xs font-inter">
+            © {year} MediLink Cloud. All rights reserved.
+          </p>
+          <div className="flex items-center gap-5">
+            {legalLinks.map((l) => (
+              <Link key={l.label} to={l.path} className="text-white/30 hover:text-white/70 text-xs transition-colors duration-200">
+                {l.label}
+              </Link>
+            ))}
           </div>
         </div>
       </div>
