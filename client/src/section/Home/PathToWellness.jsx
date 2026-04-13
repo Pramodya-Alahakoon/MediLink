@@ -29,7 +29,7 @@ const steps = [
 
 function PathToWellness() {
   return (
-    <section className="py-24 bg-white relative overflow-hidden">
+    <section className="py-24 bg-white dark:bg-slate-900 relative overflow-hidden transition-colors duration-300">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute bottom-0 left-1/2 w-[800px] h-[300px] bg-primary/5 rounded-full blur-[100px] -translate-x-1/2" />
       </div>
@@ -45,7 +45,7 @@ function PathToWellness() {
           <span className="inline-block text-xs font-bold font-inter tracking-widest text-primary uppercase mb-3">
             How It Works
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold font-manrope text-tertiary leading-tight">
+          <h2 className="text-3xl sm:text-4xl font-extrabold font-manrope text-tertiary dark:text-white leading-tight">
             Your path to wellness
             <br />in 4 simple steps.
           </h2>
@@ -71,19 +71,19 @@ function PathToWellness() {
               <div className={`relative w-[76px] h-[76px] rounded-2xl flex items-center justify-center mb-6 z-10 transition-all duration-300 ${
                 index === 0
                   ? "bg-primary shadow-xl shadow-primary/30"
-                  : "bg-secondary border-2 border-gray-100 group-hover:border-primary/20"
+                  : "bg-secondary dark:bg-slate-800 border-2 border-gray-100 dark:border-slate-700 group-hover:border-primary/20 dark:group-hover:border-primary/30"
               }`}>
                 <span className="text-2xl">{step.icon}</span>
                 {/* Small number label */}
                 <span className={`absolute -top-2 -right-2 text-[10px] font-bold font-manrope w-5 h-5 rounded-full flex items-center justify-center ${
-                  index === 0 ? "bg-white text-primary" : "bg-primary text-white"
+                  index === 0 ? "bg-white dark:bg-slate-900 text-primary" : "bg-primary text-white"
                 }`}>
                   {index + 1}
                 </span>
               </div>
 
-              <h3 className="font-bold font-manrope text-tertiary text-base mb-2">{step.title}</h3>
-              <p className="text-sm text-neutral font-inter leading-relaxed max-w-[180px]">{step.desc}</p>
+              <h3 className="font-bold font-manrope text-tertiary dark:text-white text-base mb-2">{step.title}</h3>
+              <p className="text-sm text-neutral dark:text-slate-400 font-inter leading-relaxed max-w-[180px]">{step.desc}</p>
             </motion.div>
           ))}
         </div>

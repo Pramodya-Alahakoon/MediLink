@@ -8,7 +8,7 @@ const services = [
     icon: FiCalendar,
     title: "Instant Booking",
     desc: "Book with any specialist in under 60 seconds — no phone calls, no waiting rooms.",
-    accent: "bg-blue-50",
+    accent: "bg-blue-50 dark:bg-blue-500/10",
     iconColor: "text-blue-500",
   },
   {
@@ -16,7 +16,7 @@ const services = [
     icon: FiVideo,
     title: "Video Consults",
     desc: "High-definition virtual care from home. Secure, private, and instant.",
-    accent: "bg-violet-50",
+    accent: "bg-violet-50 dark:bg-violet-500/10",
     iconColor: "text-violet-500",
   },
   {
@@ -32,7 +32,7 @@ const services = [
     icon: FiLock,
     title: "Secure Records",
     desc: "End-to-end encrypted medical history, always accessible, always private.",
-    accent: "bg-green-50",
+    accent: "bg-green-50 dark:bg-green-500/10",
     iconColor: "text-green-600",
   },
   {
@@ -40,7 +40,7 @@ const services = [
     icon: FiBookOpen,
     title: "E-Prescriptions",
     desc: "Receive digital prescriptions sent directly to you or your local pharmacy.",
-    accent: "bg-orange-50",
+    accent: "bg-orange-50 dark:bg-orange-500/10",
     iconColor: "text-orange-500",
   },
   {
@@ -48,7 +48,7 @@ const services = [
     icon: FiFileText,
     title: "Health Reports",
     desc: "AI-generated health summaries that help you understand your results clearly.",
-    accent: "bg-pink-50",
+    accent: "bg-pink-50 dark:bg-pink-500/10",
     iconColor: "text-pink-500",
   },
 ];
@@ -65,7 +65,7 @@ const item = {
 
 function Services() {
   return (
-    <section className="py-24 bg-white relative overflow-hidden">
+    <section className="py-24 bg-white dark:bg-slate-900 relative overflow-hidden transition-colors duration-300">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 right-0 w-[600px] h-[400px] bg-primary/5 rounded-full blur-[120px]" />
       </div>
@@ -82,12 +82,12 @@ function Services() {
           <span className="inline-block text-xs font-bold font-inter tracking-widest text-primary uppercase mb-3">
             What We Offer
           </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-manrope text-tertiary leading-tight mb-4">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-manrope text-tertiary dark:text-white leading-tight mb-4">
             Everything you need for
             <br />
             <span className="text-primary">modern healthcare.</span>
           </h2>
-          <p className="text-neutral font-inter text-base lg:text-lg max-w-xl">
+          <p className="text-neutral dark:text-slate-400 font-inter text-base lg:text-lg max-w-xl">
             A complete, AI-powered suite designed around your comfort and convenience.
           </p>
         </motion.div>
@@ -107,18 +107,18 @@ function Services() {
                 key={svc.id}
                 variants={item}
                 whileHover={{ y: -5 }}
-                className="group relative bg-secondary rounded-3xl p-7 overflow-hidden cursor-default border border-transparent hover:border-primary/10 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
+                className="group relative bg-secondary dark:bg-slate-800 rounded-3xl p-7 overflow-hidden cursor-default border border-transparent hover:border-primary/10 dark:hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
               >
                 {/* Hover glow */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/0 group-hover:from-primary/3 group-hover:to-primary/0 transition-all duration-500 rounded-3xl" />
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/0 group-hover:from-primary/3 dark:group-hover:from-primary/10 group-hover:to-primary/0 transition-all duration-500 rounded-3xl" />
 
                 <div className={`w-12 h-12 rounded-2xl ${svc.accent} flex items-center justify-center mb-5 flex-shrink-0`}>
                   <Icon className={`w-5 h-5 ${svc.iconColor}`} />
                 </div>
-                <h3 className="text-lg font-bold font-manrope text-tertiary mb-2">
+                <h3 className="text-lg font-bold font-manrope text-tertiary dark:text-white mb-2">
                   {svc.title}
                 </h3>
-                <p className="text-neutral font-inter text-sm leading-relaxed">
+                <p className="text-neutral dark:text-slate-400 font-inter text-sm leading-relaxed">
                   {svc.desc}
                 </p>
               </motion.div>

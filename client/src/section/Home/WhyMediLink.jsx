@@ -3,15 +3,15 @@ import { FiShield, FiZap, FiCheckCircle, FiCreditCard, FiHeadphones, FiArrowRigh
 import { Link } from "react-router-dom";
 
 const features = [
-  { icon: FiShield, title: "End-to-End Privacy", desc: "Military-grade encryption on all medical data.", accent: "bg-blue-50", color: "text-blue-500" },
-  { icon: FiCheckCircle, title: "Verified Experts", desc: "All doctors are rigorously background-checked.", accent: "bg-green-50", color: "text-green-500" },
-  { icon: FiZap, title: "Lightning Fast", desc: "From symptom to specialist in under 2 minutes.", accent: "bg-yellow-50", color: "text-yellow-500" },
+  { icon: FiShield, title: "End-to-End Privacy", desc: "Military-grade encryption on all medical data.", accent: "bg-blue-50 dark:bg-blue-500/10", color: "text-blue-500" },
+  { icon: FiCheckCircle, title: "Verified Experts", desc: "All doctors are rigorously background-checked.", accent: "bg-green-50 dark:bg-green-500/10", color: "text-green-500" },
+  { icon: FiZap, title: "Lightning Fast", desc: "From symptom to specialist in under 2 minutes.", accent: "bg-yellow-50 dark:bg-yellow-500/10", color: "text-yellow-500" },
   { icon: FiCreditCard, title: "Flexible Payments", desc: "Supports insurance, cards, and digital wallets.", accent: "bg-primary/5", color: "text-primary" },
 ];
 
 function WhyMediLink() {
   return (
-    <section className="py-24 bg-secondary relative overflow-hidden">
+    <section className="py-24 bg-[#F8FAFB] dark:bg-slate-900 relative overflow-hidden transition-colors duration-300">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/2 right-0 w-[500px] h-[500px] bg-primary/8 rounded-full blur-[100px] -translate-y-1/2" />
       </div>
@@ -33,7 +33,7 @@ function WhyMediLink() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-manrope text-tertiary leading-tight mb-6"
+              className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-manrope text-tertiary dark:text-white leading-tight mb-6"
             >
               Healthcare that
               <br />
@@ -45,7 +45,7 @@ function WhyMediLink() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.15 }}
-              className="text-neutral font-inter text-base lg:text-lg leading-relaxed mb-10 max-w-md"
+              className="text-neutral dark:text-slate-400 font-inter text-base lg:text-lg leading-relaxed mb-10 max-w-md"
             >
               We built MediLink Cloud to remove every friction between you and the care you deserve — no paperwork, no hold music, no confusion.
             </motion.p>
@@ -56,14 +56,14 @@ function WhyMediLink() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
-              className="w-full max-w-md bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex items-start gap-4 mb-8"
+              className="w-full max-w-md bg-white dark:bg-slate-800 rounded-3xl p-6 border border-gray-100 dark:border-slate-700 shadow-sm flex items-start gap-4 mb-8"
             >
               <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center flex-shrink-0 shadow-md shadow-primary/25">
                 <FiHeadphones className="text-white w-5 h-5" />
               </div>
               <div>
-                <p className="font-bold font-manrope text-tertiary mb-1">24 / 7 Human Support</p>
-                <p className="text-sm text-neutral font-inter leading-relaxed">Real people, always available. Medical + technical help, any hour of the day.</p>
+                <p className="font-bold font-manrope text-tertiary dark:text-white mb-1">24 / 7 Human Support</p>
+                <p className="text-sm text-neutral dark:text-slate-400 font-inter leading-relaxed">Real people, always available. Medical + technical help, any hour of the day.</p>
               </div>
             </motion.div>
 
@@ -95,13 +95,13 @@ function WhyMediLink() {
                     viewport={{ once: true }}
                     transition={{ duration: 0.45, delay: index * 0.1 }}
                     whileHover={{ y: -4 }}
-                    className={`bg-white rounded-3xl p-6 border border-gray-100 hover:border-primary/10 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 ${index % 2 === 1 ? 'sm:mt-8' : ''}`}
+                    className={`bg-white dark:bg-slate-800 rounded-3xl p-6 border border-gray-100 dark:border-slate-700 hover:border-primary/10 dark:hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 ${index % 2 === 1 ? 'sm:mt-8' : ''}`}
                   >
                     <div className={`w-12 h-12 rounded-2xl ${feat.accent} flex items-center justify-center mb-5`}>
                       <Icon className={`w-5 h-5 ${feat.color}`} />
                     </div>
-                    <h3 className="font-bold font-manrope text-tertiary text-base mb-2">{feat.title}</h3>
-                    <p className="text-sm text-neutral font-inter leading-relaxed">{feat.desc}</p>
+                    <h3 className="font-bold font-manrope text-tertiary dark:text-white text-base mb-2">{feat.title}</h3>
+                    <p className="text-sm text-neutral dark:text-slate-400 font-inter leading-relaxed">{feat.desc}</p>
                   </motion.div>
                 );
               })}

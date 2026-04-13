@@ -103,13 +103,13 @@ const sections = [
 
 function renderContent(text) {
   return text.split(/\*\*(.*?)\*\*/g).map((part, i) =>
-    i % 2 === 1 ? <strong key={i} className="text-tertiary font-semibold">{part}</strong> : part
+    i % 2 === 1 ? <strong key={i} className="text-tertiary dark:text-white font-semibold">{part}</strong> : part
   );
 }
 
 function Terms() {
   return (
-    <main className="bg-[#F8FAFB] overflow-x-hidden">
+    <main className="bg-[#F8FAFB] dark:bg-slate-900 overflow-x-hidden transition-colors duration-300">
       {/* ── HERO ── */}
       <section className="relative pt-36 pb-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-tertiary via-[#0c3756] to-primary opacity-95" />
@@ -136,11 +136,11 @@ function Terms() {
 
             {/* Sticky Table of Contents */}
             <aside className="w-full lg:w-64 flex-shrink-0">
-              <div className="lg:sticky lg:top-28 bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
-                <p className="text-xs font-bold font-inter uppercase tracking-widest text-neutral mb-4">On this page</p>
+              <div className="lg:sticky lg:top-28 bg-white dark:bg-slate-800 rounded-3xl border border-gray-100 dark:border-slate-700 p-6 shadow-sm transition-colors duration-300">
+                <p className="text-xs font-bold font-inter uppercase tracking-widest text-neutral dark:text-slate-400 mb-4">On this page</p>
                 <nav className="space-y-1">
                   {sections.map((s) => (
-                    <a key={s.id} href={`#${s.id}`} className="block text-sm font-inter text-neutral hover:text-primary hover:bg-primary/5 rounded-lg px-3 py-2 transition-all">
+                    <a key={s.id} href={`#${s.id}`} className="block text-sm font-inter text-neutral dark:text-slate-400 hover:text-primary dark:hover:text-primary hover:bg-primary/5 rounded-lg px-3 py-2 transition-all">
                       {s.title}
                     </a>
                   ))}
@@ -152,9 +152,9 @@ function Terms() {
             <div className="flex-1 min-w-0">
               {/* Intro callout */}
               <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-                className="bg-primary/5 border border-primary/20 rounded-2xl p-6 mb-8"
+                className="bg-primary/5 dark:bg-primary/10 border border-primary/20 dark:border-primary/30 rounded-2xl p-6 mb-8 transition-colors duration-300"
               >
-                <p className="text-tertiary font-inter text-sm leading-relaxed">
+                <p className="text-tertiary dark:text-slate-200 font-inter text-sm leading-relaxed">
                   These Terms of Service ("Terms") govern your access to and use of MediLink Cloud, its AI tools, patient portal, and booking services (collectively, the "Service"). Please read them carefully before using the platform.
                 </p>
               </motion.div>
@@ -162,14 +162,14 @@ function Terms() {
               <div className="space-y-6">
                 {sections.map((section, i) => (
                   <motion.div key={section.id} id={section.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.04 }}
-                    className="bg-white rounded-3xl border border-gray-100 p-7 sm:p-8 hover:border-primary/10 transition-colors"
+                    className="bg-white dark:bg-slate-800 rounded-3xl border border-gray-100 dark:border-slate-700 p-7 sm:p-8 hover:border-primary/10 dark:hover:border-primary/30 transition-colors duration-300"
                   >
-                    <h2 className="text-lg font-extrabold font-manrope text-tertiary mb-4">{section.title}</h2>
+                    <h2 className="text-lg font-extrabold font-manrope text-tertiary dark:text-white mb-4">{section.title}</h2>
                     <ul className="space-y-3">
                       {section.content.map((c, j) => (
                         <li key={j} className="flex items-start gap-3">
                           <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
-                          <p className="text-neutral font-inter text-sm leading-relaxed">{renderContent(c)}</p>
+                          <p className="text-neutral dark:text-slate-400 font-inter text-sm leading-relaxed">{renderContent(c)}</p>
                         </li>
                       ))}
                     </ul>
@@ -179,11 +179,11 @@ function Terms() {
 
               {/* Bottom contact */}
               <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
-                className="mt-8 bg-white rounded-3xl border border-gray-100 p-7 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5"
+                className="mt-8 bg-white dark:bg-slate-800 rounded-3xl border border-gray-100 dark:border-slate-700 p-7 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 transition-colors duration-300"
               >
                 <div>
-                  <p className="font-bold font-manrope text-tertiary mb-1">Questions about our Terms?</p>
-                  <p className="text-sm text-neutral font-inter">Contact our legal team at <a href="mailto:legal@medilink.cloud" className="text-primary hover:underline">legal@medilink.cloud</a></p>
+                  <p className="font-bold font-manrope text-tertiary dark:text-white mb-1">Questions about our Terms?</p>
+                  <p className="text-sm text-neutral dark:text-slate-400 font-inter">Contact our legal team at <a href="mailto:legal@medilink.cloud" className="text-primary hover:underline">legal@medilink.cloud</a></p>
                 </div>
                 <Link to="/contact">
                   <button className="group flex items-center gap-2 text-primary font-semibold font-inter text-sm whitespace-nowrap hover:gap-3 transition-all">
