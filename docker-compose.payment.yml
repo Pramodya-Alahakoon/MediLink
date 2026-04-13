@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    container_name: medilink-payment-service
+    ports:
+      - "3005:3005"
+    environment:
+      NODE_ENV: development
+      PORT: 3005
+      MONGO_URI: mongodb://mongo:27017/medilink-payments
+      JWT_SECRET: ${JWT_SECRET:-your_jwt_secret_change_in_production}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      AUTH_SERVICE_URL: http://auth-service:3001
+      APPOINTMENT_SERVICE_URL: http://appointment-service:3002
+      DOCTOR_SERVICE_URL: http://doctor-service:3003
+      PATIENT_SERVICE_URL: http://patient-service:3004
+      LOG_LEVEL: debug
+    depends_on:
+      - mongo
+    volumes:
+      - ./payment-service:/app
+      - /app/node_modules
+    networks:
+      - medilink-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3005/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:7.0
+    container_name: medilink-mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-password}
+    volumes:
+      - mongo_data:/data/db
+      - mongo_config:/data/configdb
+    networks:
+      - medilink-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+networks:
+  medilink-network:
+    driver: bridge
+
+volumes:
+  mongo_data:
+  mongo_config:

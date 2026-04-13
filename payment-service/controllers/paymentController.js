@@ -1,0 +1,255 @@
+import Payment from '../models/Payment.js';
+import Transaction from '../models/Transaction.js';
+import { 
+  createCheckoutSession as createStripeCheckoutSession,
+  retrieveCheckoutSession,
+  createRefund,
+} from '../utils/stripeUtils.js';
+import {
+  PaymentNotFoundError,
+  InvalidPaymentError,
+  StripeError,
+  RefundError,
+} from '../errors/customErrors.js';
+import { v4 as uuidv4 } from 'uuid';
+
+// Create checkout session for payment
+export const createCheckoutSession = async (req, res, next) => {
+  try {
+    const { amount, paymentType, referenceId, metadata } = req.body;
+    const userId = req.user?.userId || req.user?._id;
+
+    if (!amount || !paymentType || !referenceId) {
+      throw new InvalidPaymentError('Missing required fields: amount, paymentType, referenceId');
+    }
+
+    // Build success and cancel URLs
+    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const successUrl = `${baseUrl}/payment/success?sessionId={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = `${baseUrl}/payment/cancel`;
+
+    // Create Stripe checkout session
+    const checkoutSession = await createStripeCheckoutSession(
+      amount,
+      paymentType,
+      referenceId,
+      {
+        ...metadata,
+        description: `${paymentType} payment for user ${userId}`,
+      },
+      successUrl,
+      cancelUrl
+    );
+
+    // Save payment to DB with pending status
+    const payment = await Payment.create({
+      userId,
+      amount,
+      currency: 'usd',
+      paymentType,
+      referenceId,
+      stripeCheckoutSessionId: checkoutSession.id,
+      status: 'pending',
+      metadata: {
+        ...metadata,
+        description: `${paymentType} payment`,
+      },
+    });
+
+    res.status(201).json({
+      status: 'success',
+      data: {
+        paymentId: payment._id,
+        checkoutSessionId: checkoutSession.id,
+        checkoutUrl: checkoutSession.url,
+        amount: amount,
+        currency: 'usd',
+      },
+    });
+  } catch (error) {
+    next(new StripeError(error.message));
+  }
+};
+
+// Verify checkout session completion
+export const verifyCheckoutSession = async (req, res, next) => {
+  try {
+    const { sessionId } = req.body;
+    const userId = req.user?.userId || req.user?._id;
+
+    if (!sessionId) {
+      throw new InvalidPaymentError('Checkout session ID is required');
+    }
+
+    // Retrieve session from Stripe
+    const session = await retrieveCheckoutSession(sessionId);
+
+    if (session.payment_status !== 'paid') {
+      throw new InvalidPaymentError(`Checkout session not completed. Status: ${session.payment_status}`);
+    }
+
+    // Find and update payment in DB
+    const payment = await Payment.findOneAndUpdate(
+      { stripeCheckoutSessionId: sessionId },
+      {
+        status: 'completed',
+        stripeChargeId: session.payment_intent?.charges?.data[0]?.id,
+        paymentMethod: 'card',
+        receipt: {
+          url: session.payment_intent?.charges?.data[0]?.receipt_url,
+          receiptNumber: session.id,
+        },
+      },
+      { new: true }
+    );
+
+    if (!payment) {
+      throw new PaymentNotFoundError();
+    }
+
+    // Verify user owns this payment
+    if (payment.userId.toString() !== userId.toString()) {
+      throw new InvalidPaymentError('Unauthorized access to this payment');
+    }
+
+    // Create transaction record
+    await Transaction.create({
+      paymentId: payment._id,
+      transactionId: uuidv4(),
+      amount: payment.amount,
+      fee: payment.amount * 0.029 + 0.30,
+      netAmount: payment.amount - (payment.amount * 0.029 + 0.30),
+      status: 'success',
+      stripeEventId: session.payment_intent?.id,
+    });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Payment verified successfully',
+      data: {
+        paymentId: payment._id,
+        amount: payment.amount,
+        status: payment.status,
+      },
+    });
+  } catch (error) {
+    next(error instanceof InvalidPaymentError || error instanceof PaymentNotFoundError
+      ? error
+      : new StripeError(error.message));
+  }
+};
+
+// Get payment by ID
+export const getPayment = async (req, res, next) => {
+  try {
+    const { paymentId } = req.params;
+    const userId = req.user?.userId || req.user?._id;
+
+    const payment = await Payment.findById(paymentId);
+
+    if (!payment) {
+      throw new PaymentNotFoundError();
+    }
+
+    // Verify ownership
+    if (payment.userId.toString() !== userId.toString()) {
+      throw new InvalidPaymentError('Unauthorized access to this payment');
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: payment,
+    });
+  } catch (error) {
+    next(error instanceof PaymentNotFoundError || error instanceof InvalidPaymentError
+      ? error
+      : new PaymentNotFoundError());
+  }
+};
+
+// Get all payments for a user
+export const getUserPayments = async (req, res, next) => {
+  try {
+    const userId = req.user?.userId || req.user?._id;
+    const { page = 1, limit = 10, status } = req.query;
+
+    const query = { userId };
+    if (status) query.status = status;
+
+    const payments = await Payment.find(query)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await Payment.countDocuments(query);
+
+    res.status(200).json({
+      status: 'success',
+      data: payments,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Refund a payment
+export const refundPayment = async (req, res, next) => {
+  try {
+    const { paymentId } = req.params;
+    const { amount, reason } = req.body;
+    const userId = req.user?.userId || req.user?._id;
+
+    const payment = await Payment.findById(paymentId);
+
+    if (!payment) {
+      throw new PaymentNotFoundError();
+    }
+
+    if (payment.userId.toString() !== userId.toString()) {
+      throw new InvalidPaymentError('Unauthorized access to this payment');
+    }
+
+    if (payment.status === 'refunded') {
+      throw new RefundError('Payment already refunded');
+    }
+
+    if (payment.status !== 'completed') {
+      throw new RefundError('Only completed payments can be refunded');
+    }
+
+    // Create refund with Stripe
+    const refund = await createRefund(payment.stripeChargeId, amount, reason);
+
+    // Update payment status
+    payment.status = 'refunded';
+    await payment.save();
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Payment refund initiated',
+      data: {
+        paymentId: payment._id,
+        refundAmount: amount || payment.amount,
+        stripeRefundId: refund.id,
+      },
+    });
+  } catch (error) {
+    next(error instanceof RefundError || error instanceof PaymentNotFoundError || error instanceof InvalidPaymentError
+      ? error
+      : new RefundError(error.message));
+  }
+};
+
+export default {
+  createCheckoutSession,
+  verifyCheckoutSession,
+  getPayment,
+  getUserPayments,
+  refundPayment,
+};
