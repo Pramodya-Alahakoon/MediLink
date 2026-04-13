@@ -77,25 +77,29 @@ function SignIn() {
 
     setIsLoading(true);
     try {
-      const response = await customFetch.post("/auth/login", {
+      const response = await customFetch.post('/api/auth/login', {
         email,
-        password,
+        password
       });
 
-      if (response.data) {
+      //localhost:5000/api/auth/login
+
+      if (response.data.token) {
+        // Save token to localStorage
+        localStorage.setItem('token', response.data.token);
         toast.success("Login successful!");
 
         // Delay navigation to show toast
         setTimeout(() => {
-          // Navigate based on user role
-          switch (response.data.user.role) {
+          // Navigate based on patient role
+          switch (response.data.patient.role) {
             case "admin":
               navigate("/");
               break;
             case "organizer":
               navigate("/organizer-dashboard");
               break;
-            case "user":
+            case "patient":
               navigate("/");
               break;
             default:
