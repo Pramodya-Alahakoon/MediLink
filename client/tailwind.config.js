@@ -7,13 +7,25 @@ export default {
   theme: {
     extend: {
       colors: {
-        accent: "#aa3bff",
-        "accent-light": "rgba(170, 59, 255, 0.1)",
-        "accent-border": "rgba(170, 59, 255, 0.5)",
+        primary: "#007A7C",
+        secondary: "#F8FAFB",
+        tertiary: "#102A43",
+        neutral: "#627D98",
+        accent: "#007A7C",
+        "accent-light": "rgba(0, 122, 124, 0.1)",
+        "accent-border": "rgba(0, 122, 124, 0.5)",
+        // Backwards compatibility for old "event-" names
+        "event-navy": "#102A43",
+        "event-white": "#F8FAFB",
+        "event-charcoal": "#102A43",
+        "event-red": "#007A7C",
+        "event-gray": "#627D98",
       },
       fontFamily: {
-        sans: ["system-ui", "Segoe UI", "Roboto", "sans-serif"],
-        heading: ["system-ui", "Segoe UI", "Roboto", "sans-serif"],
+        manrope: ["Manrope", "sans-serif"],
+        inter: ["Inter", "sans-serif"],
+        sans: ["Inter", "system-ui", "sans-serif"],
+        heading: ["Manrope", "sans-serif"],
       },
       animation: {
         float: "float 3s ease-in-out infinite",

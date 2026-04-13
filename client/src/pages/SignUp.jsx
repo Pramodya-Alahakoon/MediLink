@@ -166,17 +166,17 @@ function SignUp() {
   return (
     <div className="w-full flex lg:flex-row flex-col min-h-screen bg-gradient-to-br from-slate-50 to-white">
       {/* Hero Image Section - Left Side */}
-      <div className="lg:w-1/2 lg:block hidden relative overflow-hidden bg-gradient-to-br from-green-500 to-emerald-600">
+      <div className="lg:w-1/2 lg:block hidden relative overflow-hidden bg-gradient-to-br from-primary to-tertiary">
         <img
           src={hero}
           alt="Medical Background"
-          className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity duration-300"
+          className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity duration-300"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-tertiary/60 via-transparent to-transparent"></div>
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-white text-center px-8">
+          <div className="text-white text-center px-8 font-manrope">
             <h2 className="text-4xl font-bold mb-4">Join Us Today</h2>
-            <p className="text-lg opacity-90">Create an account to access healthcare services</p>
+            <p className="text-lg opacity-90 font-inter">Create an account to access healthcare services</p>
           </div>
         </div>
       </div>
@@ -191,9 +191,9 @@ function SignUp() {
         {/* Sign Up Container */}
         <div className="w-full max-w-xl lg:max-w-md">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-3">Create Account</h1>
-            <p className="text-gray-600 text-base leading-relaxed">
+          <div className="mb-8 font-manrope">
+            <h1 className="text-4xl font-bold text-tertiary mb-3">Create Account</h1>
+            <p className="text-neutral text-base leading-relaxed font-inter">
               Sign up to get started with your account
             </p>
           </div>
@@ -214,7 +214,7 @@ function SignUp() {
                 className={`w-full px-4 py-3 text-base font-medium placeholder-gray-400 bg-white border-2 rounded-lg transition-all duration-300 focus:outline-none ${
                   touched.fullName && errors.fullName
                     ? "border-red-500 focus:border-red-600 focus:ring-2 focus:ring-red-200"
-                    : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 group-hover:border-gray-400"
+                    : "border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 group-hover:border-neutral/30 font-inter"
                 }`}
               />
               {touched.fullName && errors.fullName && (
@@ -245,7 +245,7 @@ function SignUp() {
                 className={`w-full px-4 py-3 text-base font-medium placeholder-gray-400 bg-white border-2 rounded-lg transition-all duration-300 focus:outline-none ${
                   touched.email && errors.email
                     ? "border-red-500 focus:border-red-600 focus:ring-2 focus:ring-red-200"
-                    : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 group-hover:border-gray-400"
+                    : "border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 group-hover:border-neutral/30 font-inter"
                 }`}
               />
               {touched.email && errors.email && (
@@ -276,7 +276,7 @@ function SignUp() {
                 className={`w-full px-4 py-3 text-base font-medium placeholder-gray-400 bg-white border-2 rounded-lg transition-all duration-300 focus:outline-none ${
                   touched.phoneNumber && errors.phoneNumber
                     ? "border-red-500 focus:border-red-600 focus:ring-2 focus:ring-red-200"
-                    : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 group-hover:border-gray-400"
+                    : "border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 group-hover:border-neutral/30 font-inter"
                 }`}
               />
               {touched.phoneNumber && errors.phoneNumber && (
@@ -307,7 +307,7 @@ function SignUp() {
                 className={`w-full px-4 py-3 text-base font-medium placeholder-gray-400 bg-white border-2 rounded-lg transition-all duration-300 focus:outline-none ${
                   touched.location && errors.location
                     ? "border-red-500 focus:border-red-600 focus:ring-2 focus:ring-red-200"
-                    : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 group-hover:border-gray-400"
+                    : "border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 group-hover:border-neutral/30 font-inter"
                 }`}
               />
               {touched.location && errors.location && (
@@ -338,7 +338,7 @@ function SignUp() {
                 className={`w-full px-4 py-3 text-base font-medium placeholder-gray-400 bg-white border-2 rounded-lg transition-all duration-300 focus:outline-none pr-12 ${
                   touched.password && errors.password
                     ? "border-red-500 focus:border-red-600 focus:ring-2 focus:ring-red-200"
-                    : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 group-hover:border-gray-400"
+                    : "border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 group-hover:border-neutral/30 font-inter"
                 }`}
               />
               <button
@@ -404,7 +404,7 @@ function SignUp() {
           <button
             onClick={handleFormSubmit}
             disabled={isLoading}
-            className="w-full bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:hover:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+            className="w-full bg-primary hover:bg-primary/90 disabled:bg-neutral/40 text-white font-bold py-4 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-95 disabled:hover:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl font-manrope uppercase tracking-wider"
           >
             {isLoading && (
               <svg
@@ -431,11 +431,11 @@ function SignUp() {
           </button>
 
           {/* Sign In Link */}
-          <p className="text-center text-gray-600 text-sm font-medium mt-6">
+          <p className="text-center text-neutral text-sm font-medium mt-8 font-inter">
             Already have an account?{" "}
             <button
               onClick={() => navigate("/signin")}
-              className="text-blue-600 font-semibold hover:text-blue-700 hover:underline transition-colors"
+              className="text-primary font-bold hover:text-primary/80 transition-colors"
             >
               Sign In
             </button>
