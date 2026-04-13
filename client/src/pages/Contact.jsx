@@ -48,7 +48,7 @@ function Contact() {
   };
 
   return (
-    <main className="bg-[#F8FAFB] overflow-x-hidden">
+    <main className="bg-[#F8FAFB] dark:bg-slate-900 overflow-x-hidden transition-colors duration-300">
       {/* ── HERO ── */}
       <section className="relative pt-36 pb-24 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-tertiary via-[#0c3756] to-primary opacity-95" />
@@ -77,42 +77,42 @@ function Contact() {
             <div className="w-full lg:w-2/5 flex flex-col gap-6">
               <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
                 <span className="inline-block text-xs font-bold font-inter tracking-widest text-primary uppercase mb-3">Contact Details</span>
-                <h2 className="text-2xl sm:text-3xl font-extrabold font-manrope text-tertiary leading-tight mb-2">Let's start a conversation.</h2>
-                <p className="text-neutral font-inter text-sm leading-relaxed">We respond to every message. No chatbots, no scripted replies — real humans who care about your experience.</p>
+                <h2 className="text-2xl sm:text-3xl font-extrabold font-manrope text-tertiary dark:text-white leading-tight mb-2">Let's start a conversation.</h2>
+                <p className="text-neutral dark:text-slate-400 font-inter text-sm leading-relaxed">We respond to every message. No chatbots, no scripted replies — real humans who care about your experience.</p>
               </motion.div>
 
               <div className="space-y-4">
                 {contactDetails.map((d, i) => {
                   const Icon = d.icon;
                   return (
-                    <motion.div key={d.label} custom={i} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}
-                      className="bg-white rounded-2xl p-5 border border-gray-100 flex items-start gap-4 hover:shadow-md hover:border-primary/10 transition-all"
-                    >
-                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Icon className="w-4 h-4 text-primary" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-semibold text-neutral font-inter uppercase tracking-wide mb-0.5">{d.label}</p>
-                        {d.link ? (
-                          <a href={d.link} className="text-tertiary font-inter text-sm font-medium hover:text-primary transition-colors">{d.value}</a>
-                        ) : (
-                          <p className="text-tertiary font-inter text-sm">{d.value}</p>
-                        )}
-                      </div>
-                    </motion.div>
+                      <motion.div key={d.label} custom={i} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}
+                        className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-gray-100 dark:border-slate-700 flex items-start gap-4 hover:shadow-md hover:border-primary/10 dark:hover:border-slate-600 transition-all"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 dark:bg-slate-900 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <Icon className="w-4 h-4 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-neutral dark:text-slate-400 font-inter uppercase tracking-wide mb-0.5">{d.label}</p>
+                          {d.link ? (
+                            <a href={d.link} className="text-tertiary dark:text-white font-inter text-sm font-medium hover:text-primary dark:hover:text-primary transition-colors">{d.value}</a>
+                          ) : (
+                            <p className="text-tertiary dark:text-white font-inter text-sm">{d.value}</p>
+                          )}
+                        </div>
+                      </motion.div>
                   );
                 })}
               </div>
 
               {/* Social links */}
-              <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="bg-white rounded-2xl p-5 border border-gray-100">
-                <p className="text-xs font-bold font-inter uppercase tracking-widest text-neutral mb-4">Follow MediLink Cloud</p>
+              <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-gray-100 dark:border-slate-700">
+                <p className="text-xs font-bold font-inter uppercase tracking-widest text-neutral dark:text-slate-400 mb-4">Follow MediLink Cloud</p>
                 <div className="flex gap-3">
                   {socials.map((s) => {
                     const Icon = s.icon;
                     return (
                       <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label}
-                        className="w-10 h-10 rounded-xl bg-secondary border border-gray-100 flex items-center justify-center text-tertiary hover:bg-primary hover:text-white hover:border-primary transition-all"
+                        className="w-10 h-10 rounded-xl bg-secondary dark:bg-slate-900 border border-gray-100 dark:border-slate-800 flex items-center justify-center text-tertiary dark:text-white hover:bg-primary dark:hover:bg-primary hover:text-white hover:border-primary transition-all"
                       >
                         <Icon className="w-4 h-4" />
                       </a>
@@ -124,34 +124,34 @@ function Contact() {
 
             {/* ─ RIGHT: Form ─ */}
             <motion.div initial={{ opacity: 0, x: 24 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="w-full lg:w-3/5">
-              <div className="bg-white rounded-3xl border border-gray-100 p-8 sm:p-10 shadow-sm">
+              <div className="bg-white dark:bg-slate-800 rounded-3xl border border-gray-100 dark:border-slate-700 p-8 sm:p-10 shadow-sm transition-colors duration-300">
                 {!submitted ? (
                   <>
-                    <h3 className="text-xl font-extrabold font-manrope text-tertiary mb-1">Send us a message</h3>
-                    <p className="text-sm text-neutral font-inter mb-8">Fill in the form below — we'll get back to you within 24 hours.</p>
+                    <h3 className="text-xl font-extrabold font-manrope text-tertiary dark:text-white mb-1">Send us a message</h3>
+                    <p className="text-sm text-neutral dark:text-slate-400 font-inter mb-8">Fill in the form below — we'll get back to you within 24 hours.</p>
 
                     <form onSubmit={handleSubmit} className="space-y-5">
                       {/* Name + Email */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div>
-                          <label className="block text-xs font-semibold text-neutral font-inter uppercase tracking-wide mb-2">Full Name</label>
+                          <label className="block text-xs font-semibold text-neutral dark:text-slate-400 font-inter uppercase tracking-wide mb-2">Full Name</label>
                           <input name="name" value={form.name} onChange={handleChange} required type="text" placeholder="Jane Smith"
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-[#F8FAFB] text-tertiary font-inter text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder-neutral/50"
+                            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-[#F8FAFB] dark:bg-slate-900/50 text-tertiary dark:text-white font-inter text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder-neutral/50 dark:placeholder-slate-500"
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-semibold text-neutral font-inter uppercase tracking-wide mb-2">Email Address</label>
+                          <label className="block text-xs font-semibold text-neutral dark:text-slate-400 font-inter uppercase tracking-wide mb-2">Email Address</label>
                           <input name="email" value={form.email} onChange={handleChange} required type="email" placeholder="jane@example.com"
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-[#F8FAFB] text-tertiary font-inter text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder-neutral/50"
+                            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-[#F8FAFB] dark:bg-slate-900/50 text-tertiary dark:text-white font-inter text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder-neutral/50 dark:placeholder-slate-500"
                           />
                         </div>
                       </div>
 
                       {/* Topic */}
                       <div>
-                        <label className="block text-xs font-semibold text-neutral font-inter uppercase tracking-wide mb-2">Topic</label>
+                        <label className="block text-xs font-semibold text-neutral dark:text-slate-400 font-inter uppercase tracking-wide mb-2">Topic</label>
                         <select name="topic" value={form.topic} onChange={handleChange} required
-                          className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-[#F8FAFB] text-tertiary font-inter text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none cursor-pointer"
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-[#F8FAFB] dark:bg-slate-900/50 text-tertiary dark:text-white font-inter text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none cursor-pointer"
                         >
                           <option value="">Select a topic…</option>
                           {topics.map((t) => <option key={t} value={t}>{t}</option>)}
@@ -160,9 +160,9 @@ function Contact() {
 
                       {/* Message */}
                       <div>
-                        <label className="block text-xs font-semibold text-neutral font-inter uppercase tracking-wide mb-2">Message</label>
+                        <label className="block text-xs font-semibold text-neutral dark:text-slate-400 font-inter uppercase tracking-wide mb-2">Message</label>
                         <textarea name="message" value={form.message} onChange={handleChange} required rows={5} placeholder="Tell us how we can help you…"
-                          className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-[#F8FAFB] text-tertiary font-inter text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder-neutral/50 resize-none"
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-[#F8FAFB] dark:bg-slate-900/50 text-tertiary dark:text-white font-inter text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder-neutral/50 dark:placeholder-slate-500 resize-none"
                         />
                       </div>
 
@@ -182,12 +182,12 @@ function Contact() {
                   </>
                 ) : (
                   <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-12">
-                    <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-6">
+                    <div className="w-16 h-16 rounded-full bg-green-50 dark:bg-green-500/10 flex items-center justify-center mx-auto mb-6">
                       <FiCheckCircle className="w-8 h-8 text-green-500" />
                     </div>
-                    <h3 className="text-2xl font-extrabold font-manrope text-tertiary mb-3">Message received!</h3>
-                    <p className="text-neutral font-inter text-sm max-w-xs mx-auto leading-relaxed">
-                      Thank you, <span className="font-semibold text-tertiary">{form.name}</span>. We'll reach out to <span className="font-semibold text-primary">{form.email}</span> within 24 hours.
+                    <h3 className="text-2xl font-extrabold font-manrope text-tertiary dark:text-white mb-3">Message received!</h3>
+                    <p className="text-neutral dark:text-slate-400 font-inter text-sm max-w-xs mx-auto leading-relaxed">
+                      Thank you, <span className="font-semibold text-tertiary dark:text-white">{form.name}</span>. We'll reach out to <span className="font-semibold text-primary">{form.email}</span> within 24 hours.
                     </p>
                     <button onClick={() => { setSubmitted(false); setForm({ name: "", email: "", topic: "", message: "" }); }}
                       className="mt-8 text-sm text-primary font-semibold font-inter hover:underline underline-offset-4"
@@ -206,13 +206,13 @@ function Contact() {
       <section className="pb-20">
         <div className="container mx-auto px-5 sm:px-8 lg:px-16 xl:px-20">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-            className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm"
+            className="bg-white dark:bg-slate-800 rounded-3xl border border-gray-100 dark:border-slate-700 overflow-hidden shadow-sm transition-colors"
           >
-            <div className="bg-gradient-to-br from-primary/5 to-tertiary/5 h-60 flex items-center justify-center">
+            <div className="bg-gradient-to-br from-primary/5 to-tertiary/5 dark:from-slate-900/50 dark:to-slate-900/50 h-60 flex items-center justify-center border-y border-white/50 dark:border-slate-700/50">
               <div className="text-center">
                 <FiMapPin className="w-10 h-10 text-primary mx-auto mb-3" />
-                <p className="font-manrope font-bold text-tertiary">123 Healthcare Way, Colombo 03, Sri Lanka</p>
-                <p className="text-sm text-neutral font-inter mt-1">Interactive map coming soon</p>
+                <p className="font-manrope font-bold text-tertiary dark:text-white">123 Healthcare Way, Colombo 03, Sri Lanka</p>
+                <p className="text-sm text-neutral dark:text-slate-400 font-inter mt-1">Interactive map coming soon</p>
               </div>
             </div>
           </motion.div>

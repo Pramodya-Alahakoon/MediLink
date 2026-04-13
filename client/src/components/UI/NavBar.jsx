@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiLogIn, FiUserPlus, FiLogOut, FiUser, FiMenu, FiX } from "react-icons/fi";
+import { FiLogIn, FiUserPlus, FiLogOut, FiUser, FiMenu, FiX, FiSun, FiMoon } from "react-icons/fi";
 import Logo from "@/components/UI/Logo";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import customFetch from "@/utils/customFetch";
+import { useTheme } from "@/context/ThemeContext";
 import { toast } from "react-hot-toast";
 import Modal from "@/components/UI/Modal";
 
@@ -21,6 +22,7 @@ function NavComponent() {
   const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -64,7 +66,7 @@ function NavComponent() {
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? "py-3" : "py-5"}`}>
         <div className={`mx-4 sm:mx-6 lg:mx-10 rounded-2xl transition-all duration-500 px-4 sm:px-6 lg:px-8 ${
           isScrolled
-            ? "glass shadow-xl shadow-tertiary/5"
+            ? "glass shadow-xl shadow-tertiary/5 dark:bg-slate-900/80 dark:border-white/10 dark:shadow-slate-900/20"
             : "bg-transparent"
         }`}>
           <div className="flex items-center justify-between h-14">
@@ -73,13 +75,13 @@ function NavComponent() {
               <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
                 <span className="text-white font-black text-base font-manrope">M</span>
               </div>
-              <span className="font-bold text-lg text-tertiary font-manrope tracking-tight hidden sm:block">
+              <span className="font-bold text-lg text-tertiary dark:text-white font-manrope tracking-tight hidden sm:block">
                 Medi<span className="text-primary">Link</span>
               </span>
             </Link>
 
             {/* Desktop Nav - center */}
-            <nav className="hidden lg:flex items-center gap-1 bg-white/50 backdrop-blur-sm rounded-full px-2 py-1.5 border border-white/60">
+            <nav className="hidden lg:flex items-center gap-1 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm rounded-full px-2 py-1.5 border border-white/60 dark:border-white/10">
               {NavItems.map((item) => (
                 <Link
                   key={item.title}
@@ -87,7 +89,7 @@ function NavComponent() {
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 font-inter ${
                     isActive(item.path)
                       ? "bg-primary text-white shadow-md shadow-primary/30"
-                      : "text-tertiary/70 hover:text-tertiary hover:bg-white/80"
+                      : "text-tertiary/70 dark:text-slate-300 hover:text-tertiary dark:hover:text-white hover:bg-white/80 dark:hover:bg-slate-700/50"
                   }`}
                 >
                   {item.title}
@@ -97,17 +99,26 @@ function NavComponent() {
 
             {/* Desktop Buttons */}
             <div className="hidden lg:flex items-center gap-3">
+              {/* Theme Toggle Button */}
+              <button
+                onClick={toggleTheme}
+                aria-label="Toggle Dark Mode"
+                className="w-10 h-10 rounded-full flex items-center justify-center bg-white/50 dark:bg-slate-800 border border-white/60 dark:border-slate-700 text-tertiary dark:text-yellow-400 hover:bg-white/80 dark:hover:bg-slate-700 transition-colors"
+              >
+                {theme === "dark" ? <FiSun className="w-4 h-4" /> : <FiMoon className="w-4 h-4" />}
+              </button>
+
               {currentUser ? (
                 <>
                   <Link to={`/${currentUser.role}-dashboard`}>
-                    <button className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-tertiary hover:text-primary transition-colors font-inter">
+                    <button className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-tertiary dark:text-slate-200 hover:text-primary dark:hover:text-primary transition-colors font-inter">
                       <FiUser className="w-4 h-4" />
                       Dashboard
                     </button>
                   </Link>
                   <button
                     onClick={() => setIsLogoutModalOpen(true)}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold bg-tertiary text-white hover:bg-tertiary/90 transition-all font-inter shadow-sm"
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold bg-tertiary dark:bg-slate-700 text-white hover:bg-tertiary/90 dark:hover:bg-slate-600 transition-all font-inter shadow-sm"
                   >
                     <FiLogOut className="w-4 h-4" />
                     Logout
@@ -116,7 +127,7 @@ function NavComponent() {
               ) : (
                 <>
                   <Link to="/signin">
-                    <button className="px-4 py-2 rounded-full text-sm font-medium text-tertiary/70 hover:text-tertiary transition-colors font-inter">
+                    <button className="px-4 py-2 rounded-full text-sm font-medium text-tertiary/70 dark:text-slate-300 hover:text-tertiary dark:hover:text-white transition-colors font-inter">
                       Sign In
                     </button>
                   </Link>
@@ -130,13 +141,21 @@ function NavComponent() {
               )}
             </div>
 
-            {/* Mobile Menu Toggle */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden w-9 h-9 rounded-xl bg-white/80 glass flex items-center justify-center text-tertiary hover:text-primary transition-colors"
-            >
-              {isMobileMenuOpen ? <FiX className="w-5 h-5" /> : <FiMenu className="w-5 h-5" />}
-            </button>
+            {/* Mobile Menu & Theme Toggle */}
+            <div className="lg:hidden flex items-center gap-2">
+              <button
+                onClick={toggleTheme}
+                className="w-9 h-9 rounded-xl bg-white/80 dark:bg-slate-800 flex items-center justify-center text-tertiary dark:text-yellow-400 hover:text-primary dark:hover:text-yellow-300 transition-colors"
+              >
+                {theme === "dark" ? <FiSun className="w-5 h-5" /> : <FiMoon className="w-5 h-5" />}
+              </button>
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="w-9 h-9 rounded-xl bg-white/80 dark:bg-slate-800 flex items-center justify-center text-tertiary dark:text-slate-200 hover:text-primary dark:hover:text-white transition-colors border border-transparent dark:border-slate-700"
+              >
+                {isMobileMenuOpen ? <FiX className="w-5 h-5" /> : <FiMenu className="w-5 h-5" />}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -148,7 +167,7 @@ function NavComponent() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
-              className="lg:hidden mx-4 sm:mx-6 mt-2 glass rounded-2xl shadow-2xl border border-white/60 overflow-hidden"
+              className="lg:hidden mx-4 sm:mx-6 mt-2 glass dark:bg-slate-800/95 rounded-2xl shadow-2xl border border-white/60 dark:border-slate-700 overflow-hidden"
             >
               <div className="p-4 space-y-1">
                 {NavItems.map((item) => (
@@ -158,7 +177,7 @@ function NavComponent() {
                     className={`block px-4 py-3 rounded-xl text-base font-medium transition-all font-inter ${
                       isActive(item.path)
                         ? "bg-primary text-white"
-                        : "text-tertiary hover:bg-primary/5 hover:text-primary"
+                        : "text-tertiary dark:text-slate-200 hover:bg-primary/5 hover:text-primary dark:hover:bg-slate-700"
                     }`}
                   >
                     {item.title}

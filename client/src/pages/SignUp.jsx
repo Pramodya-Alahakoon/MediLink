@@ -10,8 +10,23 @@ import axios from "axios";
 import Logo from "@/components/UI/Logo";
 import { MdErrorOutline } from "react-icons/md";
 
+const specializations = [
+  "Cardiology",
+  "Dermatology",
+  "Neurology",
+  "Pediatrics",
+  "Psychiatry",
+  "Oncology",
+  "Orthopedics",
+  "Radiology",
+  "General Surgery",
+  "Family Medicine",
+];
+
 function SignUp() {
   const navigate = useNavigate();
+  const [activeRole, setActiveRole] = useState("Patient");
+  const [specializationMode, setSpecializationMode] = useState("select");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [formData, setFormData] = useState({
@@ -21,6 +36,7 @@ function SignUp() {
     confirmPassword: "",
     phoneNumber: "",
     location: "",
+    specialization: "",
   });
   const [errors, setErrors] = useState({
     fullName: "",
@@ -29,6 +45,7 @@ function SignUp() {
     confirmPassword: "",
     phoneNumber: "",
     location: "",
+    specialization: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [touched, setTouched] = useState({
@@ -38,6 +55,7 @@ function SignUp() {
     confirmPassword: false,
     phoneNumber: false,
     location: false,
+    specialization: false,
   });
 
   const togglePasswordVisibility = () => {
@@ -106,6 +124,12 @@ function SignUp() {
       isValid = false;
     }
 
+    // Specialization validation
+    if (activeRole === "Doctor" && !formData.specialization.trim()) {
+      newErrors.specialization = "Specialization is required";
+      isValid = false;
+    }
+
     // Password validation
     if (!formData.password) {
       newErrors.password = "Password is required";
@@ -136,13 +160,19 @@ function SignUp() {
 
     setIsLoading(true);
     try {
-      const response = await customFetch.post("/auth/register", {
+      const payload = {
         fullName: formData.fullName,
         email: formData.email,
         password: formData.password,
         phoneNumber: formData.phoneNumber,
         location: formData.location,
-      });
+        role: activeRole.toLowerCase(),
+      };
+      if (activeRole === "Doctor") {
+        payload.specialization = formData.specialization;
+      }
+      
+      const response = await customFetch.post("/auth/register", payload);
 
       if (response.data) {
         toast.success("Registration successful!");
@@ -164,43 +194,59 @@ function SignUp() {
   };
 
   return (
-    <div className="w-full flex lg:flex-row flex-col min-h-screen bg-gradient-to-br from-slate-50 to-white">
+    <div className="w-full flex lg:flex-row flex-col min-h-screen bg-[#F8FAFB] dark:bg-slate-900">
       {/* Hero Image Section - Left Side */}
-      <div className="lg:w-1/2 lg:block hidden relative overflow-hidden bg-gradient-to-br from-primary to-tertiary">
+      <div className="lg:w-1/2 lg:block hidden relative overflow-hidden">
         <img
           src={hero}
           alt="Medical Background"
-          className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity duration-300"
+          className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-tertiary/60 via-transparent to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-tr from-[#012022] via-[#054E50]/95 to-[#087D80]/70" />
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-white text-center px-8 font-manrope">
-            <h2 className="text-4xl font-bold mb-4">Join Us Today</h2>
-            <p className="text-lg opacity-90 font-inter">Create an account to access healthcare services</p>
+          <div className="text-white text-center px-8 font-manrope max-w-xl drop-shadow-xl">
+            <h2 className="text-4xl xl:text-5xl font-black mb-4 drop-shadow-lg text-white">Join Us Today</h2>
+            <p className="text-lg xl:text-xl font-inter drop-shadow-md text-white/95">Create an account to access premium healthcare services tailored for you.</p>
           </div>
         </div>
       </div>
 
       {/* Form Section - Right Side */}
-      <div className="flex flex-col w-full lg:w-1/2 justify-center px-6 sm:px-8 md:px-12 lg:px-16 py-12 sm:py-16">
-        {/* Logo */}
-        <div className="mb-8 lg:mb-12">
-          <Logo className="w-[112px] h-[54px]" />
-        </div>
-
-        {/* Sign Up Container */}
-        <div className="w-full max-w-xl lg:max-w-md">
+      <div className="flex flex-col w-full lg:w-1/2 justify-center items-center py-6 px-4 sm:px-10 lg:px-12 relative bg-[#F8FAFB] dark:bg-slate-900 min-h-screen">
+        <div className="w-full max-w-[460px] bg-white/70 dark:bg-slate-800/40 backdrop-blur-2xl border border-slate-200/80 dark:border-slate-700/50 px-6 py-6 sm:px-8 sm:py-8 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-black/20">
+          
           {/* Header */}
-          <div className="mb-8 font-manrope">
-            <h1 className="text-4xl font-bold text-tertiary mb-3">Create Account</h1>
-            <p className="text-neutral text-base leading-relaxed font-inter">
+          <div className="mb-4 font-manrope">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#112429] dark:text-white mb-1">Create Account</h1>
+            <p className="text-[#64748B] dark:text-slate-400 text-xs sm:text-sm font-inter">
               Sign up to get started with your account
             </p>
           </div>
 
+          {/* Role Selector Pill */}
+          <div className="bg-[#F1F5F9]/80 dark:bg-slate-800/80 backdrop-blur-sm p-1 rounded-2xl flex justify-between items-center mb-5 gap-1">
+            {["Patient", "Doctor"].map((role) => (
+              <button
+                key={role}
+                onClick={() => {
+                  setActiveRole(role);
+                  setFormData(prev => ({ ...prev, specialization: "" }));
+                  setSpecializationMode("select");
+                }}
+                className={`flex-1 py-2 text-sm font-semibold transition-all duration-300 rounded-xl font-inter ${
+                  activeRole === role
+                    ? "bg-white dark:bg-slate-700 text-[#112429] dark:text-white shadow-sm transform scale-100"
+                    : "text-[#64748B] dark:text-slate-400 hover:text-[#112429] dark:hover:text-white bg-transparent"
+                }`}
+              >
+                {role}
+              </button>
+            ))}
+          </div>
+
           {/* Full Name Input */}
-          <div className="mb-6">
-            <label className="block text-sm font-semibold text-gray-700 mb-3">
+          <div className="mb-4">
+            <label className="block text-xs font-bold text-[#112429] dark:text-slate-200 mb-1.5">
               Full Name
             </label>
             <div className="relative group">
@@ -210,12 +256,12 @@ function SignUp() {
                 value={formData.fullName}
                 onChange={handleInputChange}
                 onBlur={() => handleBlur("fullName")}
-                placeholder="John Doe"
-                className={`w-full px-4 py-3 text-base font-medium placeholder-gray-400 bg-white border-2 rounded-lg transition-all duration-300 focus:outline-none ${
+                placeholder="Enter Your Name"
+                className={`w-full px-4 py-2.5 text-sm font-medium bg-white/50 dark:bg-slate-800/50 dark:text-white border border-slate-200/80 dark:border-slate-700/50 rounded-xl transition-colors focus:outline-none focus:bg-white dark:focus:bg-slate-800/80 ${
                   touched.fullName && errors.fullName
-                    ? "border-red-500 focus:border-red-600 focus:ring-2 focus:ring-red-200"
-                    : "border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 group-hover:border-neutral/30 font-inter"
-                }`}
+                    ? "border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-500/10"
+                    : "focus:border-[#055153] dark:focus:border-primary focus:ring-4 focus:ring-[#055153]/10 dark:focus:ring-primary/20 hover:border-[#CBD5E1] dark:hover:border-slate-600"
+                } font-inter`}
               />
               {touched.fullName && errors.fullName && (
                 <MdErrorOutline className="absolute right-4 top-3.5 text-red-500 text-xl" />
@@ -230,8 +276,8 @@ function SignUp() {
           </div>
 
           {/* Email Input */}
-          <div className="mb-6">
-            <label className="block text-sm font-semibold text-gray-700 mb-3">
+          <div className="mb-4">
+            <label className="block text-xs font-bold text-[#112429] dark:text-slate-200 mb-1.5">
               Email Address
             </label>
             <div className="relative group">
@@ -241,12 +287,12 @@ function SignUp() {
                 value={formData.email}
                 onChange={handleInputChange}
                 onBlur={() => handleBlur("email")}
-                placeholder="you@example.com"
-                className={`w-full px-4 py-3 text-base font-medium placeholder-gray-400 bg-white border-2 rounded-lg transition-all duration-300 focus:outline-none ${
+                placeholder="Enter your E-mail"
+                className={`w-full px-4 py-2.5 text-sm font-medium bg-white/50 dark:bg-slate-800/50 dark:text-white border border-slate-200/80 dark:border-slate-700/50 rounded-xl transition-colors focus:outline-none focus:bg-white dark:focus:bg-slate-800/80 ${
                   touched.email && errors.email
-                    ? "border-red-500 focus:border-red-600 focus:ring-2 focus:ring-red-200"
-                    : "border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 group-hover:border-neutral/30 font-inter"
-                }`}
+                    ? "border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-500/10"
+                    : "focus:border-[#055153] dark:focus:border-primary focus:ring-4 focus:ring-[#055153]/10 dark:focus:ring-primary/20 hover:border-[#CBD5E1] dark:hover:border-slate-600"
+                } font-inter`}
               />
               {touched.email && errors.email && (
                 <MdErrorOutline className="absolute right-4 top-3.5 text-red-500 text-xl" />
@@ -261,8 +307,8 @@ function SignUp() {
           </div>
 
           {/* Phone Number Input */}
-          <div className="mb-6">
-            <label className="block text-sm font-semibold text-gray-700 mb-3">
+          <div className="mb-4">
+            <label className="block text-xs font-bold text-[#112429] dark:text-slate-200 mb-1.5">
               Phone Number
             </label>
             <div className="relative group">
@@ -272,12 +318,12 @@ function SignUp() {
                 value={formData.phoneNumber}
                 onChange={handleInputChange}
                 onBlur={() => handleBlur("phoneNumber")}
-                placeholder="0xxxxxxxxx"
-                className={`w-full px-4 py-3 text-base font-medium placeholder-gray-400 bg-white border-2 rounded-lg transition-all duration-300 focus:outline-none ${
+                placeholder="Enter Phone Number"
+                className={`w-full px-4 py-2.5 text-sm font-medium bg-white/50 dark:bg-slate-800/50 dark:text-white border border-slate-200/80 dark:border-slate-700/50 rounded-xl transition-colors focus:outline-none focus:bg-white dark:focus:bg-slate-800/80 ${
                   touched.phoneNumber && errors.phoneNumber
-                    ? "border-red-500 focus:border-red-600 focus:ring-2 focus:ring-red-200"
-                    : "border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 group-hover:border-neutral/30 font-inter"
-                }`}
+                    ? "border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-500/10"
+                    : "focus:border-[#055153] dark:focus:border-primary focus:ring-4 focus:ring-[#055153]/10 dark:focus:ring-primary/20 hover:border-[#CBD5E1] dark:hover:border-slate-600"
+                } font-inter`}
               />
               {touched.phoneNumber && errors.phoneNumber && (
                 <MdErrorOutline className="absolute right-4 top-3.5 text-red-500 text-xl" />
@@ -292,8 +338,8 @@ function SignUp() {
           </div>
 
           {/* Location Input */}
-          <div className="mb-6">
-            <label className="block text-sm font-semibold text-gray-700 mb-3">
+          <div className="mb-4">
+            <label className="block text-xs font-bold text-[#112429] dark:text-slate-200 mb-1.5">
               Location
             </label>
             <div className="relative group">
@@ -303,12 +349,12 @@ function SignUp() {
                 value={formData.location}
                 onChange={handleInputChange}
                 onBlur={() => handleBlur("location")}
-                placeholder="City, Country"
-                className={`w-full px-4 py-3 text-base font-medium placeholder-gray-400 bg-white border-2 rounded-lg transition-all duration-300 focus:outline-none ${
+                placeholder="Enter Location"
+                className={`w-full px-4 py-2.5 text-sm font-medium bg-white/50 dark:bg-slate-800/50 dark:text-white border border-slate-200/80 dark:border-slate-700/50 rounded-xl transition-colors focus:outline-none focus:bg-white dark:focus:bg-slate-800/80 ${
                   touched.location && errors.location
-                    ? "border-red-500 focus:border-red-600 focus:ring-2 focus:ring-red-200"
-                    : "border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 group-hover:border-neutral/30 font-inter"
-                }`}
+                    ? "border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-500/10"
+                    : "focus:border-[#055153] dark:focus:border-primary focus:ring-4 focus:ring-[#055153]/10 dark:focus:ring-primary/20 hover:border-[#CBD5E1] dark:hover:border-slate-600"
+                } font-inter`}
               />
               {touched.location && errors.location && (
                 <MdErrorOutline className="absolute right-4 top-3.5 text-red-500 text-xl" />
@@ -322,9 +368,75 @@ function SignUp() {
             )}
           </div>
 
+          {/* Specialization Input (Doctor Only) */}
+          {activeRole === "Doctor" && (
+            <div className="mb-4">
+              <label className="block text-xs font-bold text-[#112429] dark:text-slate-200 mb-1.5">
+                Specialization
+              </label>
+              <div className="relative group">
+                {specializationMode === "select" ? (
+                  <select
+                    name="specialization"
+                    value={formData.specialization}
+                    onChange={(e) => {
+                      if (e.target.value === "Other") {
+                        setSpecializationMode("manual");
+                        setFormData((prev) => ({ ...prev, specialization: "" }));
+                      } else {
+                        handleInputChange(e);
+                      }
+                    }}
+                    onBlur={() => handleBlur("specialization")}
+                    className={`w-full px-4 py-2.5 text-sm font-medium bg-white/50 dark:bg-slate-800/50 dark:text-white border border-slate-200/80 dark:border-slate-700/50 rounded-xl transition-colors focus:outline-none focus:bg-white dark:focus:bg-slate-800/80 ${
+                      touched.specialization && errors.specialization
+                        ? "border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-500/10"
+                        : "focus:border-[#055153] dark:focus:border-primary focus:ring-4 focus:ring-[#055153]/10 dark:focus:ring-primary/20 hover:border-[#CBD5E1] dark:hover:border-slate-600"
+                    } font-inter appearance-none`}
+                  >
+                    <option value="" disabled hidden>Select Specialization</option>
+                    {specializations.map((spec) => (
+                      <option className="bg-white dark:bg-slate-800 text-black dark:text-white" key={spec} value={spec}>{spec}</option>
+                    ))}
+                    <option className="bg-white dark:bg-slate-800 text-black dark:text-white" value="Other">Other (Enter Manually)</option>
+                  </select>
+                ) : (
+                  <div className="relative flex items-center">
+                    <input
+                      type="text"
+                      name="specialization"
+                      value={formData.specialization}
+                      onChange={handleInputChange}
+                      onBlur={() => handleBlur("specialization")}
+                      placeholder="Enter Specialization manually"
+                      className={`w-full px-4 py-2.5 pr-24 text-sm font-medium bg-white/50 dark:bg-slate-800/50 dark:text-white border border-slate-200/80 dark:border-slate-700/50 rounded-xl transition-colors focus:outline-none focus:bg-white dark:focus:bg-slate-800/80 ${
+                        touched.specialization && errors.specialization
+                          ? "border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-500/10"
+                          : "focus:border-[#055153] dark:focus:border-primary focus:ring-4 focus:ring-[#055153]/10 dark:focus:ring-primary/20 hover:border-[#CBD5E1] dark:hover:border-slate-600"
+                      } font-inter`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setSpecializationMode("select")}
+                      className="absolute right-3 text-[#055153] dark:text-primary font-bold text-xs"
+                    >
+                      Show List
+                    </button>
+                  </div>
+                )}
+              </div>
+              {touched.specialization && errors.specialization && (
+                <p className="text-red-500 text-sm mt-2 flex items-center gap-1">
+                  <MdErrorOutline size={16} />
+                  {errors.specialization}
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Password Input */}
-          <div className="mb-6">
-            <label className="block text-sm font-semibold text-gray-700 mb-3">
+          <div className="mb-4">
+            <label className="block text-xs font-bold text-[#112429] dark:text-slate-200 mb-1.5">
               Password
             </label>
             <div className="relative group">
@@ -335,11 +447,11 @@ function SignUp() {
                 onChange={handleInputChange}
                 onBlur={() => handleBlur("password")}
                 placeholder="Enter your password"
-                className={`w-full px-4 py-3 text-base font-medium placeholder-gray-400 bg-white border-2 rounded-lg transition-all duration-300 focus:outline-none pr-12 ${
+                className={`w-full px-4 py-2.5 text-sm font-medium bg-white/50 dark:bg-slate-800/50 dark:text-white border border-slate-200/80 dark:border-slate-700/50 rounded-xl transition-colors focus:outline-none focus:bg-white dark:focus:bg-slate-800/80 pr-12 ${
                   touched.password && errors.password
-                    ? "border-red-500 focus:border-red-600 focus:ring-2 focus:ring-red-200"
-                    : "border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 group-hover:border-neutral/30 font-inter"
-                }`}
+                    ? "border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-500/10"
+                    : "focus:border-[#055153] dark:focus:border-primary focus:ring-4 focus:ring-[#055153]/10 dark:focus:ring-primary/20 hover:border-[#CBD5E1] dark:hover:border-slate-600"
+                } font-inter`}
               />
               <button
                 type="button"
@@ -362,8 +474,8 @@ function SignUp() {
           </div>
 
           {/* Confirm Password Input */}
-          <div className="mb-6">
-            <label className="block text-sm font-semibold text-gray-700 mb-3">
+          <div className="mb-4">
+            <label className="block text-xs font-bold text-[#112429] dark:text-slate-200 mb-1.5">
               Confirm Password
             </label>
             <div className="relative group">
@@ -374,11 +486,11 @@ function SignUp() {
                 onChange={handleInputChange}
                 onBlur={() => handleBlur("confirmPassword")}
                 placeholder="Confirm your password"
-                className={`w-full px-4 py-3 text-base font-medium placeholder-gray-400 bg-white border-2 rounded-lg transition-all duration-300 focus:outline-none pr-12 ${
+                className={`w-full px-4 py-2.5 text-sm font-medium bg-white/50 dark:bg-slate-800/50 dark:text-white border border-slate-200/80 dark:border-slate-700/50 rounded-xl transition-colors focus:outline-none focus:bg-white dark:focus:bg-slate-800/80 pr-12 ${
                   touched.confirmPassword && errors.confirmPassword
-                    ? "border-red-500 focus:border-red-600 focus:ring-2 focus:ring-red-200"
-                    : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 group-hover:border-gray-400"
-                }`}
+                    ? "border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-500/10"
+                    : "focus:border-[#055153] dark:focus:border-primary focus:ring-4 focus:ring-[#055153]/10 dark:focus:ring-primary/20 hover:border-[#CBD5E1] dark:hover:border-slate-600"
+                } font-inter`}
               />
               <button
                 type="button"
@@ -404,7 +516,7 @@ function SignUp() {
           <button
             onClick={handleFormSubmit}
             disabled={isLoading}
-            className="w-full bg-primary hover:bg-primary/90 disabled:bg-neutral/40 text-white font-bold py-4 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-95 disabled:hover:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl font-manrope uppercase tracking-wider"
+            className="w-full bg-[#055153] dark:bg-primary hover:bg-[#044143] dark:hover:bg-primary/90 disabled:bg-gray-300 dark:disabled:bg-slate-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 transform active:scale-[0.98] disabled:active:scale-100 flex items-center justify-center gap-2 shadow-lg shadow-[#055153]/20 dark:shadow-primary/20 mt-1 font-inter"
           >
             {isLoading && (
               <svg
@@ -431,21 +543,22 @@ function SignUp() {
           </button>
 
           {/* Sign In Link */}
-          <p className="text-center text-neutral text-sm font-medium mt-8 font-inter">
+          <p className="text-center text-[#475569] dark:text-slate-400 text-sm font-medium mt-6 font-inter">
             Already have an account?{" "}
             <button
               onClick={() => navigate("/signin")}
-              className="text-primary font-bold hover:text-primary/80 transition-colors"
+              className="text-[#055153] dark:text-primary font-bold hover:underline transition-colors block mx-auto py-1"
             >
               Sign In
             </button>
           </p>
 
           {/* Security Notice */}
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <p className="text-xs text-gray-500 text-center leading-relaxed">
+          <div className="mt-4 pt-3 border-t border-[#E2E8F0] dark:border-slate-700">
+            <p className="text-xs text-[#94A3B8] dark:text-slate-500 text-center leading-relaxed">
               This site is protected by reCAPTCHA and the Google Privacy Policy
-              and Terms of Service apply. © 2025 All rights reserved
+              and Terms of Service apply.
+              <br /> © 2026 All rights reserved
             </p>
           </div>
         </div>
