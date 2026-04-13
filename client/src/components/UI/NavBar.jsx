@@ -23,6 +23,7 @@ const NavItems = [
     path: "/contact",
     subItems: [],
   },
+  
 ];
 
 function NavComponent() {
