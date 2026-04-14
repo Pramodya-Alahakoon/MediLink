@@ -9,6 +9,7 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
+import PlanAppointment from './pages/PlanAppointment/PlanAppoinment';
 import { ThemeProvider } from './context/ThemeContext';
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
               <Route path="/contact" element={<Contact />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
+              <Route path="/appointments" element={<PlanAppointment />} />
             </Route>
           </Routes>
         </div>
