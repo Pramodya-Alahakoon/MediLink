@@ -15,8 +15,11 @@ import { FcGoogle } from "react-icons/fc";
 import { FiShield, FiLock, FiCpu } from "react-icons/fi";
 import { FaArrowRight } from "react-icons/fa6";
 
+import { useAuth } from "../context/AuthContext";
+
 function SignIn() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
@@ -75,7 +78,6 @@ function SignIn() {
   };
 
   const handleFormSubmit = async () => {
-    // Validate form before submission
     if (!validateForm()) {
       return;
     }
@@ -88,36 +90,32 @@ function SignIn() {
       });
 
       if (response.data.token) {
-        // Save token to localStorage
-        localStorage.setItem('token', response.data.token);
+        const { token, patient: userData } = response.data;
+        
+        // Use central login function
+        login(userData, token);
+        
         toast.success("Login successful!");
 
-        // Delay navigation to show toast
-        setTimeout(() => {
-          // Navigate based on patient role
-          // Use the activeRole toggle from the UI to unblock login testing, 
-          // falling back to database role if not explicitly toggled.
-          const finalRole = activeRole === "Doctor" ? "doctor" : response.data.patient.role;
-          
-          switch (finalRole) {
-            case "admin":
-              navigate("/");
-              break;
-            case "organizer":
-              navigate("/organizer-dashboard");
-              break;
-            case "doctor":
-              navigate("/doctor/dashboard");
-              break;
-            case "patient":
-              navigate("/appointments");
-              break;
-            default:
-              navigate("/appointments"); // Default fallback for patient role
-          }
-        }, 1500);
+        // Immediate redirection based on verified role
+        const finalRole = userData.role;
+        
+        switch (finalRole) {
+          case "admin":
+            navigate("/");
+            break;
+          case "doctor":
+            navigate("/doctor/dashboard");
+            break;
+          case "patient":
+            navigate("/appointments");
+            break;
+          default:
+            navigate("/appointments");
+        }
       }
     } catch (error) {
+      // ... error handling ...
       if (axios.isAxiosError(error)) {
         const errorMessage = error.response?.data?.msg || "Login failed";
         toast.error(errorMessage);

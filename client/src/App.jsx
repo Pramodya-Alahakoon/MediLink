@@ -13,32 +13,42 @@ import PlanAppointment from './pages/PlanAppointment/PlanAppoinment';
 import DoctorLayout from './layouts/DoctorLayout';
 import Dashboard from './pages/Doctor/Dashboard';
 import { ThemeProvider } from './context/ThemeContext';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/UI/ProtectedRoute';
 
 function App() {
   return (
-    <ThemeProvider>
-      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <div className="app">
-          <Routes>
-            <Route element={<Layout />}>
-              <Route path="/" element={<Homepage />} />
-              <Route path="/signin" element={<SignIn />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/appointments" element={<PlanAppointment />} />
-            </Route>
-            
-            {/* Doctor Dashboard Routes */}
-            <Route element={<DoctorLayout />}>
-              <Route path="/doctor/dashboard" element={<Dashboard />} />
-            </Route>
-          </Routes>
-        </div>
-      </Router>
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider>
+        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <div className="app">
+            <Routes>
+              <Route element={<Layout />}>
+                <Route path="/" element={<Homepage />} />
+                <Route path="/signin" element={<SignIn />} />
+                <Route path="/signup" element={<SignUp />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
+                
+                {/* Patient / General Protected Routes */}
+                <Route element={<ProtectedRoute allowedRoles={['patient', 'doctor', 'admin']} />}>
+                  <Route path="/appointments" element={<PlanAppointment />} />
+                </Route>
+              </Route>
+              
+              {/* Doctor Dashboard Routes - Securely protected */}
+              <Route element={<ProtectedRoute allowedRoles={['doctor', 'admin']} />}>
+                <Route element={<DoctorLayout />}>
+                  <Route path="/doctor/dashboard" element={<Dashboard />} />
+                </Route>
+              </Route>
+            </Routes>
+          </div>
+        </Router>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
 

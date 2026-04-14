@@ -44,18 +44,26 @@ export const register = async (req, res, next) => {
 
 
 export const verifyToken = async (req, res) => {
-  const { token } = req.body; // Appointment service එකෙන් එවන ටෝකන් එක
+  const { token } = req.body;
 
   if (!token) {
     throw new UnauthenticatedError("no token provided");
   }
 
   try {
-    // JWT එක පරීක්ෂා කර userId සහ role එක ලබාගැනීම [cite: 41]
-    const { userId, role } = verifyJWT(token);
+    const { userId } = verifyJWT(token);
+    const user = await Patient.findById(userId).select("-password");
     
-    // සාර්ථක නම් එම දත්ත ආපසු යැවීම
-    res.status(StatusCodes.OK).json({ userId, role });
+    if (!user) {
+      throw new NotFoundError("user not found");
+    }
+
+    res.status(StatusCodes.OK).json({ 
+      userId: user._id, 
+      role: user.role,
+      fullName: user.fullName,
+      email: user.email
+    });
   } catch (error) {
     throw new UnauthenticatedError("invalid token");
   }
