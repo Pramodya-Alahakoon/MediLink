@@ -9,6 +9,11 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
+import PatientLayout from './patient/components/PatientLayout';
+import PatientSymptomCheckerPage from './pages/patient/PatientSymptomCheckerPage';
+import PatientAIInsightsPage from './pages/patient/PatientAIInsightsPage';
+import PatientReportsPage from './pages/patient/PatientReportsPage';
+import PatientFindDoctorsPage from './pages/patient/PatientFindDoctorsPage';
 
 function App() {
   return (
@@ -23,6 +28,13 @@ function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
+          </Route>
+          <Route path="/patient" element={<PatientLayout />}>
+            <Route index element={<PatientSymptomCheckerPage />} />
+            <Route path="symptom-checker" element={<PatientSymptomCheckerPage />} />
+            <Route path="ai-insights" element={<PatientAIInsightsPage />} />
+            <Route path="reports" element={<PatientReportsPage />} />
+            <Route path="find-doctors" element={<PatientFindDoctorsPage />} />
           </Route>
         </Routes>
       </div>
