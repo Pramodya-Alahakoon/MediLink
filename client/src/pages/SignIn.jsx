@@ -95,12 +95,19 @@ function SignIn() {
         // Delay navigation to show toast
         setTimeout(() => {
           // Navigate based on patient role
-          switch (response.data.patient.role) {
+          // Use the activeRole toggle from the UI to unblock login testing, 
+          // falling back to database role if not explicitly toggled.
+          const finalRole = activeRole === "Doctor" ? "doctor" : response.data.patient.role;
+          
+          switch (finalRole) {
             case "admin":
               navigate("/");
               break;
             case "organizer":
               navigate("/organizer-dashboard");
+              break;
+            case "doctor":
+              navigate("/doctor/dashboard");
               break;
             case "patient":
               navigate("/");
