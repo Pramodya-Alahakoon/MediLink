@@ -1,15 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import customFetch from "../../utils/customFetch";
 import toast from "react-hot-toast";
-import { FiCalendar, FiClock, FiUser, FiStar, FiArrowRight, FiPhone } from "react-icons/fi";
+import { FiCalendar, FiUser, FiStar, FiArrowRight, FiPhone, FiCheck } from "react-icons/fi";
 
 function PlanAppointment() {
+  // ========== STATE ==========
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  
-  // Form State
+  const hasInitialized = useRef(false);
+
+  // Form Data
   const [formData, setFormData] = useState({
     patientName: "",
     contactPhone: "",
@@ -19,69 +21,67 @@ function PlanAppointment() {
     symptoms: "",
   });
 
-  // Data State
+  // API Data
   const [currentUser, setCurrentUser] = useState(null);
+  const [allDoctors, setAllDoctors] = useState([]);
   const [specializations, setSpecializations] = useState([]);
-  const [doctors, setDoctors] = useState([]);
-  const [filteredDoctors, setFilteredDoctors] = useState([]);
   const [appointmentResponse, setAppointmentResponse] = useState(null);
 
-  // Initial Data Fetch
+  // ========== EFFECTS ==========
+
+  // Initialize data once on mount
   useEffect(() => {
-    fetchInitialData();
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
+
+    const init = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch user data
+        const token = localStorage.getItem("token");
+        try {
+          const userRes = await customFetch.post("/api/auth/verify", { token });
+          setCurrentUser(userRes.data.user || { _id: null, name: "" });
+          setFormData((prev) => ({
+            ...prev,
+            patientName: userRes.data.user?.name || "",
+          }));
+        } catch (err) {
+          console.warn("Auth verify failed:", err.message);
+          setCurrentUser({ _id: null, name: "" });
+        }
+
+        // Fetch doctors
+        try {
+          const doctorsRes = await customFetch.get("/api/doctors");
+          const doctors = doctorsRes.data.doctors || [];
+          setAllDoctors(doctors);
+          
+          // Extract unique specializations
+          const specs = [...new Set(doctors.map((d) => d.specialization).filter(Boolean))];
+          setSpecializations(specs);
+        } catch (err) {
+          console.warn("Doctors fetch failed:", err.message);
+          setAllDoctors([]);
+          setSpecializations([]);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    init();
   }, []);
 
-  // Fetch specializations and current user
-  const fetchInitialData = async () => {
-    try {
-      setIsLoading(true);
-      const [userResponse, doctorsResponse] = await Promise.all([
-        customFetch.get("/users/current-user"),
-        customFetch.get("/api/doctors"),
-      ]);
+  // ========== HANDLERS ==========
 
-      setCurrentUser(userResponse.data.user);
-      
-      // Set pre-filled name from user
-      setFormData((prev) => ({
-        ...prev,
-        patientName: userResponse.data.user.name || "",
-      }));
-
-      // Extract unique specializations from doctors
-      const doctorList = doctorsResponse.data.doctors || [];
-      setDoctors(doctorList);
-      
-      const uniqueSpecializations = [...new Set(doctorList.map((doc) => doc.specialization))];
-      setSpecializations(uniqueSpecializations);
-    } catch (error) {
-      console.error("Failed to fetch initial data:", error);
-      toast.error("Failed to load appointment data");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Filter doctors when specialization changes
-  useEffect(() => {
-    if (formData.specialization) {
-      const filtered = doctors.filter(
-        (doc) => doc.specialization === formData.specialization
-      );
-      setFilteredDoctors(filtered);
-      setFormData((prev) => ({ ...prev, doctorId: "" })); // Reset doctor selection
-    }
-  }, [formData.specialization, doctors]);
-
-  // Handle input change
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-    
-    // Clear error when user edits
+    // Clear error for this field
     if (errors[name]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -91,24 +91,21 @@ function PlanAppointment() {
     }
   };
 
-  // Validation functions
   const validateStep = (step) => {
     const newErrors = {};
 
     switch (step) {
       case 1: {
-        // Name validation
         if (!formData.patientName.trim()) {
           newErrors.patientName = "Patient name is required";
         } else if (formData.patientName.trim().length < 3) {
-          newErrors.patientName = "Patient name must be at least 3 characters";
+          newErrors.patientName = "Name must be at least 3 characters";
         }
 
-        // Phone validation
         if (!formData.contactPhone.trim()) {
-          newErrors.contactPhone = "Contact phone is required";
+          newErrors.contactPhone = "Phone number is required";
         } else if (!/^[0-9]{10}$/.test(formData.contactPhone)) {
-          newErrors.contactPhone = "Phone number must be exactly 10 digits";
+          newErrors.contactPhone = "Phone must be exactly 10 digits";
         }
         break;
       }
@@ -129,13 +126,13 @@ function PlanAppointment() {
 
       case 4: {
         if (!formData.appointmentDate) {
-          newErrors.appointmentDate = "Please select an appointment date";
+          newErrors.appointmentDate = "Please select a date";
         } else {
-          const selectedDate = new Date(formData.appointmentDate);
+          const selected = new Date(formData.appointmentDate);
           const today = new Date();
           today.setHours(0, 0, 0, 0);
-          if (selectedDate < today) {
-            newErrors.appointmentDate = "Appointment date cannot be in the past";
+          if (selected < today) {
+            newErrors.appointmentDate = "Date must be in the future";
           }
         }
         break;
@@ -145,7 +142,7 @@ function PlanAppointment() {
         if (!formData.symptoms.trim()) {
           newErrors.symptoms = "Please describe your symptoms";
         } else if (formData.symptoms.trim().length < 10) {
-          newErrors.symptoms = "Symptoms description must be at least 10 characters";
+          newErrors.symptoms = "Symptoms must be at least 10 characters";
         }
         break;
       }
@@ -158,31 +155,28 @@ function PlanAppointment() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle next step
-  const handleNextStep = () => {
+  const handleNext = () => {
     if (validateStep(currentStep)) {
       setCurrentStep(currentStep + 1);
     }
   };
 
-  // Handle previous step
-  const handlePreviousStep = () => {
-    setCurrentStep(currentStep - 1);
+  const handlePrevious = () => {
+    setCurrentStep(Math.max(1, currentStep - 1));
   };
 
-  // Handle form submission
   const handleSubmit = async () => {
-    if (!validateStep(currentStep)) {
+    if (!validateStep(currentStep)) return;
+
+    if (!currentUser?._id) {
+      toast.error("Please sign in to book an appointment");
+      window.location.href = "/signin";
       return;
     }
 
     setIsLoading(true);
     try {
-      // Find selected doctor details
-      const selectedDoctor = doctors.find((doc) => doc._id === formData.doctorId);
-
-      // Format date and time for appointment
-      const appointmentDateTime = new Date(formData.appointmentDate);
+      const doctor = allDoctors.find((d) => d._id === formData.doctorId);
 
       const appointmentData = {
         patientId: currentUser._id,
@@ -190,43 +184,42 @@ function PlanAppointment() {
         contactPhone: formData.contactPhone,
         specialization: formData.specialization,
         doctorId: formData.doctorId,
-        appointmentDate: appointmentDateTime.toISOString(),
+        appointmentDate: new Date(formData.appointmentDate).toISOString(),
         symptoms: formData.symptoms,
       };
 
-      console.log("Submitting appointment data:", appointmentData);
-
       const response = await customFetch.post("/api/appointments", appointmentData);
-
       setAppointmentResponse(response.data);
       toast.success("Appointment booked successfully!");
-
-      // Move to summary step
       setCurrentStep(6);
     } catch (error) {
-      const errorMessage =
+      const msg =
         error.response?.data?.message ||
         error.response?.data?.msg ||
+        error.message ||
         "Failed to book appointment";
-      toast.error(errorMessage);
+      toast.error(msg);
       console.error("Booking error:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Calculate progress
-  const calculateProgress = () => {
-    return (currentStep / 6) * 100;
+  // ========== RENDER HELPERS ==========
+
+  const getFilteredDoctors = () => {
+    if (!formData.specialization) return [];
+    return allDoctors.filter(
+      (doc) => doc.specialization === formData.specialization
+    );
   };
 
-  // Check if can proceed
-  const canProceed = () => {
-    return validateStep(currentStep);
+  const getProgressPercent = () => {
+    if (currentStep > 5) return 100;
+    return currentStep * 20;
   };
 
-  // Render step content
-  const renderStepContent = () => {
+  const renderStep = () => {
     switch (currentStep) {
       case 1:
         return (
@@ -236,7 +229,6 @@ function PlanAppointment() {
               Personal Information
             </h2>
 
-            {/* Patient Name */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Full Name *
@@ -258,12 +250,11 @@ function PlanAppointment() {
               )}
             </div>
 
-            {/* Contact Phone */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 <div className="flex items-center gap-2">
                   <FiPhone className="text-blue-600" />
-                  Contact Phone Number *
+                  Phone Number (10 digits) *
                 </div>
               </label>
               <input
@@ -271,9 +262,8 @@ function PlanAppointment() {
                 name="contactPhone"
                 value={formData.contactPhone}
                 onChange={handleInputChange}
-                placeholder="10-digit phone number"
+                placeholder="1234567890"
                 maxLength="10"
-                pattern="\d{10}"
                 className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition-colors ${
                   errors.contactPhone
                     ? "border-red-500 focus:border-red-600"
@@ -290,29 +280,33 @@ function PlanAppointment() {
       case 2:
         return (
           <div className="space-y-6">
-            <h2 className="text-2xl font-semibold mb-6">Select Specialization</h2>
+            <h2 className="text-2xl font-semibold mb-6">Medical Specialization</h2>
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                Medical Specialization *
+                Select Specialization *
               </label>
-              <select
-                name="specialization"
-                value={formData.specialization}
-                onChange={handleInputChange}
-                className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition-colors ${
-                  errors.specialization
-                    ? "border-red-500 focus:border-red-600"
-                    : "border-gray-300 dark:border-slate-600 focus:border-blue-600"
-                } dark:bg-slate-700 dark:text-white`}
-              >
-                <option value="">Choose a specialization</option>
-                {specializations.map((spec) => (
-                  <option key={spec} value={spec}>
-                    {spec}
-                  </option>
-                ))}
-              </select>
+              {specializations.length === 0 ? (
+                <p className="text-gray-500">No specializations available</p>
+              ) : (
+                <select
+                  name="specialization"
+                  value={formData.specialization}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition-colors ${
+                    errors.specialization
+                      ? "border-red-500 focus:border-red-600"
+                      : "border-gray-300 dark:border-slate-600 focus:border-blue-600"
+                  } dark:bg-slate-700 dark:text-white`}
+                >
+                  <option value="">Choose a specialization</option>
+                  {specializations.map((spec) => (
+                    <option key={spec} value={spec}>
+                      {spec}
+                    </option>
+                  ))}
+                </select>
+              )}
               {errors.specialization && (
                 <p className="text-red-500 text-sm mt-1">{errors.specialization}</p>
               )}
@@ -325,8 +319,8 @@ function PlanAppointment() {
                 className="bg-blue-50 dark:bg-slate-700 p-4 rounded-lg"
               >
                 <p className="text-sm text-gray-700 dark:text-gray-300">
-                  Found <span className="font-semibold">{filteredDoctors.length}</span> doctor(s) in{" "}
-                  <span className="font-semibold">{formData.specialization}</span>
+                  Found <span className="font-semibold">{getFilteredDoctors().length}</span> doctor(s)
+                  in <span className="font-semibold">{formData.specialization}</span>
                 </p>
               </motion.div>
             )}
@@ -336,15 +330,15 @@ function PlanAppointment() {
       case 3:
         return (
           <div className="space-y-6">
-            <h2 className="text-2xl font-semibold mb-6">Select Doctor</h2>
+            <h2 className="text-2xl font-semibold mb-6">Choose Doctor</h2>
 
-            {filteredDoctors.length === 0 ? (
+            {getFilteredDoctors().length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                No doctors available in this specialization
+                No doctors available. Please select a different specialization.
               </div>
             ) : (
               <div className="space-y-3">
-                {filteredDoctors.map((doctor) => (
+                {getFilteredDoctors().map((doctor) => (
                   <motion.button
                     key={doctor._id}
                     onClick={() =>
@@ -374,31 +368,21 @@ function PlanAppointment() {
                           </p>
                         )}
                       </div>
-                      {doctor.rating && (
-                        <div className="flex items-center gap-1 ml-4">
-                          <FiStar className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {doctor.rating.toFixed(1)}
-                          </span>
-                        </div>
-                      )}
-                      {formData.doctorId === doctor._id && (
-                        <div className="w-5 h-5 rounded-full bg-blue-600 ml-4 flex items-center justify-center">
-                          <svg
-                            className="w-3 h-3 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={3}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                        </div>
-                      )}
+                      <div className="flex items-center gap-3 ml-4">
+                        {doctor.rating && (
+                          <div className="flex items-center gap-1">
+                            <FiStar className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              {doctor.rating.toFixed(1)}
+                            </span>
+                          </div>
+                        )}
+                        {formData.doctorId === doctor._id && (
+                          <div className="w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center">
+                            <FiCheck className="w-3 h-3 text-white" />
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </motion.button>
                 ))}
@@ -464,7 +448,7 @@ function PlanAppointment() {
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Symptoms *
+                Symptoms & Medical History *
               </label>
               <textarea
                 name="symptoms"
@@ -480,7 +464,7 @@ function PlanAppointment() {
               />
               <div className="flex justify-between items-center mt-2">
                 <p className="text-xs text-gray-500">
-                  {formData.symptoms.length} characters
+                  {formData.symptoms.length} / 1000 characters
                 </p>
                 {errors.symptoms && (
                   <p className="text-red-500 text-sm">{errors.symptoms}</p>
@@ -498,9 +482,8 @@ function PlanAppointment() {
     }
   };
 
-  // Render summary
   const renderSummary = () => {
-    const selectedDoctor = doctors.find((doc) => doc._id === formData.doctorId);
+    const doctor = allDoctors.find((d) => d._id === formData.doctorId);
 
     return (
       <div className="space-y-6">
@@ -510,19 +493,7 @@ function PlanAppointment() {
           className="text-center mb-8"
         >
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg
-              className="w-8 h-8 text-green-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
+            <FiCheck className="w-8 h-8 text-green-600" />
           </div>
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             Appointment Confirmed!
@@ -539,16 +510,16 @@ function PlanAppointment() {
                 Doctor
               </p>
               <p className="text-lg font-semibold text-gray-900 dark:text-white mt-1">
-                Dr. {selectedDoctor?.name}
+                Dr. {doctor?.name}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                {selectedDoctor?.specialization}
+                {doctor?.specialization}
               </p>
             </div>
 
             <div>
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                Date
+                Date & Time
               </p>
               <p className="text-lg font-semibold text-gray-900 dark:text-white mt-1">
                 {new Date(formData.appointmentDate).toLocaleDateString()}
@@ -576,19 +547,19 @@ function PlanAppointment() {
 
           {appointmentResponse?.appointment?.preMedicationSteps &&
             appointmentResponse.appointment.preMedicationSteps.length > 0 && (
-              <div className="bg-blue-50 dark:bg-slate-700 p-4 rounded-lg">
+              <div className="bg-blue-50 dark:bg-slate-700 p-4 rounded-lg border-l-4 border-blue-600">
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
                   Pre-Medication Steps:
                 </h3>
                 <ul className="space-y-2">
                   {appointmentResponse.appointment.preMedicationSteps.map(
-                    (step, index) => (
+                    (step, idx) => (
                       <li
-                        key={index}
+                        key={idx}
                         className="flex items-start gap-3 text-sm text-gray-700 dark:text-gray-300"
                       >
                         <span className="font-semibold text-blue-600 min-w-max">
-                          {index + 1}.
+                          {idx + 1}.
                         </span>
                         <span>{step}</span>
                       </li>
@@ -605,7 +576,7 @@ function PlanAppointment() {
               </p>
               <p className="text-lg font-semibold text-gray-900 dark:text-white mt-1">
                 <span
-                  className={`inline-block px-3 py-1 rounded-full text-sm ${
+                  className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
                     appointmentResponse.appointment.urgencyLevel === "high"
                       ? "bg-red-100 text-red-800"
                       : appointmentResponse.appointment.urgencyLevel === "medium"
@@ -623,6 +594,8 @@ function PlanAppointment() {
       </div>
     );
   };
+
+  // ========== MAIN RENDER ==========
 
   return (
     <section className="min-h-screen bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 py-16">
@@ -646,17 +619,17 @@ function PlanAppointment() {
         {currentStep < 6 && (
           <div className="mb-8">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-xs font-semibold text-blue-600 bg-blue-100 px-3 py-1 rounded-full">
+              <span className="text-xs font-semibold text-blue-600 bg-blue-100 px-3 py-1 rounded-full dark:bg-blue-900 dark:text-blue-200">
                 Step {currentStep} of 5
               </span>
               <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                {calculateProgress().toFixed(0)}%
+                {getProgressPercent()}%
               </span>
             </div>
             <div className="h-2 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
               <motion.div
-                initial={{ width: `${((currentStep - 1) / 5) * 100}%` }}
-                animate={{ width: `${calculateProgress()}%` }}
+                initial={{ width: 0 }}
+                animate={{ width: `${getProgressPercent()}%` }}
                 transition={{ duration: 0.5 }}
                 className="h-full bg-gradient-to-r from-blue-600 to-blue-700"
               />
@@ -678,7 +651,7 @@ function PlanAppointment() {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             </div>
           ) : (
-            renderStepContent()
+            renderStep()
           )}
         </motion.div>
 
@@ -689,7 +662,7 @@ function PlanAppointment() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={handlePreviousStep}
+                onClick={handlePrevious}
                 className="flex-1 px-6 py-3 border-2 border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
               >
                 Previous
@@ -700,8 +673,8 @@ function PlanAppointment() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={handleNextStep}
-                disabled={!canProceed() || isLoading}
+                onClick={handleNext}
+                disabled={isLoading}
                 className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 disabled:cursor-not-allowed"
               >
                 Next
@@ -712,7 +685,7 @@ function PlanAppointment() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleSubmit}
-                disabled={!canProceed() || isLoading}
+                disabled={isLoading}
                 className="flex-1 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
@@ -751,7 +724,7 @@ function PlanAppointment() {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => window.location.href = "/"}
+            onClick={() => (window.location.href = "/")}
             className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-semibold transition-all duration-300"
           >
             Return to Home
