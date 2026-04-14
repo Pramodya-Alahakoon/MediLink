@@ -15,11 +15,13 @@ const NavItems = [
   { title: "Contact", path: "/contact" },
 ];
 
+import { useAuth } from "@/context/AuthContext";
+
 function NavComponent() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
+  const { user: currentUser, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
@@ -35,40 +37,10 @@ function NavComponent() {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
 
-  useEffect(() => {
-    const getCurrentUser = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          setCurrentUser(null);
-          return;
-        }
-        const { data } = await customFetch.post("/api/auth/verify", { token });
-        setCurrentUser(data.user);
-      } catch (error) {
-        console.warn("Failed to fetch current user:", error.message);
-        setCurrentUser(null);
-      }
-    };
-    getCurrentUser();
-  }, []);
-
   const handleLogout = async () => {
-    try {
-      await customFetch.post("/api/auth/logout");
-      setCurrentUser(null);
-      localStorage.removeItem("token");
-      setIsLogoutModalOpen(false);
-      toast.success("Logged out successfully");
-      navigate("/");
-    } catch (error) {
-      console.warn("Error logging out:", error.message);
-      // Clear local data even if API fails
-      setCurrentUser(null);
-      localStorage.removeItem("token");
-      setIsLogoutModalOpen(false);
-      navigate("/");
-    }
+    await logout();
+    setIsLogoutModalOpen(false);
+    navigate("/");
   };
 
   const isActive = (path) => location.pathname === path;

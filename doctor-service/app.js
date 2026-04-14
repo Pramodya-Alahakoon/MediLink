@@ -6,6 +6,7 @@ import prescriptionRouter from './routes/prescriptionRoutes.js';
 import appointmentRouter from './routes/appointmentRoutes.js';
 import patientReportRouter from './routes/patientReportRoutes.js';
 import consultationRouter from './routes/consultationRoutes.js';
+import uploadRouter from './routes/uploadRoutes.js';
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use('/api/doctors', appointmentRouter);
 app.use('/api/doctors', patientReportRouter);
 app.use('/api/availability', availabilityRouter);
 app.use('/api/prescriptions', prescriptionRouter);
+app.use('/api/upload', uploadRouter);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

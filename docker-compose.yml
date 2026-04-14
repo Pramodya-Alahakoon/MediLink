@@ -35,6 +35,7 @@ services:
       - "3003:3003"
     environment:
       - PORT=3003
+      - CLOUDINARY_URL=cloudinary://334213839224793:6Vs2LWGTMoQ3tA87qcR7JovBs9k@dnjq7l123
     env_file:
       - ./doctor-service/.env
     networks:
@@ -48,6 +49,7 @@ services:
       - "3000:3000"
     environment:
       - PORT=3000
+      - CLOUDINARY_URL=cloudinary://334213839224793:6Vs2LWGTMoQ3tA87qcR7JovBs9k@dnjq7l123
     env_file:
       - ./patient-service/.env
     networks:

@@ -1,6 +1,9 @@
-const path = require('path');
-const fs = require('fs');
-const cloudinary = require('../config/cloudinary');
+/**
+ * controllers/uploadController.js — Cloudinary upload controller for Doctor Service
+ */
+
+import cloudinary from '../config/cloudinary.js';
+import fs from 'fs';
 
 /**
  * Handle single file upload
@@ -8,7 +11,7 @@ const cloudinary = require('../config/cloudinary');
  * @param {Object} req - Express request object with file
  * @param {Object} res - Express response object
  */
-exports.uploadFile = async (req, res) => {
+export const uploadFile = async (req, res) => {
   try {
     // Check if file was uploaded
     if (!req.file) {
@@ -20,7 +23,7 @@ exports.uploadFile = async (req, res) => {
 
     // Upload to Cloudinary
     const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: 'medilink/patients',
+      folder: 'medilink/doctors',
       resource_type: 'auto'
     });
 
@@ -65,7 +68,7 @@ exports.uploadFile = async (req, res) => {
  * @param {Object} req - Express request object with files
  * @param {Object} res - Express response object
  */
-exports.uploadMultipleFiles = async (req, res) => {
+export const uploadMultipleFiles = async (req, res) => {
   try {
     // Check if files were uploaded
     if (!req.files || req.files.length === 0) {
@@ -78,7 +81,7 @@ exports.uploadMultipleFiles = async (req, res) => {
     // Upload all files to Cloudinary
     const uploadPromises = req.files.map(file => 
       cloudinary.uploader.upload(file.path, {
-        folder: 'medilink/patients',
+        folder: 'medilink/doctors',
         resource_type: 'auto'
       })
     );
@@ -128,11 +131,11 @@ exports.uploadMultipleFiles = async (req, res) => {
 
 /**
  * Delete uploaded file
- * @route DELETE /api/delete-file/:publicId
+ * @route DELETE /api/upload/delete/:publicId
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
-exports.deleteFile = async (req, res) => {
+export const deleteFile = async (req, res) => {
   try {
     const { publicId } = req.params;
 
