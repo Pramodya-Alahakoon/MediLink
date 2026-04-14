@@ -110,10 +110,10 @@ function SignIn() {
               navigate("/doctor/dashboard");
               break;
             case "patient":
-              navigate("/");
+              navigate("/appointments");
               break;
             default:
-              navigate("/"); // Default fallback
+              navigate("/appointments"); // Default fallback for patient role
           }
         }, 1500);
       }
