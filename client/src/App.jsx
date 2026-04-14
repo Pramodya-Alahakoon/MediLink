@@ -9,6 +9,8 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
+import DoctorLayout from './layouts/DoctorLayout';
+import Dashboard from './pages/Doctor/Dashboard';
 import { ThemeProvider } from './context/ThemeContext';
 
 function App() {
@@ -25,6 +27,11 @@ function App() {
               <Route path="/contact" element={<Contact />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
+            </Route>
+            
+            {/* Doctor Dashboard Routes */}
+            <Route element={<DoctorLayout />}>
+              <Route path="/doctor/dashboard" element={<Dashboard />} />
             </Route>
           </Routes>
         </div>
