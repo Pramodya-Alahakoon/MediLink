@@ -238,7 +238,7 @@ export const validateAdminAddUser = withValidationError([
 
   body("role")
     .optional()
-    .isIn(["user", "admin", "organizer"])
+    .isIn(["patient", "admin", "doctor"])
     .withMessage("Invalid role specified"),
 ]);
 

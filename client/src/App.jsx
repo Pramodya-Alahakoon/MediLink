@@ -1,7 +1,8 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import Layout from './components/UI/Layout';
+import ProtectedRoute from './components/UI/ProtectedRoute';
 import Homepage from './pages/Homepage';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
@@ -9,6 +10,7 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
+import AdminDashboard from './pages/AdminDashboard';
 import DoctorLayout from './layouts/DoctorLayout';
 import Dashboard from './pages/Doctor/Dashboard';
 import { ThemeProvider } from './context/ThemeContext';
@@ -19,6 +21,7 @@ function App() {
       <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <div className="app">
           <Routes>
+            {/* ── Public Routes (with Navbar/Footer Layout) ── */}
             <Route element={<Layout />}>
               <Route path="/" element={<Homepage />} />
               <Route path="/signin" element={<SignIn />} />
@@ -28,11 +31,30 @@ function App() {
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
             </Route>
-            
-            {/* Doctor Dashboard Routes */}
-            <Route element={<DoctorLayout />}>
+
+            {/* ── Admin Dashboard (role-guarded) ── */}
+            <Route
+              path="/admin/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* ── Doctor Dashboard Routes (role-guarded) ── */}
+            <Route
+              element={
+                <ProtectedRoute allowedRoles={['doctor']}>
+                  <DoctorLayout />
+                </ProtectedRoute>
+              }
+            >
               <Route path="/doctor/dashboard" element={<Dashboard />} />
             </Route>
+
+            {/* ── Catch-all → redirect to home ── */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
       </Router>
@@ -41,5 +63,3 @@ function App() {
 }
 
 export default App;
-
-

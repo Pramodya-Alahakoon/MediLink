@@ -3,15 +3,14 @@ import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import customFetch from "../utils/customFetch";
 import axios from "axios";
-import { 
-  IoEyeOutline, 
-  IoEyeOffOutline, 
-  IoMailOutline, 
+import {
+  IoEyeOutline,
+  IoEyeOffOutline,
+  IoMailOutline,
   IoLockClosedOutline,
-  IoCheckmarkCircle
+  IoCheckmarkCircle,
 } from "react-icons/io5";
 import { MdErrorOutline } from "react-icons/md";
-import { FcGoogle } from "react-icons/fc";
 import { FiShield, FiLock, FiCpu } from "react-icons/fi";
 import { FaArrowRight } from "react-icons/fa6";
 
@@ -24,16 +23,14 @@ function SignIn() {
   const [passwordError, setPasswordError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [touched, setTouched] = useState({ email: false, password: false });
+  // activeRole is DISPLAY-ONLY — it does NOT influence the redirect.
+  // The actual role always comes from the server response.
   const [activeRole, setActiveRole] = useState("Patient");
 
   const validateForm = () => {
     let isValid = true;
-    const errors = {
-      email: "",
-      password: "",
-    };
+    const errors = { email: "", password: "" };
 
-    // Email validation
     if (!email.trim()) {
       errors.email = "Email is required";
       isValid = false;
@@ -42,7 +39,6 @@ function SignIn() {
       isValid = false;
     }
 
-    // Password validation
     if (!password.trim()) {
       errors.password = "Password is required";
       isValid = false;
@@ -66,60 +62,51 @@ function SignIn() {
     setPasswordError("");
   };
 
-  const handleEmailBlur = () => {
-    setTouched({ ...touched, email: true });
-  };
-
-  const handlePasswordBlur = () => {
-    setTouched({ ...touched, password: true });
-  };
+  const handleEmailBlur = () => setTouched({ ...touched, email: true });
+  const handlePasswordBlur = () => setTouched({ ...touched, password: true });
 
   const handleFormSubmit = async () => {
-    // Validate form before submission
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsLoading(true);
     try {
-      const response = await customFetch.post('/api/auth/login', {
+      const response = await customFetch.post("/api/auth/login", {
         email,
-        password
+        password,
       });
 
-      if (response.data.token) {
-        // Save token to localStorage
-        localStorage.setItem('token', response.data.token);
-        toast.success("Login successful!");
+      const { token, patient } = response.data;
 
-        // Delay navigation to show toast
+      if (token && patient) {
+        // Persist auth info to localStorage
+        localStorage.setItem("token", token);
+        localStorage.setItem("userRole", patient.role);
+        localStorage.setItem("userName", patient.name);
+        localStorage.setItem("userEmail", patient.email);
+        localStorage.setItem("userId", patient.userId);
+
+        toast.success(`Welcome back, ${patient.name}!`);
+
+        // Navigate based on the ACTUAL role from the database
         setTimeout(() => {
-          // Navigate based on patient role
-          // Use the activeRole toggle from the UI to unblock login testing, 
-          // falling back to database role if not explicitly toggled.
-          const finalRole = activeRole === "Doctor" ? "doctor" : response.data.patient.role;
-          
-          switch (finalRole) {
+          switch (patient.role) {
             case "admin":
-              navigate("/");
-              break;
-            case "organizer":
-              navigate("/organizer-dashboard");
+              navigate("/admin/dashboard");
               break;
             case "doctor":
               navigate("/doctor/dashboard");
               break;
             case "patient":
+            default:
               navigate("/");
               break;
-            default:
-              navigate("/"); // Default fallback
           }
-        }, 1500);
+        }, 1200);
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        const errorMessage = error.response?.data?.msg || "Login failed";
+        const errorMessage =
+          error.response?.data?.msg || "Login failed. Please try again.";
         toast.error(errorMessage);
       } else {
         toast.error("Something went wrong. Please try again.");
@@ -132,7 +119,7 @@ function SignIn() {
 
   return (
     <div className="w-full flex lg:flex-row flex-col min-h-screen bg-[#F8FAFB] dark:bg-slate-900">
-      
+
       {/* ── LEFT SIDE: Hero Section ── */}
       <div className="lg:w-1/2 w-full relative hidden lg:flex flex-col justify-center overflow-hidden">
         {/* Background Image with Teal Overlay */}
@@ -142,7 +129,6 @@ function SignIn() {
             alt="Medical Hero"
             className="w-full h-full object-cover object-[center_top]"
           />
-          {/* Deep dark teal multi-stop overlay for readability */}
           <div className="absolute inset-0 bg-gradient-to-tr from-[#012022] via-[#054E50]/95 to-[#087D80]/70" />
         </div>
 
@@ -161,11 +147,12 @@ function SignIn() {
             <h1 className="text-white text-4xl xl:text-5xl font-black font-manrope leading-[1.1] tracking-tight mb-16 drop-shadow-lg">
               Exceptional care starts with a single connection.
             </h1>
-            
+
             {/* Quote Block */}
             <div className="border-l-4 border-white/50 pl-6 mt-12 drop-shadow-md">
               <p className="text-white text-xl xl:text-2xl font-serif italic leading-relaxed mb-4">
-                "MediLink Cloud has transformed how I manage my health. The interface is as intuitive as the care is compassionate."
+                "MediLink Cloud has transformed how I manage my health. The
+                interface is as intuitive as the care is compassionate."
               </p>
               <p className="text-white/80 text-sm font-inter uppercase tracking-widest font-semibold flex items-center gap-2 drop-shadow-sm">
                 <span className="w-4 h-[1px] bg-white/70 inline-block"></span>
@@ -179,22 +166,26 @@ function SignIn() {
       {/* ── RIGHT SIDE: Form Section ── */}
       <div className="lg:w-1/2 w-full flex flex-col justify-center items-center py-6 px-4 sm:px-10 lg:px-12 relative bg-[#F8FAFB] dark:bg-slate-900 min-h-screen">
         <div className="w-full max-w-[460px] bg-white/70 dark:bg-slate-800/40 backdrop-blur-2xl border border-slate-200/80 dark:border-slate-700/50 px-6 py-6 sm:px-8 sm:py-8 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-black/20">
-          
+
           {/* Titles */}
           <div className="mb-4">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#112429] dark:text-white font-manrope mb-1">Welcome Back</h2>
-            <p className="text-[#64748B] dark:text-slate-400 text-xs sm:text-sm font-inter">Sign in to access your health portal</p>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#112429] dark:text-white font-manrope mb-1">
+              Welcome Back
+            </h2>
+            <p className="text-[#64748B] dark:text-slate-400 text-xs sm:text-sm font-inter">
+              Sign in to access your health portal
+            </p>
           </div>
 
-          {/* Role Selector Pill */}
+          {/* Role Selector Pill — DISPLAY / HINT ONLY */}
           <div className="bg-[#F1F5F9]/80 dark:bg-slate-800/80 backdrop-blur-sm p-1 rounded-2xl flex justify-between items-center mb-5 gap-1">
-            {["Patient", "Doctor"].map((role) => (
+            {["Patient", "Doctor", "Admin"].map((role) => (
               <button
                 key={role}
                 onClick={() => setActiveRole(role)}
                 className={`flex-1 py-2 text-sm font-semibold transition-all duration-300 rounded-xl font-inter ${
                   activeRole === role
-                    ? "bg-white dark:bg-slate-700 text-[#112429] dark:text-white shadow-sm transform scale-100"
+                    ? "bg-white dark:bg-slate-700 text-[#112429] dark:text-white shadow-sm"
                     : "text-[#64748B] dark:text-slate-400 hover:text-[#112429] dark:hover:text-white bg-transparent"
                 }`}
               >
@@ -290,7 +281,10 @@ function SignIn() {
                 type="checkbox"
                 className="w-4 h-4 text-[#055153] dark:text-primary border-[#CBD5E1] dark:border-slate-600 rounded focus:ring-[#055153] dark:focus:ring-primary dark:bg-slate-800 cursor-pointer"
               />
-              <label htmlFor="remember" className="ml-2.5 block text-sm text-[#475569] dark:text-slate-300 font-medium font-inter cursor-pointer">
+              <label
+                htmlFor="remember"
+                className="ml-2.5 block text-sm text-[#475569] dark:text-slate-300 font-medium font-inter cursor-pointer"
+              >
                 Keep me signed in
               </label>
             </div>
@@ -304,8 +298,20 @@ function SignIn() {
               {isLoading ? (
                 <span className="flex items-center gap-2">
                   <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      fill="none"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
                   </svg>
                   Signing in...
                 </span>
@@ -319,8 +325,11 @@ function SignIn() {
 
           {/* Register Link */}
           <p className="text-center text-[#475569] dark:text-slate-400 text-sm font-medium mt-6 font-inter">
-            Don't have an account?{" "}
-            <Link to="/signup" className="text-[#055153] dark:text-primary font-bold hover:underline transition-colors block mx-auto py-1">
+            Don&apos;t have an account?{" "}
+            <Link
+              to="/signup"
+              className="text-[#055153] dark:text-primary font-bold hover:underline transition-colors"
+            >
               Register Now
             </Link>
           </p>
@@ -334,8 +343,11 @@ function SignIn() {
             <span className="flex items-center gap-1.5">
               <FiLock className="w-3.5 h-3.5" /> Secure Data
             </span>
+            <span className="w-1 h-1 rounded-full bg-[#CBD5E1] dark:bg-slate-700" />
+            <span className="flex items-center gap-1.5">
+              <FiShield className="w-3.5 h-3.5" /> HIPAA Safe
+            </span>
           </div>
-
         </div>
       </div>
     </div>
@@ -343,4 +355,3 @@ function SignIn() {
 }
 
 export default SignIn;
-
