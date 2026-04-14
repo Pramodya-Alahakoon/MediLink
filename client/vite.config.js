@@ -10,14 +10,4 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  server: {
-    proxy: {
-      // Forward all /api/* calls to the auth-service running on port 5000
-      '/api': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
-        secure: false,
-      },
-    },
-  },
 })
