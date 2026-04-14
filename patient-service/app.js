@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const path = require('path');
 const app = express();
 const patientRoutes = require('./routes/patientRoutes');
@@ -9,6 +10,10 @@ const videoConsultationRoutes = require('./routes/videoConsultationRoutes');
 const medicalHistoryRoutes = require('./routes/medicalHistoryRoutes');
 
 // Middleware
+app.use(cors({
+    origin: process.env.CLIENT_URL || "http://localhost:5173", 
+    credentials: true
+}));
 app.use(express.json());
 
 // Serve static files from uploads directory

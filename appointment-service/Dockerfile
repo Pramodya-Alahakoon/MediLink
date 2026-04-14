@@ -10,7 +10,7 @@ RUN npm install
 COPY . .
 
 # Expose the correct port defined in server.js
-EXPOSE 3005
+EXPOSE 3002
 
 # Start the Node application
 CMD ["node", "server.js"]
