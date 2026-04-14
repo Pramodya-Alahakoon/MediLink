@@ -30,7 +30,7 @@ const testimonials = [
 
 function Testimonials() {
   return (
-    <section className="py-24 bg-secondary relative overflow-hidden">
+    <section className="py-24 bg-[#F8FAFB] dark:bg-slate-900 relative overflow-hidden transition-colors duration-300">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/8 rounded-full blur-[120px]" />
       </div>
@@ -45,11 +45,11 @@ function Testimonials() {
         >
           <div>
             <span className="inline-block text-xs font-bold font-inter tracking-widest text-primary uppercase mb-3">Patient Stories</span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold font-manrope text-tertiary leading-tight">
+            <h2 className="text-3xl sm:text-4xl font-extrabold font-manrope text-tertiary dark:text-white leading-tight">
               Real people, real results.
             </h2>
           </div>
-          <p className="text-neutral font-inter text-sm max-w-xs text-right hidden sm:block">
+          <p className="text-neutral dark:text-slate-400 font-inter text-sm max-w-xs text-right hidden sm:block">
             Trusted by thousands of patients across the UK, US & South Asia.
           </p>
         </motion.div>
@@ -64,7 +64,7 @@ function Testimonials() {
               viewport={{ once: true }}
               transition={{ duration: 0.45, delay: index * 0.12 }}
               whileHover={{ y: -5 }}
-              className={`bg-white rounded-3xl p-7 border border-gray-100 hover:border-primary/10 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 flex flex-col ${index === 1 ? 'lg:mt-8' : ''}`}
+              className={`bg-white dark:bg-slate-800 rounded-3xl p-7 border border-gray-100 dark:border-slate-700 hover:border-primary/10 dark:hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 flex flex-col ${index === 1 ? 'lg:mt-8' : ''}`}
             >
               {/* Stars */}
               <div className="flex gap-1 mb-5">
@@ -74,19 +74,19 @@ function Testimonials() {
               </div>
 
               {/* Quote */}
-              <blockquote className="text-tertiary/80 font-inter text-base leading-relaxed flex-grow mb-7">
+              <blockquote className="text-tertiary/80 dark:text-white/80 font-inter text-base leading-relaxed flex-grow mb-7">
                 "{t.quote}"
               </blockquote>
 
               {/* Footer */}
-              <div className="flex items-center gap-3 border-t border-gray-100 pt-5">
+              <div className="flex items-center gap-3 border-t border-gray-100 dark:border-slate-700 pt-5">
                 <img src={t.avatar} alt={t.author} className="w-11 h-11 rounded-full object-cover flex-shrink-0" />
                 <div className="min-w-0">
-                  <p className="font-bold font-manrope text-tertiary text-sm truncate">{t.author}</p>
-                  <p className="text-xs text-neutral font-inter truncate">{t.role}</p>
+                  <p className="font-bold font-manrope text-tertiary dark:text-white text-sm truncate">{t.author}</p>
+                  <p className="text-xs text-neutral dark:text-slate-400 font-inter truncate">{t.role}</p>
                 </div>
                 <div className="ml-auto flex-shrink-0">
-                  <span className="text-[10px] font-semibold font-inter text-primary bg-primary/8 rounded-full px-2.5 py-1 whitespace-nowrap">
+                  <span className="text-[10px] font-semibold font-inter text-primary bg-primary/8 dark:bg-primary/20 rounded-full px-2.5 py-1 whitespace-nowrap">
                     {t.condition}
                   </span>
                 </div>
@@ -101,7 +101,7 @@ function Testimonials() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.4 }}
-          className="mt-14 flex flex-col sm:flex-row items-center justify-center gap-8 py-7 px-8 bg-white rounded-3xl border border-gray-100 shadow-sm"
+          className="mt-14 flex flex-col sm:flex-row items-center justify-center gap-8 py-7 px-8 bg-white dark:bg-slate-800 rounded-3xl border border-gray-100 dark:border-slate-700 shadow-sm"
         >
           {[
             { val: "50,000+", lbl: "Patients served" },
@@ -110,8 +110,8 @@ function Testimonials() {
             { val: "99.9%", lbl: "Platform uptime" },
           ].map((stat, i) => (
             <div key={i} className="text-center">
-              <p className="text-2xl font-extrabold font-manrope text-tertiary">{stat.val}</p>
-              <p className="text-xs text-neutral font-inter mt-0.5">{stat.lbl}</p>
+              <p className="text-2xl font-extrabold font-manrope text-tertiary dark:text-white">{stat.val}</p>
+              <p className="text-xs text-neutral dark:text-slate-400 font-inter mt-0.5">{stat.lbl}</p>
             </div>
           ))}
         </motion.div>

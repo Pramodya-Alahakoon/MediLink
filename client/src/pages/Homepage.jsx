@@ -9,7 +9,7 @@ import Testimonials from "@/section/Home/Testimonials";
 
 const Home = () => {
   return (
-    <main className="w-full overflow-x-hidden bg-[#F8FAFB]">
+    <main className="w-full overflow-x-hidden bg-[#F8FAFB] dark:bg-slate-900 transition-colors duration-300">
       <Hero />
       <Stats />
       <Services />

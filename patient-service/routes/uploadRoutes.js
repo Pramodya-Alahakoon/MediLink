@@ -14,6 +14,6 @@ router.post('/single', upload.single('file'), uploadController.uploadFile);
 router.post('/multiple', upload.array('files', 5), uploadController.uploadMultipleFiles);
 
 // Delete uploaded file
-router.delete('/:filename', uploadController.deleteFile);
+router.delete('/delete/:publicId', uploadController.deleteFile);
 
 module.exports = router;

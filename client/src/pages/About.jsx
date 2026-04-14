@@ -40,7 +40,7 @@ const fadeUp = {
 
 function About() {
   return (
-    <main className="bg-[#F8FAFB] overflow-x-hidden">
+    <main className="bg-[#F8FAFB] dark:bg-slate-900 overflow-x-hidden transition-colors duration-300">
       {/* ── HERO ── */}
       <section className="relative pt-36 pb-24 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-tertiary via-[#0c3756] to-primary opacity-95" />
@@ -61,7 +61,7 @@ function About() {
       </section>
 
       {/* ── STATS BAR ── */}
-      <section className="py-10 bg-white border-b border-gray-100">
+      <section className="py-10 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 transition-colors duration-300">
         <div className="container mx-auto px-5 sm:px-8 lg:px-16 xl:px-20">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             {stats.map((s, i) => (
@@ -75,19 +75,19 @@ function About() {
       </section>
 
       {/* ── MISSION ── */}
-      <section className="py-24 bg-[#F8FAFB]">
+      <section className="py-24 bg-[#F8FAFB] dark:bg-slate-800/50 transition-colors duration-300">
         <div className="container mx-auto px-5 sm:px-8 lg:px-16 xl:px-20">
           <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
             <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="w-full lg:w-1/2">
               <span className="inline-block text-xs font-bold font-inter tracking-widest text-primary uppercase mb-4">Our Mission</span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold font-manrope text-tertiary leading-tight mb-6">
+              <h2 className="text-3xl sm:text-4xl font-extrabold font-manrope text-tertiary dark:text-white leading-tight mb-6">
                 Technology that puts<br />
                 <span className="text-primary italic">humanity first.</span>
               </h2>
-              <p className="text-neutral font-inter text-base lg:text-lg leading-relaxed mb-6">
+              <p className="text-neutral dark:text-slate-300 font-inter text-base lg:text-lg leading-relaxed mb-6">
                 We built MediLink Cloud to dismantle the walls between patients and the care they deserve. No endless queues. No confusion over records. No friction between you and a verified specialist.
               </p>
-              <p className="text-neutral font-inter text-base lg:text-lg leading-relaxed mb-8">
+              <p className="text-neutral dark:text-slate-300 font-inter text-base lg:text-lg leading-relaxed mb-8">
                 Our AI-enabled platform powers every interaction — from the moment you describe a symptom to the second a prescription reaches your phone — ensuring you always feel informed, supported, and in control.
               </p>
               <Link to="/contact">
@@ -101,13 +101,13 @@ function About() {
                 const Icon = v.icon;
                 return (
                   <motion.div key={v.title} custom={i} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}
-                    className={`bg-white rounded-3xl p-6 border border-gray-100 hover:shadow-lg hover:shadow-primary/5 transition-all ${i % 2 === 1 ? 'mt-6' : ''}`}
+                    className={`bg-white dark:bg-slate-800 rounded-3xl p-6 border border-gray-100 dark:border-slate-700 hover:shadow-lg hover:shadow-primary/5 transition-all ${i % 2 === 1 ? 'mt-6' : ''}`}
                   >
-                    <div className={`w-11 h-11 rounded-2xl ${v.bg} flex items-center justify-center mb-4`}>
+                    <div className={`w-11 h-11 rounded-2xl ${v.bg} dark:bg-slate-900 flex items-center justify-center mb-4`}>
                       <Icon className={`w-5 h-5 ${v.color}`} />
                     </div>
-                    <h3 className="font-bold font-manrope text-tertiary mb-2 text-sm">{v.title}</h3>
-                    <p className="text-neutral font-inter text-xs leading-relaxed">{v.desc}</p>
+                    <h3 className="font-bold font-manrope text-tertiary dark:text-white mb-2 text-sm">{v.title}</h3>
+                    <p className="text-neutral dark:text-slate-400 font-inter text-xs leading-relaxed">{v.desc}</p>
                   </motion.div>
                 );
               })}
@@ -117,26 +117,26 @@ function About() {
       </section>
 
       {/* ── TIMELINE ── */}
-      <section className="py-24 bg-white relative overflow-hidden">
+      <section className="py-24 bg-white dark:bg-slate-900 relative overflow-hidden transition-colors duration-300">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px]" />
         </div>
         <div className="container mx-auto px-5 sm:px-8 lg:px-16 xl:px-20 relative z-10">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
             <span className="inline-block text-xs font-bold font-inter tracking-widest text-primary uppercase mb-3">Our Journey</span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold font-manrope text-tertiary">From idea to impact.</h2>
+            <h2 className="text-3xl sm:text-4xl font-extrabold font-manrope text-tertiary dark:text-white">From idea to impact.</h2>
           </motion.div>
           <div className="relative max-w-2xl mx-auto">
             {/* Vertical line */}
-            <div className="absolute left-[27px] top-0 bottom-0 w-0.5 bg-gray-100 z-0" />
+            <div className="absolute left-[27px] top-0 bottom-0 w-0.5 bg-gray-100 dark:bg-slate-800 z-0" />
             <div className="space-y-10">
               {milestones.map((m, i) => (
                 <motion.div key={m.year} custom={i} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="flex items-start gap-6 relative z-10">
-                  <div className={`w-[54px] h-[54px] rounded-2xl flex-shrink-0 flex items-center justify-center font-extrabold font-manrope text-xs shadow-sm ${i === 0 ? 'bg-primary text-white shadow-primary/30' : 'bg-white border-2 border-gray-100 text-tertiary'}`}>
+                  <div className={`w-[54px] h-[54px] rounded-2xl flex-shrink-0 flex items-center justify-center font-extrabold font-manrope text-xs shadow-sm ${i === 0 ? 'bg-primary text-white shadow-primary/30' : 'bg-white dark:bg-slate-800 border-2 border-gray-100 dark:border-slate-700 text-tertiary dark:text-white'}`}>
                     {m.year}
                   </div>
-                  <div className="bg-white rounded-2xl border border-gray-100 px-5 py-4 flex-1 hover:shadow-md hover:border-primary/10 transition-all">
-                    <p className="text-tertiary font-inter text-sm leading-relaxed">{m.event}</p>
+                  <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 px-5 py-4 flex-1 hover:shadow-md hover:border-primary/10 transition-all">
+                    <p className="text-tertiary dark:text-slate-200 font-inter text-sm leading-relaxed">{m.event}</p>
                   </div>
                 </motion.div>
               ))}
@@ -146,24 +146,24 @@ function About() {
       </section>
 
       {/* ── TEAM ── */}
-      <section className="py-24 bg-[#F8FAFB]">
+      <section className="py-24 bg-[#F8FAFB] dark:bg-slate-800/50 transition-colors duration-300">
         <div className="container mx-auto px-5 sm:px-8 lg:px-16 xl:px-20">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
             <span className="inline-block text-xs font-bold font-inter tracking-widest text-primary uppercase mb-3">Leadership</span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold font-manrope text-tertiary">The minds behind MediLink.</h2>
+            <h2 className="text-3xl sm:text-4xl font-extrabold font-manrope text-tertiary dark:text-white">The minds behind MediLink.</h2>
           </motion.div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {team.map((member, i) => (
               <motion.div key={member.name} custom={i} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}
-                className="bg-white rounded-3xl overflow-hidden border border-gray-100 hover:shadow-xl hover:shadow-primary/5 transition-all text-center group"
+                className="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-700 hover:shadow-xl hover:shadow-primary/5 transition-all text-center group"
               >
                 <div className="bg-gradient-to-b from-primary/5 to-primary/10 h-44 flex items-end justify-center overflow-hidden">
                   <img src={member.avatar} alt={member.name} className="w-[70%] h-[90%] object-cover object-top transition-transform duration-500 group-hover:scale-105" />
                 </div>
                 <div className="p-5">
-                  <h3 className="font-bold font-manrope text-tertiary mb-0.5">{member.name}</h3>
+                  <h3 className="font-bold font-manrope text-tertiary dark:text-white mb-0.5">{member.name}</h3>
                   <p className="text-xs font-semibold text-primary font-inter mb-3">{member.role}</p>
-                  <p className="text-xs text-neutral font-inter leading-relaxed">{member.bio}</p>
+                  <p className="text-xs text-neutral dark:text-slate-400 font-inter leading-relaxed">{member.bio}</p>
                 </div>
               </motion.div>
             ))}
@@ -172,7 +172,7 @@ function About() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-white dark:bg-slate-900 transition-colors duration-300">
         <div className="container mx-auto px-5 sm:px-8 lg:px-16 xl:px-20">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
             className="bg-gradient-to-br from-tertiary to-primary rounded-3xl p-10 sm:p-14 text-center text-white relative overflow-hidden"

@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const cloudinary = require('../config/cloudinary');
 
 /**
  * Handle single file upload
@@ -7,7 +8,7 @@ const fs = require('fs');
  * @param {Object} req - Express request object with file
  * @param {Object} res - Express response object
  */
-exports.uploadFile = (req, res) => {
+exports.uploadFile = async (req, res) => {
   try {
     // Check if file was uploaded
     if (!req.file) {
@@ -17,22 +18,27 @@ exports.uploadFile = (req, res) => {
       });
     }
 
-    // Construct file URL
-    const fileUrl = `/uploads/${req.file.filename}`;
-    const fileSize = req.file.size;
-    const fileName = req.file.filename;
-    const originalName = req.file.originalname;
-    const mimeType = req.file.mimetype;
+    // Upload to Cloudinary
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: 'medilink/patients',
+      resource_type: 'auto'
+    });
+
+    // Delete local file after successful upload
+    fs.unlink(req.file.path, (err) => {
+      if (err) console.error('Error deleting local file:', err);
+    });
 
     res.status(200).json({
       success: true,
       message: 'File uploaded successfully',
       data: {
-        fileUrl: fileUrl,
-        fileName: fileName,
-        originalName: originalName,
-        fileSize: fileSize,
-        mimeType: mimeType
+        fileUrl: result.secure_url,
+        fileName: result.original_filename,
+        originalName: req.file.originalname,
+        fileSize: req.file.size,
+        mimeType: req.file.mimetype,
+        cloudinaryPublicId: result.public_id
       }
     });
   } catch (error) {
@@ -59,7 +65,7 @@ exports.uploadFile = (req, res) => {
  * @param {Object} req - Express request object with files
  * @param {Object} res - Express response object
  */
-exports.uploadMultipleFiles = (req, res) => {
+exports.uploadMultipleFiles = async (req, res) => {
   try {
     // Check if files were uploaded
     if (!req.files || req.files.length === 0) {
@@ -69,13 +75,30 @@ exports.uploadMultipleFiles = (req, res) => {
       });
     }
 
-    // Map files to response format
-    const uploadedFiles = req.files.map(file => ({
-      fileUrl: `/uploads/${file.filename}`,
-      fileName: file.filename,
-      originalName: file.originalname,
-      fileSize: file.size,
-      mimeType: file.mimetype
+    // Upload all files to Cloudinary
+    const uploadPromises = req.files.map(file => 
+      cloudinary.uploader.upload(file.path, {
+        folder: 'medilink/patients',
+        resource_type: 'auto'
+      })
+    );
+
+    const results = await Promise.all(uploadPromises);
+
+    // Delete local files after successful upload
+    req.files.forEach(file => {
+      fs.unlink(file.path, (err) => {
+        if (err) console.error('Error deleting local file:', err);
+      });
+    });
+
+    // Map results to response format
+    const uploadedFiles = results.map(result => ({
+      fileUrl: result.secure_url,
+      fileName: result.original_filename,
+      fileSize: result.bytes,
+      mimeType: result.resource_type,
+      cloudinaryPublicId: result.public_id
     }));
 
     res.status(200).json({
@@ -105,38 +128,28 @@ exports.uploadMultipleFiles = (req, res) => {
 
 /**
  * Delete uploaded file
- * @route DELETE /api/delete-file/:filename
+ * @route DELETE /api/delete-file/:publicId
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
-exports.deleteFile = (req, res) => {
+exports.deleteFile = async (req, res) => {
   try {
-    const { filename } = req.params;
+    const { publicId } = req.params;
 
-    // Validate filename to prevent directory traversal attacks
-    if (filename.includes('..') || filename.includes('/')) {
+    // Validate publicId to prevent directory traversal attacks
+    if (publicId.includes('..') || publicId.includes('/') || publicId.includes('\\')) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid filename format'
+        message: 'Invalid publicId format'
       });
     }
 
-    const filePath = path.join(__dirname, '../uploads', filename);
-
-    // Check if file exists
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({
-        success: false,
-        message: 'File not found'
-      });
-    }
-
-    // Delete file
-    fs.unlinkSync(filePath);
+    // Delete from Cloudinary
+    await cloudinary.uploader.destroy(publicId);
 
     res.status(200).json({
       success: true,
-      message: 'File deleted successfully'
+      message: 'File deleted successfully from Cloudinary'
     });
   } catch (error) {
     console.error('Error deleting file:', error);

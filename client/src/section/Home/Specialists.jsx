@@ -11,7 +11,7 @@ const specialists = [
     reviews: "234",
     image: "/Images/specialist_1.png",
     available: true,
-    color: "from-blue-50 to-blue-100/40",
+    color: "from-blue-50 dark:from-blue-500/20 to-blue-100/40 dark:to-blue-500/5",
   },
   {
     id: 2,
@@ -21,7 +21,7 @@ const specialists = [
     reviews: "189",
     image: "/Images/specialist_2.png",
     available: true,
-    color: "from-violet-50 to-violet-100/40",
+    color: "from-violet-50 dark:from-violet-500/20 to-violet-100/40 dark:to-violet-500/5",
   },
   {
     id: 3,
@@ -31,7 +31,7 @@ const specialists = [
     reviews: "411",
     image: "/Images/specialist_3.png",
     available: true,
-    color: "from-primary/5 to-primary/10",
+    color: "from-primary/5 dark:from-primary/20 to-primary/10 dark:to-primary/10",
   },
   {
     id: 4,
@@ -41,7 +41,7 @@ const specialists = [
     reviews: "156",
     image: "/Images/specialist_4.png",
     available: false,
-    color: "from-pink-50 to-pink-100/40",
+    color: "from-pink-50 dark:from-pink-500/20 to-pink-100/40 dark:to-pink-500/5",
   },
 ];
 
@@ -49,7 +49,7 @@ function Specialists() {
   const navigate = useNavigate();
 
   return (
-    <section className="py-24 bg-secondary relative overflow-hidden">
+    <section className="py-24 bg-[#F8FAFB] dark:bg-slate-900 relative overflow-hidden transition-colors duration-300">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[900px] h-[400px] bg-primary/8 rounded-full blur-[120px]" />
       </div>
@@ -65,7 +65,7 @@ function Specialists() {
             <span className="inline-block text-xs font-bold font-inter tracking-widest text-primary uppercase mb-3">
               Our Team
             </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold font-manrope text-tertiary leading-tight">
+            <h2 className="text-3xl sm:text-4xl font-extrabold font-manrope text-tertiary dark:text-white leading-tight">
               Meet the doctors
               <br />who have your back.
             </h2>
@@ -91,7 +91,7 @@ function Specialists() {
               viewport={{ once: true }}
               transition={{ duration: 0.45, delay: index * 0.1 }}
               whileHover={{ y: -6 }}
-              className="group bg-white rounded-3xl overflow-hidden border border-gray-100 hover:border-primary/10 hover:shadow-xl hover:shadow-primary/8 transition-all duration-300 cursor-pointer flex flex-col"
+              className="group bg-white dark:bg-slate-800 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-700 hover:border-primary/10 dark:hover:border-primary/30 hover:shadow-xl hover:shadow-primary/8 transition-all duration-300 cursor-pointer flex flex-col"
               onClick={() => navigate('/appointments')}
             >
               {/* Image area */}
@@ -102,23 +102,23 @@ function Specialists() {
                   className="w-[78%] h-[88%] object-cover object-top transition-transform duration-500 group-hover:scale-105 z-10 relative drop-shadow-md"
                 />
                 {/* Availability dot */}
-                <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-white rounded-full px-2.5 py-1 shadow-sm z-20">
-                  <span className={`w-2 h-2 rounded-full ${doc.available ? 'bg-green-400 animate-pulse' : 'bg-gray-300'}`} />
-                  <span className="text-[11px] font-semibold text-tertiary font-inter">{doc.available ? 'Available' : 'Busy'}</span>
+                <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-white dark:bg-slate-900 rounded-full px-2.5 py-1 shadow-sm z-20">
+                  <span className={`w-2 h-2 rounded-full ${doc.available ? 'bg-green-400 animate-pulse' : 'bg-gray-300 dark:bg-gray-600'}`} />
+                  <span className="text-[11px] font-semibold text-tertiary dark:text-white font-inter">{doc.available ? 'Available' : 'Busy'}</span>
                 </div>
                 {/* Rating */}
-                <div className="absolute top-4 right-4 flex items-center gap-1 bg-white rounded-full px-2.5 py-1 shadow-sm z-20">
+                <div className="absolute top-4 right-4 flex items-center gap-1 bg-white dark:bg-slate-900 rounded-full px-2.5 py-1 shadow-sm z-20">
                   <FiStar className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                  <span className="text-[11px] font-bold text-tertiary font-inter">{doc.rating}</span>
+                  <span className="text-[11px] font-bold text-tertiary dark:text-white font-inter">{doc.rating}</span>
                 </div>
               </div>
 
               {/* Info */}
               <div className="p-5 flex flex-col flex-grow">
-                <h3 className="font-bold font-manrope text-tertiary text-base mb-0.5">{doc.name}</h3>
-                <p className="text-xs text-neutral font-inter mb-1">{doc.title}</p>
-                <p className="text-[11px] text-neutral/70 font-inter mb-5">{doc.reviews} reviews</p>
-                <button className="mt-auto w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-secondary text-tertiary hover:bg-primary hover:text-white text-sm font-semibold font-inter transition-all duration-300 group-hover:bg-primary group-hover:text-white">
+                <h3 className="font-bold font-manrope text-tertiary dark:text-white text-base mb-0.5">{doc.name}</h3>
+                <p className="text-xs text-neutral dark:text-slate-400 font-inter mb-1">{doc.title}</p>
+                <p className="text-[11px] text-neutral/70 dark:text-slate-500 font-inter mb-5">{doc.reviews} reviews</p>
+                <button className="mt-auto w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-secondary dark:bg-slate-700/50 text-tertiary dark:text-white hover:bg-primary dark:hover:bg-primary hover:text-white dark:hover:text-white text-sm font-semibold font-inter transition-all duration-300 group-hover:bg-primary group-hover:text-white">
                   <FiCalendar className="w-3.5 h-3.5" />
                   Book Now
                 </button>

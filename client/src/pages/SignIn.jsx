@@ -1,18 +1,25 @@
-import hero from "/Images/main.jpg";
 import { useState } from "react";
-import CustomButton from "@/components/UI/Button";
-import { IoEyeOutline } from "react-icons/io5";
-import { IoEyeOffOutline } from "react-icons/io5";
 import { Link, useNavigate } from "react-router-dom";
-import Logo from "@/components/UI/Logo";
 import toast from "react-hot-toast";
 import customFetch from "../utils/customFetch";
 import axios from "axios";
+import { 
+  IoEyeOutline, 
+  IoEyeOffOutline, 
+  IoMailOutline, 
+  IoLockClosedOutline,
+  IoCheckmarkCircle
+} from "react-icons/io5";
 import { MdErrorOutline } from "react-icons/md";
-import { MdCheckCircle } from "react-icons/md";
+import { FcGoogle } from "react-icons/fc";
+import { FiShield, FiLock, FiCpu } from "react-icons/fi";
+import { FaArrowRight } from "react-icons/fa6";
+
+import { useAuth } from "../context/AuthContext";
 
 function SignIn() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
@@ -20,6 +27,7 @@ function SignIn() {
   const [passwordError, setPasswordError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [touched, setTouched] = useState({ email: false, password: false });
+  const [activeRole, setActiveRole] = useState("Patient");
 
   const validateForm = () => {
     let isValid = true;
@@ -70,7 +78,6 @@ function SignIn() {
   };
 
   const handleFormSubmit = async () => {
-    // Validate form before submission
     if (!validateForm()) {
       return;
     }
@@ -82,32 +89,33 @@ function SignIn() {
         password
       });
 
-      //localhost:5000/api/auth/login
-
       if (response.data.token) {
-        // Save token to localStorage
-        localStorage.setItem('token', response.data.token);
+        const { token, patient: userData } = response.data;
+        
+        // Use central login function
+        login(userData, token);
+        
         toast.success("Login successful!");
 
-        // Delay navigation to show toast
-        setTimeout(() => {
-          // Navigate based on patient role
-          switch (response.data.patient.role) {
-            case "admin":
-              navigate("/");
-              break;
-            case "organizer":
-              navigate("/organizer-dashboard");
-              break;
-            case "patient":
-              navigate("/");
-              break;
-            default:
-              navigate("/"); // Default fallback
-          }
-        }, 1500);
+        // Immediate redirection based on verified role
+        const finalRole = userData.role;
+        
+        switch (finalRole) {
+          case "admin":
+            navigate("/");
+            break;
+          case "doctor":
+            navigate("/doctor/dashboard");
+            break;
+          case "patient":
+            navigate("/appointments");
+            break;
+          default:
+            navigate("/appointments");
+        }
       }
     } catch (error) {
+      // ... error handling ...
       if (axios.isAxiosError(error)) {
         const errorMessage = error.response?.data?.msg || "Login failed";
         toast.error(errorMessage);
@@ -121,166 +129,211 @@ function SignIn() {
   };
 
   return (
-    <div className="w-full flex lg:flex-row flex-col min-h-screen bg-gradient-to-br from-slate-50 to-white">
-      {/* Hero Image Section - Left Side */}
-      <div className="lg:w-1/2 lg:block hidden relative overflow-hidden bg-gradient-to-br from-primary to-tertiary">
-        <img
-          src={hero}
-          alt="Medical Background"
-          className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity duration-300"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-tertiary/60 via-transparent to-transparent"></div>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-white text-center px-8 font-manrope">
-            <h2 className="text-4xl font-bold mb-4">Welcome Back</h2>
-            <p className="text-lg opacity-90 font-inter">Access your medical records and appointments</p>
+    <div className="w-full flex lg:flex-row flex-col min-h-screen bg-[#F8FAFB] dark:bg-slate-900">
+      
+      {/* ── LEFT SIDE: Hero Section ── */}
+      <div className="lg:w-1/2 w-full relative hidden lg:flex flex-col justify-center overflow-hidden">
+        {/* Background Image with Teal Overlay */}
+        <div className="absolute inset-0">
+          <img
+            src="/Images/login-hero-new.png"
+            alt="Medical Hero"
+            className="w-full h-full object-cover object-[center_top]"
+          />
+          {/* Deep dark teal multi-stop overlay for readability */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-[#012022] via-[#054E50]/95 to-[#087D80]/70" />
+        </div>
+
+        {/* Left Side Content Overlaid */}
+        <div className="relative z-10 px-16 xl:px-24 py-20 h-full flex flex-col justify-between">
+          <div className="max-w-xl mt-12">
+            {/* Trusted Badge */}
+            <div className="inline-flex items-center gap-2 bg-white/20 dark:bg-black/20 backdrop-blur-md px-4 py-2 rounded-full mb-8 border border-white/30 dark:border-white/10">
+              <IoCheckmarkCircle className="text-teal-200" />
+              <span className="text-white/90 text-sm font-semibold tracking-wider font-manrope uppercase">
+                Trusted by 2M+ Patients
+              </span>
+            </div>
+
+            {/* Main Headline */}
+            <h1 className="text-white text-4xl xl:text-5xl font-black font-manrope leading-[1.1] tracking-tight mb-16 drop-shadow-lg">
+              Exceptional care starts with a single connection.
+            </h1>
+            
+            {/* Quote Block */}
+            <div className="border-l-4 border-white/50 pl-6 mt-12 drop-shadow-md">
+              <p className="text-white text-xl xl:text-2xl font-serif italic leading-relaxed mb-4">
+                "MediLink Cloud has transformed how I manage my health. The interface is as intuitive as the care is compassionate."
+              </p>
+              <p className="text-white/80 text-sm font-inter uppercase tracking-widest font-semibold flex items-center gap-2 drop-shadow-sm">
+                <span className="w-4 h-[1px] bg-white/70 inline-block"></span>
+                Dr. Prasanna Gunasena
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Form Section - Right Side */}
-      <div className="flex flex-col w-full lg:w-1/2 justify-center px-6 sm:px-8 md:px-12 lg:px-16 py-12 sm:py-16">
-        {/* Logo */}
-        <div className="mb-8 lg:mb-12">
-          <Logo className="w-[112px] h-[54px]" />
-        </div>
-
-        {/* Sign In Container */}
-        <div className="max-w-md w-full">
-          {/* Header */}
-          <div className="mb-8 font-manrope">
-            <h1 className="text-4xl font-bold text-tertiary mb-3">Sign In</h1>
-            <p className="text-neutral text-base leading-relaxed font-inter">
-              Enter your credentials to access your account
-            </p>
+      {/* ── RIGHT SIDE: Form Section ── */}
+      <div className="lg:w-1/2 w-full flex flex-col justify-center items-center py-6 px-4 sm:px-10 lg:px-12 relative bg-[#F8FAFB] dark:bg-slate-900 min-h-screen">
+        <div className="w-full max-w-[460px] bg-white/70 dark:bg-slate-800/40 backdrop-blur-2xl border border-slate-200/80 dark:border-slate-700/50 px-6 py-6 sm:px-8 sm:py-8 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-black/20">
+          
+          {/* Titles */}
+          <div className="mb-4">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#112429] dark:text-white font-manrope mb-1">Welcome Back</h2>
+            <p className="text-[#64748B] dark:text-slate-400 text-xs sm:text-sm font-inter">Sign in to access your health portal</p>
           </div>
 
-          {/* Email Input Group */}
-          <div className="mb-6">
-            <label className="block text-sm font-semibold text-gray-700 mb-3">
-              Email Address
-            </label>
-            <div className="relative group">
-              <input
-                type="email"
-                value={email}
-                onChange={handleEmailChange}
-                onBlur={handleEmailBlur}
-                placeholder="you@example.com"
-                className={`w-full px-4 py-3 text-base font-medium placeholder-gray-400 bg-white border-2 rounded-lg transition-all duration-300 focus:outline-none ${
-                  touched.email && emailError
-                    ? "border-red-500 focus:border-red-600 focus:ring-2 focus:ring-red-200"
-                    : "border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 group-hover:border-neutral/30 font-inter"
+          {/* Role Selector Pill */}
+          <div className="bg-[#F1F5F9]/80 dark:bg-slate-800/80 backdrop-blur-sm p-1 rounded-2xl flex justify-between items-center mb-5 gap-1">
+            {["Patient", "Doctor"].map((role) => (
+              <button
+                key={role}
+                onClick={() => setActiveRole(role)}
+                className={`flex-1 py-2 text-sm font-semibold transition-all duration-300 rounded-xl font-inter ${
+                  activeRole === role
+                    ? "bg-white dark:bg-slate-700 text-[#112429] dark:text-white shadow-sm transform scale-100"
+                    : "text-[#64748B] dark:text-slate-400 hover:text-[#112429] dark:hover:text-white bg-transparent"
                 }`}
-              />
+              >
+                {role}
+              </button>
+            ))}
+          </div>
+
+          <div className="space-y-5">
+            {/* Email Input */}
+            <div className="mb-4">
+              <label className="block text-xs font-bold text-[#112429] dark:text-slate-200 mb-1.5">
+                Email Address
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <IoMailOutline className="text-[#94A3B8] dark:text-slate-500 w-5 h-5" />
+                </div>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={handleEmailChange}
+                  onBlur={handleEmailBlur}
+                  placeholder="Enter your E-mail"
+                  className={`w-full pl-11 pr-4 py-2.5 text-sm font-medium bg-white/50 dark:bg-slate-800/50 dark:text-white border border-slate-200/80 dark:border-slate-700/50 rounded-xl transition-colors focus:outline-none focus:bg-white dark:focus:bg-slate-800/80 ${
+                    touched.email && emailError
+                      ? "border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-500/10"
+                      : "border-[#E2E8F0] dark:border-slate-700 focus:border-[#055153] dark:focus:border-primary focus:ring-4 focus:ring-[#055153]/10 dark:focus:ring-primary/20 hover:border-[#CBD5E1] dark:hover:border-slate-600"
+                  } font-inter`}
+                />
+              </div>
               {touched.email && emailError && (
-                <MdErrorOutline className="absolute right-4 top-3.5 text-red-500 text-xl" />
+                <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1 font-inter font-medium">
+                  <MdErrorOutline size={14} />
+                  {emailError}
+                </p>
               )}
             </div>
-            {touched.email && emailError && (
-              <p className="text-red-500 text-sm mt-2 flex items-center gap-1">
-                <MdErrorOutline size={16} />
-                {emailError}
-              </p>
-            )}
-          </div>
 
-          {/* Password Input Group */}
-          <div className="mb-2">
-            <label className="block text-sm font-semibold text-gray-700 mb-3">
-              Password
-            </label>
-            <div className="relative group">
-              <input
-                type={passwordVisible ? "text" : "password"}
-                value={password}
-                onChange={handlePasswordChange}
-                onBlur={handlePasswordBlur}
-                placeholder="Enter your password"
-                className={`w-full px-4 py-3 text-base font-medium placeholder-gray-400 bg-white border-2 rounded-lg transition-all duration-300 focus:outline-none pr-12 ${
-                  touched.password && passwordError
-                    ? "border-red-500 focus:border-red-600 focus:ring-2 focus:ring-red-200"
-                    : "border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 group-hover:border-neutral/30 font-inter"
-                }`}
-              />
-              <button
-                type="button"
-                onClick={() => setPasswordVisible(!passwordVisible)}
-                className="absolute right-4 top-3.5 text-gray-500 hover:text-gray-700 transition-colors"
-              >
-                {passwordVisible ? (
-                  <IoEyeOutline size={20} />
-                ) : (
-                  <IoEyeOffOutline size={20} />
-                )}
-              </button>
+            {/* Password Input */}
+            <div className="mb-4">
+              <div className="flex justify-between items-center mb-1.5">
+                <label className="block text-xs font-bold text-[#112429] dark:text-slate-200">
+                  Password
+                </label>
+                <Link
+                  to="/forgot-password"
+                  className="text-[#055153] dark:text-primary transition-colors text-[11px] font-semibold hover:underline font-inter"
+                >
+                  Forgot Password?
+                </Link>
+              </div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <IoLockClosedOutline className="text-[#94A3B8] dark:text-slate-500 w-5 h-5" />
+                </div>
+                <input
+                  type={passwordVisible ? "text" : "password"}
+                  value={password}
+                  onChange={handlePasswordChange}
+                  onBlur={handlePasswordBlur}
+                  placeholder="••••••••"
+                  className={`w-full pl-11 pr-12 py-2.5 text-sm font-medium bg-white/50 dark:bg-slate-800/50 dark:text-white border border-slate-200/80 dark:border-slate-700/50 rounded-xl transition-colors focus:outline-none focus:bg-white dark:focus:bg-slate-800/80 ${
+                    touched.password && passwordError
+                      ? "border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-500/10"
+                      : "border-[#E2E8F0] dark:border-slate-700 focus:border-[#055153] dark:focus:border-primary focus:ring-4 focus:ring-[#055153]/10 dark:focus:ring-primary/20 hover:border-[#CBD5E1] dark:hover:border-slate-600"
+                  } font-inter`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setPasswordVisible(!passwordVisible)}
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#94A3B8] dark:text-slate-500 hover:text-[#64748B] dark:hover:text-slate-300 transition-colors"
+                >
+                  {passwordVisible ? (
+                    <IoEyeOutline size={20} />
+                  ) : (
+                    <IoEyeOffOutline size={20} />
+                  )}
+                </button>
+              </div>
+              {touched.password && passwordError && (
+                <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1 font-inter font-medium">
+                  <MdErrorOutline size={14} />
+                  {passwordError}
+                </p>
+              )}
             </div>
-            {touched.password && passwordError && (
-              <p className="text-red-500 text-sm mt-2 flex items-center gap-1">
-                <MdErrorOutline size={16} />
-                {passwordError}
-              </p>
-            )}
-          </div>
 
-          {/* Forgot Password Link */}
-          <div className="flex justify-end mb-8">
-            <Link
-              to="/forgot-password"
-              className="text-primary text-sm font-semibold hover:text-primary/80 hover:underline transition-colors font-inter"
-            >
-              Forgot password?
-            </Link>
-          </div>
+            {/* Keep Signed In Checkbox */}
+            <div className="flex items-center pt-1">
+              <input
+                id="remember"
+                type="checkbox"
+                className="w-4 h-4 text-[#055153] dark:text-primary border-[#CBD5E1] dark:border-slate-600 rounded focus:ring-[#055153] dark:focus:ring-primary dark:bg-slate-800 cursor-pointer"
+              />
+              <label htmlFor="remember" className="ml-2.5 block text-sm text-[#475569] dark:text-slate-300 font-medium font-inter cursor-pointer">
+                Keep me signed in
+              </label>
+            </div>
 
-          {/* Sign In Button */}
-          <button
-            onClick={handleFormSubmit}
-            disabled={isLoading}
-            className="w-full bg-primary hover:bg-primary/90 disabled:bg-neutral/40 text-white font-bold py-4 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-95 disabled:hover:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl font-manrope uppercase tracking-wider"
-          >
-            {isLoading && (
-              <svg
-                className="animate-spin h-5 w-5"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                  fill="none"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
-            )}
-            <span>{isLoading ? "Signing in..." : "Sign In"}</span>
-          </button>
-
-          {/* Sign Up Link */}
-          <p className="text-center text-neutral text-sm font-medium mt-8 font-inter">
-            Don't have an account?{" "}
+            {/* Sign In Button */}
             <button
-              onClick={() => navigate("/signup")}
-              className="text-primary font-bold hover:text-primary/80 transition-colors"
+              onClick={handleFormSubmit}
+              disabled={isLoading}
+              className="w-full bg-[#055153] dark:bg-primary hover:bg-[#044143] dark:hover:bg-primary/90 disabled:bg-gray-300 dark:disabled:bg-slate-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 transform active:scale-[0.98] disabled:active:scale-100 flex items-center justify-center gap-2 shadow-lg shadow-[#055153]/20 dark:shadow-primary/20 mt-2"
             >
-              Sign Up Join Us
+              {isLoading ? (
+                <span className="flex items-center gap-2">
+                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Signing in...
+                </span>
+              ) : (
+                <>
+                  Sign In <FaArrowRight className="w-4 h-4 ml-1" />
+                </>
+              )}
             </button>
+          </div>
+
+          {/* Register Link */}
+          <p className="text-center text-[#475569] dark:text-slate-400 text-sm font-medium mt-6 font-inter">
+            Don't have an account?{" "}
+            <Link to="/signup" className="text-[#055153] dark:text-primary font-bold hover:underline transition-colors block mx-auto py-1">
+              Register Now
+            </Link>
           </p>
 
-          {/* Security Notice */}
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <p className="text-xs text-gray-500 text-center leading-relaxed">
-              This site is protected by reCAPTCHA and the Google Privacy Policy
-              and Terms of Service apply. © 2025 All rights reserved
-            </p>
+          {/* Trust Badges Footer */}
+          <div className="flex items-center justify-center gap-6 mt-8 pt-4 border-t border-slate-200/80 dark:border-slate-700/50 text-[10px] font-bold text-[#94A3B8] dark:text-slate-500 tracking-widest uppercase font-inter">
+            <span className="flex items-center gap-1.5">
+              <FiCpu className="w-3.5 h-3.5" /> AI Powered
+            </span>
+            <span className="w-1 h-1 rounded-full bg-[#CBD5E1] dark:bg-slate-700" />
+            <span className="flex items-center gap-1.5">
+              <FiLock className="w-3.5 h-3.5" /> Secure Data
+            </span>
           </div>
+
         </div>
       </div>
     </div>
@@ -288,3 +341,4 @@ function SignIn() {
 }
 
 export default SignIn;
+

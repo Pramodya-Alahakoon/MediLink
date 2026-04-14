@@ -31,7 +31,7 @@ function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-tertiary text-white w-full font-inter">
+    <footer className="bg-tertiary dark:bg-slate-900 dark:border-t dark:border-white/10 text-white w-full font-inter transition-colors duration-300">
       <div className="container mx-auto px-5 sm:px-8 lg:px-16 xl:px-20 pt-16 pb-8">
 
         {/* ── TOP GRID ── */}
