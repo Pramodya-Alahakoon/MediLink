@@ -1,0 +1,309 @@
+{
+  "info": {
+    "name": "Smart Healthcare - Patient Service API",
+    "_postman_id": "f1f26795-9cb2-4f58-8d58-0dfecdbf1d13",
+    "description": "Postman collection for Patient Service CRUD endpoints with automated tests and variable chaining.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1) Register Patient",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const ts = Date.now();",
+              "pm.collectionVariables.set('patient_userId', `user-${ts}`);",
+              "pm.collectionVariables.set('patient_name', `Test Patient ${ts}`);",
+              "pm.collectionVariables.set('patient_phone', `+9477${String(ts).slice(-6)}`);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "",
+              "let jsonData = {};",
+              "pm.test('Response is valid JSON', function () {",
+              "  jsonData = pm.response.json();",
+              "  pm.expect(jsonData).to.be.an('object');",
+              "});",
+              "",
+              "pm.test('Create patient success payload', function () {",
+              "  pm.expect(jsonData.success).to.eql(true);",
+              "  pm.expect(jsonData).to.have.property('data');",
+              "  pm.expect(jsonData.data).to.have.property('_id');",
+              "  pm.expect(jsonData.data.userId).to.eql(pm.collectionVariables.get('patient_userId'));",
+              "});",
+              "",
+              "pm.collectionVariables.set('patient_id', jsonData.data._id);",
+              "pm.test('patient_id collection variable is saved', function () {",
+              "  pm.expect(pm.collectionVariables.get('patient_id')).to.be.a('string').and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"{{patient_userId}}\",\n  \"name\": \"{{patient_name}}\",\n  \"age\": 29,\n  \"gender\": \"Female\",\n  \"phone\": \"{{patient_phone}}\",\n  \"address\": \"No. 10, Main Street, Colombo\",\n  \"bloodGroup\": \"O+\",\n  \"medicalHistory\": \"Mild asthma\"\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/api/patient-service/patients",
+          "host": [
+            "{{BASE_URL}}"
+          ],
+          "path": [
+            "api",
+            "patient-service",
+            "patients"
+          ]
+        }
+      }
+    },
+    {
+      "name": "2) Get All Patients",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const jsonData = pm.response.json();",
+              "",
+              "pm.test('Response format is valid', function () {",
+              "  pm.expect(jsonData.success).to.eql(true);",
+              "  pm.expect(jsonData).to.have.property('data');",
+              "  pm.expect(jsonData.data).to.be.an('array');",
+              "});",
+              "",
+              "pm.test('Count matches data length', function () {",
+              "  pm.expect(jsonData.count).to.eql(jsonData.data.length);",
+              "});",
+              "",
+              "const createdId = pm.collectionVariables.get('patient_id');",
+              "if (createdId) {",
+              "  pm.test('Created patient exists in list', function () {",
+              "    const found = jsonData.data.some(p => p._id === createdId);",
+              "    pm.expect(found).to.eql(true);",
+              "  });",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{BASE_URL}}/api/patient-service/patients",
+          "host": [
+            "{{BASE_URL}}"
+          ],
+          "path": [
+            "api",
+            "patient-service",
+            "patients"
+          ]
+        }
+      }
+    },
+    {
+      "name": "3) Get Patient by ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const jsonData = pm.response.json();",
+              "",
+              "pm.test('Response has patient object', function () {",
+              "  pm.expect(jsonData.success).to.eql(true);",
+              "  pm.expect(jsonData.data).to.be.an('object');",
+              "  pm.expect(jsonData.data._id).to.eql(pm.collectionVariables.get('patient_id'));",
+              "});",
+              "",
+              "pm.test('Patient has required fields', function () {",
+              "  pm.expect(jsonData.data).to.have.property('userId');",
+              "  pm.expect(jsonData.data).to.have.property('name');",
+              "  pm.expect(jsonData.data).to.have.property('age');",
+              "  pm.expect(jsonData.data).to.have.property('gender');",
+              "  pm.expect(jsonData.data).to.have.property('phone');",
+              "  pm.expect(jsonData.data).to.have.property('address');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{BASE_URL}}/api/patient-service/patients/{{patient_id}}",
+          "host": [
+            "{{BASE_URL}}"
+          ],
+          "path": [
+            "api",
+            "patient-service",
+            "patients",
+            "{{patient_id}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "4) Update Patient",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const jsonData = pm.response.json();",
+              "",
+              "pm.test('Update response is successful', function () {",
+              "  pm.expect(jsonData.success).to.eql(true);",
+              "  pm.expect(jsonData.data._id).to.eql(pm.collectionVariables.get('patient_id'));",
+              "});",
+              "",
+              "pm.test('Updated values are reflected', function () {",
+              "  pm.expect(jsonData.data.name).to.eql('Updated Patient Name');",
+              "  pm.expect(jsonData.data.age).to.eql(31);",
+              "  pm.expect(jsonData.data.phone).to.eql('+94771234567');",
+              "  pm.expect(jsonData.data.address).to.eql('Updated Address, Kandy');",
+              "  pm.expect(jsonData.data.medicalHistory).to.eql('Updated: seasonal allergies');",
+              "});",
+              "",
+              "pm.test('userId is not changed by update', function () {",
+              "  pm.expect(jsonData.data.userId).to.eql(pm.collectionVariables.get('patient_userId'));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Updated Patient Name\",\n  \"age\": 31,\n  \"gender\": \"Female\",\n  \"phone\": \"+94771234567\",\n  \"address\": \"Updated Address, Kandy\",\n  \"bloodGroup\": \"O+\",\n  \"medicalHistory\": \"Updated: seasonal allergies\"\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/api/patient-service/patients/{{patient_id}}",
+          "host": [
+            "{{BASE_URL}}"
+          ],
+          "path": [
+            "api",
+            "patient-service",
+            "patients",
+            "{{patient_id}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "5) Delete Patient",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const jsonData = pm.response.json();",
+              "",
+              "pm.test('Delete response is successful', function () {",
+              "  pm.expect(jsonData.success).to.eql(true);",
+              "  pm.expect(jsonData.message).to.include('deleted');",
+              "  pm.expect(jsonData.data._id).to.eql(pm.collectionVariables.get('patient_id'));",
+              "});",
+              "",
+              "pm.collectionVariables.set('deleted_patient_id', pm.collectionVariables.get('patient_id'));",
+              "pm.collectionVariables.unset('patient_id');"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{BASE_URL}}/api/patient-service/patients/{{patient_id}}",
+          "host": [
+            "{{BASE_URL}}"
+          ],
+          "path": [
+            "api",
+            "patient-service",
+            "patients",
+            "{{patient_id}}"
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "patient_id",
+      "value": ""
+    },
+    {
+      "key": "patient_userId",
+      "value": ""
+    },
+    {
+      "key": "patient_name",
+      "value": ""
+    },
+    {
+      "key": "patient_phone",
+      "value": ""
+    },
+    {
+      "key": "deleted_patient_id",
+      "value": ""
+    }
+  ]
+}
