@@ -12,15 +12,34 @@ import { createJWT } from "../utils/tokenutils.js";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
 
-export const register = async (req, res) => {
-  const isFirstAccount = (await Patient.countDocuments()) === 0;
-  req.body.role = isFirstAccount ? "admin" : "patient";
+export const register = async (req, res, next) => {
+  try {
+    const isFirstAccount = (await Patient.countDocuments()) === 0;
+    
+    if (isFirstAccount) {
+      req.body.role = "admin";
+    } else {
+      // Allow frontend to specify 'doctor', default to 'patient' otherwise
+      if (req.body.role !== "doctor" && req.body.role !== "patient") {
+        req.body.role = "patient";
+      }
+    }
 
-  const hashedPassword = await hashPassword(req.body.password);
-  req.body.password = hashedPassword;
+    // Handle doctor specialization
+    if (req.body.role === "doctor" && req.body.specialization) {
+      req.body.doctorProfile = {
+        specializations: [req.body.specialization]
+      };
+    }
 
-  const user = await Patient.create(req.body);
-  res.status(StatusCodes.CREATED).json({ msg: "Patient Created Successfully" });
+    const hashedPassword = await hashPassword(req.body.password);
+    req.body.password = hashedPassword;
+
+    const user = await Patient.create(req.body);
+    res.status(StatusCodes.CREATED).json({ msg: "User Created Successfully" });
+  } catch (error) {
+    next(error);
+  }
 };
 
 

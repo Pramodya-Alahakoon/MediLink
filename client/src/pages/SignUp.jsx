@@ -172,7 +172,7 @@ function SignUp() {
         payload.specialization = formData.specialization;
       }
       
-      const response = await customFetch.post("/auth/register", payload);
+      const response = await customFetch.post("/api/auth/register", payload);
 
       if (response.data) {
         toast.success("Registration successful!");
@@ -182,10 +182,13 @@ function SignUp() {
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        const errorMessage = error.response?.data?.msg || "Registration failed";
+        const backendMsg = error.response?.data?.message || error.response?.data?.msg;
+        const errorMessage = backendMsg 
+          ? (Array.isArray(backendMsg) ? backendMsg.join(', ') : backendMsg) 
+          : `Axios Error: ${error.message} (Status: ${error.response?.status})`;
         toast.error(errorMessage);
       } else {
-        toast.error("Something went wrong. Please try again.");
+        toast.error(`Unknown Error: ${error.message || "Please try again."}`);
       }
       console.error("Registration error:", error);
     } finally {
