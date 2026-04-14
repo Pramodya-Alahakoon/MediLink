@@ -38,9 +38,15 @@ function NavComponent() {
   useEffect(() => {
     const getCurrentUser = async () => {
       try {
-        const { data } = await customFetch.get("/users/current-user");
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setCurrentUser(null);
+          return;
+        }
+        const { data } = await customFetch.post("/api/auth/verify", { token });
         setCurrentUser(data.user);
-      } catch {
+      } catch (error) {
+        console.warn("Failed to fetch current user:", error.message);
         setCurrentUser(null);
       }
     };
@@ -49,13 +55,19 @@ function NavComponent() {
 
   const handleLogout = async () => {
     try {
-      await customFetch.post("/auth/logout");
+      await customFetch.post("/api/auth/logout");
       setCurrentUser(null);
+      localStorage.removeItem("token");
       setIsLogoutModalOpen(false);
       toast.success("Logged out successfully");
       navigate("/");
-    } catch {
-      toast.error("Error logging out");
+    } catch (error) {
+      console.warn("Error logging out:", error.message);
+      // Clear local data even if API fails
+      setCurrentUser(null);
+      localStorage.removeItem("token");
+      setIsLogoutModalOpen(false);
+      navigate("/");
     }
   };
 
