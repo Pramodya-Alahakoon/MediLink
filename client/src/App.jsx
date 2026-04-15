@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import Layout from './components/UI/Layout';
@@ -13,11 +13,40 @@ import PlanAppointment from './pages/PlanAppointment/PlanAppoinment';
 import DoctorLayout from './layouts/DoctorLayout';
 import Dashboard from './pages/Doctor/Dashboard';
 import Availability from './pages/Doctor/Availability';
+import Schedule from './pages/Doctor/Schedule';
 import PatientLayout from './layouts/PatientLayout';
 import PatientDashboard from './pages/Patient/Dashboard';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/UI/ProtectedRoute';
+
+class AppErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null, errorInfo: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error("React Error Boundary caught an error:", error, errorInfo);
+    this.setState({ errorInfo });
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '2rem', color: 'red', fontFamily: 'monospace' }}>
+          <h2>Something went wrong (White Screen Prevention)</h2>
+          <details style={{ whiteSpace: 'pre-wrap' }}>
+            <summary>{this.state.error?.toString()}</summary>
+            {this.state.errorInfo?.componentStack}
+          </details>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 function App() {
   return (
@@ -25,6 +54,7 @@ function App() {
       <ThemeProvider>
         <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <div className="app">
+            <AppErrorBoundary>
             <Routes>
               {/* Public Routes with General Layout */}
               <Route element={<Layout />}>
@@ -42,6 +72,7 @@ function App() {
                 <Route element={<DoctorLayout />}>
                   <Route path="/doctor/dashboard" element={<Dashboard />} />
                   <Route path="/doctor/availability" element={<Availability />} />
+                  <Route path="/doctor/schedules" element={<Schedule />} />
                 </Route>
               </Route>
 
@@ -53,6 +84,7 @@ function App() {
                 </Route>
               </Route>
             </Routes>
+            </AppErrorBoundary>
           </div>
         </Router>
       </ThemeProvider>
