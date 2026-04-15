@@ -1,13 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Video, User, Activity } from 'lucide-react';
+import customFetch from '@/utils/customFetch';
+import toast from 'react-hot-toast';
 
 const ScheduleList = () => {
+  const [isConnecting, setIsConnecting] = useState(false);
+
+  // Mock appointments updated with IDs for the Telemedicine demo
   const appointments = [
     {
-      id: 1,
+      id: 'demo-apt-101',
       time: '09:00',
       period: 'AM',
       patientData: {
+        id: 'pat-123',
         name: 'Sarah Jenkins',
         typeLabel: 'Video Call',
         typeIcon: Video,
@@ -17,6 +23,7 @@ const ScheduleList = () => {
       action: { label: 'Join Call', style: 'bg-[#055153] text-white hover:bg-[#044143]' },
       status: 'normal'
     },
+    // ... other mock data
     {
       id: 2,
       time: '10:30',
@@ -53,6 +60,45 @@ const ScheduleList = () => {
     }
   ];
 
+  const handleJoinCall = async (appointmentId, patientId) => {
+    setIsConnecting(true);
+    try {
+      const doctorId = 'demo-doc-789'; 
+
+      const response = await customFetch.post('/api/doctors/consultations/create-session', {
+        appointmentId,
+        doctorId,
+        patientId
+      });
+
+      if (response.data.success) {
+        const { meetingLink } = response.data.data;
+        toast.success('Consultation session ready!');
+        window.open(meetingLink, '_blank', 'noopener,noreferrer');
+        
+        // After opening, mark as active in the backend
+        await customFetch.patch(`/api/doctors/consultations/${appointmentId}/status`, { status: 'active' });
+      }
+    } catch (error) {
+      console.error('Failed to start consultation:', error);
+      toast.error('Could not start video call. Please try again.');
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
+  const handleCompleteCall = async (appointmentId) => {
+    try {
+      const response = await customFetch.patch(`/api/doctors/consultations/${appointmentId}/status`, { status: 'completed' });
+      if (response.data.success) {
+        toast.success('Consultation marked as completed');
+      }
+    } catch (error) {
+      console.error('Failed to complete consultation:', error);
+      toast.error('Failed to update status.');
+    }
+  };
+
   return (
     <div className="w-full font-inter">
       <div className="flex items-center justify-between mb-6">
@@ -77,6 +123,7 @@ const ScheduleList = () => {
           }
 
           const isUrgent = apt.status === 'urgent';
+          const isVideoCall = apt.patientData?.typeLabel === 'Video Call';
           
           return (
             <div key={apt.id} className={`flex items-center gap-6 p-5 rounded-2xl bg-white border ${isUrgent ? 'border-red-200 bg-red-50/30' : 'border-white shadow-sm shadow-slate-100'} transition-all hover:shadow-md`}>
@@ -114,10 +161,23 @@ const ScheduleList = () => {
               </div>
 
               {/* Action Column */}
-              <div className="flex-shrink-0">
-                <button className={`px-6 py-2.5 rounded-full text-[13px] font-bold transition-all shadow-sm ${apt.action.style}`}>
-                  {apt.action.label}
+              <div className="flex flex-shrink-0 gap-2">
+                <button 
+                  onClick={() => isVideoCall ? handleJoinCall(apt.id, apt.patientData.id) : null}
+                  disabled={isConnecting && isVideoCall}
+                  className={`px-6 py-2.5 rounded-full text-[13px] font-bold transition-all shadow-sm ${apt.action.style} ${isConnecting && isVideoCall ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {isConnecting && isVideoCall ? 'Connecting...' : apt.action.label}
                 </button>
+                
+                {isVideoCall && (
+                  <button 
+                    onClick={() => handleCompleteCall(apt.id)}
+                    className="px-4 py-2.5 rounded-full text-[13px] font-bold border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all"
+                  >
+                    Complete
+                  </button>
+                )}
               </div>
             </div>
           );

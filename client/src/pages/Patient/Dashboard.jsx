@@ -13,13 +13,64 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import customFetch from '@/utils/customFetch';
+import toast from 'react-hot-toast';
 
 const PatientDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const today = new Date();
+  const [isJoining, setIsJoining] = useState(false);
+  const [consultationStatus, setConsultationStatus] = useState('scheduled');
 
-  // Mock data to match the UI perfectly since exact endpoints might not be available yet
+  // Demo appointment ID matching the doctor's schedule
+  const nextAppointmentId = 'demo-apt-101';
+
+  useEffect(() => {
+    const checkStatus = async () => {
+      try {
+        const response = await customFetch.get(`/api/doctors/consultations/${nextAppointmentId}`);
+        if (response.data.success) {
+          setConsultationStatus(response.data.data.status);
+        }
+      } catch (err) {
+        // Session likely not created yet, default to scheduled
+      }
+    };
+    checkStatus();
+  }, []);
+
+  const handleJoinVideoCall = async () => {
+    if (consultationStatus === 'completed') {
+      toast.error('This session has already ended.');
+      return;
+    }
+
+    setIsJoining(true);
+    try {
+      const response = await customFetch.get(`/api/doctors/consultations/${nextAppointmentId}`);
+      
+      if (response.data.success) {
+        const { meetingLink, status } = response.data.data;
+        
+        if (status === 'completed') {
+          setConsultationStatus('completed');
+          toast.error('This session has already ended.');
+          return;
+        }
+
+        toast.success('Joining consultation...');
+        window.open(meetingLink, '_blank', 'noopener,noreferrer');
+      }
+    } catch (error) {
+      console.error('Failed to join video call:', error);
+      toast.error('Video call is not ready yet. Please wait for the doctor.');
+    } finally {
+      setIsJoining(false);
+    }
+  };
+
+  // Mock data ...
   const stats = [
     { label: 'STEP COUNT', value: '8,432', sub: '/ 10k', icon: Activity, color: 'text-emerald-500', bg: 'bg-emerald-50' },
     { label: 'HEART RATE', value: '72', sub: 'bpm', icon: Heart, color: 'text-rose-500', bg: 'bg-rose-50' },
@@ -62,16 +113,23 @@ const PatientDashboard = () => {
             <p className="text-white/80 text-[15px] mb-8">
               Cardiology Specialist • 10:30 AM <br/> Today
             </p>
-            <button className="flex items-center gap-2 bg-white text-[#0D877B] px-6 py-3.5 rounded-full font-bold text-[15px] hover:bg-emerald-50 transition-colors shadow-sm">
+            <button 
+              onClick={handleJoinVideoCall}
+              disabled={isJoining || consultationStatus === 'completed'}
+              className={`flex items-center gap-2 px-6 py-3.5 rounded-full font-bold text-[15px] transition-all shadow-sm disabled:opacity-50 ${
+                consultationStatus === 'completed' 
+                  ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
+                  : 'bg-white text-[#0D877B] hover:bg-emerald-50'
+              }`}
+            >
               <Video size={18} />
-              Join Video Call
+              {isJoining ? 'Connecting...' : consultationStatus === 'completed' ? 'Session Ended' : 'Join Video Call'}
             </button>
           </div>
 
           <div className="relative z-10 w-full md:w-auto flex justify-end">
              {/* Doctor Portrait styled like the image */}
              <div className="w-48 h-48 md:w-[220px] md:h-[220px] rounded-[20px] overflow-hidden border-4 border-white/20 shadow-xl relative">
-                {/* Fallback image if custom image doesn't exist yet */}
                 <img 
                   src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=600&auto=format&fit=crop" 
                   alt="Dr. Sarah Jenkins" 

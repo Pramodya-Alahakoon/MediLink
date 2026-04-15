@@ -1,17 +1,14 @@
 import { StatusCodes } from 'http-status-codes';
 import { BadRequestError, NotFoundError } from '../errors/customErrors.js';
+import Consultation from '../models/Consultation.js';
 
 /**
  * ----------------------------------------------------------------------------
- * PLACEHOLDER MOCK DATA & STUB SERVICE
+ * VIDEO CONSULTATION CONTROLLER
  * ----------------------------------------------------------------------------
- * The heavy lifting (Jitsi/Agora/Twilio) will eventually be done by a dedicated 
- * telemedicine service or directly integrated here later.
- * For now, this stores and generates mock session links so the Doctor UI flow 
- * can be built completely.
+ * This controller handles the creation and retrieval of video consultation 
+ * sessions using Jitsi Meet.
  */
-
-const mockConsultations = [];
 
 // @desc    Create a new video consultation session
 // @route   POST /api/doctors/consultations/create-session
@@ -20,39 +17,40 @@ export const createConsultationSession = async (req, res, next) => {
   try {
     const { appointmentId, doctorId, patientId } = req.body;
 
+    // 1. Validation
     if (!appointmentId || !doctorId || !patientId) {
       throw new BadRequestError('Required fields missing: appointmentId, doctorId, patientId');
     }
 
-    // Checking if a session already exists for this appointment
-    const existingSession = mockConsultations.find((c) => c.appointmentId === appointmentId);
+    // 2. Check if a session already exists for this appointment
+    const existingSession = await Consultation.findOne({ appointmentId });
     if (existingSession) {
       return res.status(StatusCodes.OK).json({
         success: true,
-        message: 'Session already exists',
+        message: 'Session already exists for this appointment',
         data: existingSession,
       });
     }
 
-    // TODO: Replace this block with actual API generation (e.g. Agora Token or Twilio Room)
-    const randomSuffix = Math.random().toString(36).substring(2, 10);
-    const mockLink = `https://mock-telemedicine.medilink.com/room/${appointmentId}-${randomSuffix}`;
+    // 3. Generate Jitsi Meet link
+    // Format: https://meet.jit.si/medilink-{appointmentId}
+    // Note: No API key required for basic Jitsi Meet rooms.
+    // Frontend should open this link in a new browser tab for the video call.
+    const meetingLink = `https://meet.jit.si/medilink-${appointmentId}`;
     
-    const newSession = {
+    // 4. Create and Save to Database
+    const newSession = await Consultation.create({
       appointmentId,
       doctorId,
       patientId,
-      meetingLink: mockLink,
-      platform: 'Mock/Jitsi',
-      status: 'Created',
-      createdAt: new Date().toISOString(),
-    };
-
-    mockConsultations.push(newSession);
+      meetingLink,
+      platform: 'JITSI',
+      status: 'scheduled',
+    });
 
     res.status(StatusCodes.CREATED).json({
       success: true,
-      message: 'Consultation session generated successfully',
+      message: 'Video consultation session created successfully',
       data: newSession,
     });
   } catch (error) {
@@ -67,14 +65,50 @@ export const getConsultationByAppointment = async (req, res, next) => {
   try {
     const { appointmentId } = req.params;
 
-    const session = mockConsultations.find((c) => c.appointmentId === appointmentId);
+    if (!appointmentId) {
+      throw new BadRequestError('Appointment ID is required');
+    }
+
+    const session = await Consultation.findOne({ appointmentId });
 
     if (!session) {
-      throw new NotFoundError(`No consultation session found for appointment: ${appointmentId}`);
+      throw new NotFoundError(`No video consultation found for appointment: ${appointmentId}`);
     }
 
     res.status(StatusCodes.OK).json({
       success: true,
+      data: session,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update consultation status
+// @route   PATCH /api/doctors/consultations/:appointmentId/status
+// @access  Doctor
+export const updateConsultationStatus = async (req, res, next) => {
+  try {
+    const { appointmentId } = req.params;
+    const { status } = req.body;
+
+    if (!['scheduled', 'completed', 'active'].includes(status)) {
+      throw new BadRequestError('Invalid status. Must be scheduled, completed, or active');
+    }
+
+    const session = await Consultation.findOneAndUpdate(
+      { appointmentId },
+      { status },
+      { new: true, runValidators: true }
+    );
+
+    if (!session) {
+      throw new NotFoundError(`No video consultation found for appointment: ${appointmentId}`);
+    }
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: `Consultation status updated to ${status}`,
       data: session,
     });
   } catch (error) {
