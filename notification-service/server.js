@@ -1,10 +1,13 @@
-require("dotenv").config();
-const mongoose = require("mongoose");
-const app = require("./app");
+import dotenv from "dotenv";
+import mongoose from "mongoose";
+import app from "./app.js";
+
+dotenv.config();
 
 const PORT = process.env.PORT || 5005;
 const MONGO_URI = process.env.MONGO_URI;
 
+// Bootstraps database connection (optional) and starts the HTTP server.
 async function startServer() {
   if (MONGO_URI) {
     try {
