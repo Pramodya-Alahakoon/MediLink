@@ -17,6 +17,7 @@ import { format, parseISO } from 'date-fns';
 import { toast } from 'react-hot-toast';
 import customFetch from '../../utils/customFetch';
 import { useDoctorContext } from '../../context/DoctorContext';
+import PrescriptionBuilderModal from '../../components/DoctorDashboard/PrescriptionBuilderModal';
 
 const Schedule = () => {
   const { doctorId } = useDoctorContext();
@@ -27,6 +28,7 @@ const Schedule = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [prescriptionModalApt, setPrescriptionModalApt] = useState(null);
 
   const statusMap = {
     'Upcoming': 'Confirmed',
@@ -331,7 +333,11 @@ const Schedule = () => {
 
                 {(apt.status === 'Pending' || apt.status === 'Confirmed') && (
                   <>
-                    <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white text-slate-600 hover:text-slate-900 transition-colors shadow-sm bg-transparent border border-transparent hover:border-slate-200">
+                    <button 
+                      onClick={() => setPrescriptionModalApt(apt)}
+                      className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white text-emerald-600 hover:text-emerald-700 transition-colors shadow-sm bg-transparent border border-transparent hover:border-emerald-200"
+                      title="Issue Prescription"
+                    >
                       <FileText size={18} />
                     </button>
                     <button 
@@ -382,6 +388,18 @@ const Schedule = () => {
           </div>
         </div>
       )}
+
+      {/* Prescription Builder Modal */}
+      <PrescriptionBuilderModal 
+        isOpen={!!prescriptionModalApt}
+        appointment={prescriptionModalApt}
+        doctorId={doctorId}
+        onClose={() => setPrescriptionModalApt(null)}
+        onSuccess={() => {
+          fetchAppointments();
+          fetchAllCounts();
+        }}
+      />
     </div>
   );
 };
