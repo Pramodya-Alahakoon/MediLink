@@ -94,7 +94,7 @@ function NavComponent() {
 
               {currentUser ? (
                 <>
-                  <Link to={`/${currentUser.role}-dashboard`}>
+                  <Link to={`/${currentUser.role}/dashboard`}>
                     <button className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-tertiary dark:text-slate-200 hover:text-primary dark:hover:text-primary transition-colors font-inter">
                       <FiUser className="w-4 h-4" />
                       Dashboard
@@ -171,7 +171,7 @@ function NavComponent() {
               <div className="p-4 pt-0 border-t border-white/40 flex flex-col gap-2 mt-2">
                 {currentUser ? (
                   <>
-                    <Link to={`/${currentUser.role}-dashboard`}>
+                    <Link to={`/${currentUser.role}/dashboard`}>
                       <button className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold border-2 border-tertiary/20 text-tertiary hover:border-primary hover:text-primary transition-all font-inter">
                         <FiUser className="w-4 h-4" />
                         Dashboard

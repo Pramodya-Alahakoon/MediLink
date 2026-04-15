@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import Layout from './components/UI/Layout';
 import Homepage from './pages/Homepage';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
+import SignInRestricted from './pages/SignInRestricted';
+import SignUpRestricted from './pages/SignUpRestricted';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Privacy from './pages/Privacy';
@@ -12,9 +14,41 @@ import Terms from './pages/Terms';
 import PlanAppointment from './pages/PlanAppointment/PlanAppoinment';
 import DoctorLayout from './layouts/DoctorLayout';
 import Dashboard from './pages/Doctor/Dashboard';
+import Availability from './pages/Doctor/Availability';
+import Schedule from './pages/Doctor/Schedule';
+import PatientLayout from './layouts/PatientLayout';
+import PatientDashboard from './pages/Patient/Dashboard';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/UI/ProtectedRoute';
+
+class AppErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null, errorInfo: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error("React Error Boundary caught an error:", error, errorInfo);
+    this.setState({ errorInfo });
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '2rem', color: 'red', fontFamily: 'monospace' }}>
+          <h2>Something went wrong (White Screen Prevention)</h2>
+          <details style={{ whiteSpace: 'pre-wrap' }}>
+            <summary>{this.state.error?.toString()}</summary>
+            {this.state.errorInfo?.componentStack}
+          </details>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 function App() {
   return (
@@ -22,7 +56,9 @@ function App() {
       <ThemeProvider>
         <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <div className="app">
+            <AppErrorBoundary>
             <Routes>
+              {/* Public Routes with General Layout */}
               <Route element={<Layout />}>
                 <Route path="/" element={<Homepage />} />
                 <Route path="/signin" element={<SignIn />} />
@@ -31,20 +67,32 @@ function App() {
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />
-                
-                {/* Patient / General Protected Routes */}
-                <Route element={<ProtectedRoute allowedRoles={['patient', 'doctor', 'admin']} />}>
-                  <Route path="/appointments" element={<PlanAppointment />} />
-                </Route>
+              </Route>
+              
+              {/* Restricted Routes - Doctor & Admin Only */}
+              <Route element={<Layout />}>
+                <Route path="/signin/restricted" element={<SignInRestricted />} />
+                <Route path="/signup/restricted" element={<SignUpRestricted />} />
               </Route>
               
               {/* Doctor Dashboard Routes - Securely protected */}
               <Route element={<ProtectedRoute allowedRoles={['doctor', 'admin']} />}>
                 <Route element={<DoctorLayout />}>
                   <Route path="/doctor/dashboard" element={<Dashboard />} />
+                  <Route path="/doctor/availability" element={<Availability />} />
+                  <Route path="/doctor/schedules" element={<Schedule />} />
+                </Route>
+              </Route>
+
+              {/* Patient Dashboard Routes - Securely protected */}
+              <Route element={<ProtectedRoute allowedRoles={['patient', 'admin']} />}>
+                <Route element={<PatientLayout />}>
+                  <Route path="/patient/dashboard" element={<PatientDashboard />} />
+                  <Route path="/appointments" element={<PlanAppointment />} />
                 </Route>
               </Route>
             </Routes>
+            </AppErrorBoundary>
           </div>
         </Router>
       </ThemeProvider>

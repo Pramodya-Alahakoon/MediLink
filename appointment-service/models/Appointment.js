@@ -12,6 +12,7 @@ const specializations = [
   "Hematology",
   "Infectious Disease"
 ];
+
 const appointmentSchema = new mongoose.Schema({
     patientId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -35,12 +36,14 @@ const appointmentSchema = new mongoose.Schema({
         enum: specializations
     },
 
-
+    // doctorId stored as String to support both MongoDB ObjectIds and
+    // custom string IDs (e.g. "DOC-1234567890") from doctor-service
     doctorId: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         required: true,
-        ref: 'Doctor'
+        index: true,
     },
+
     appointmentDate: {
         type: Date,
         required: true  
@@ -72,10 +75,22 @@ const appointmentSchema = new mongoose.Schema({
         enum: ['Pending', 'Confirmed', 'Cancelled', 'Completed'], 
         default: 'Pending'
     },
+    // Notes added by the doctor when accepting/completing
+    doctorNotes: {
+        type: String,
+        trim: true,
+        default: ''
+    },
+    // Reason provided when cancelling/rejecting
+    cancellationReason: {
+        type: String,
+        trim: true,
+        default: ''
+    },
     createdAt: {
         type: Date,
         default: Date.now
     }
 }, { timestamps: true });
 
-export default mongoose.model('Appointment', appointmentSchema);
+export default mongoose.model('Appointment', appointmentSchema);

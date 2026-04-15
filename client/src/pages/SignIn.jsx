@@ -27,7 +27,6 @@ function SignIn() {
   const [passwordError, setPasswordError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [touched, setTouched] = useState({ email: false, password: false });
-  const [activeRole, setActiveRole] = useState("Patient");
 
   const validateForm = () => {
     let isValid = true;
@@ -91,33 +90,31 @@ function SignIn() {
 
       if (response.data.token) {
         const { token, patient: userData } = response.data;
-        
+        const actualRole = userData.role;
+
         // Use central login function
         login(userData, token);
         
         toast.success("Login successful!");
 
-        // Immediate redirection based on verified role
-        const finalRole = userData.role;
-        
-        switch (finalRole) {
+        // Redirect based on actual DB role
+        switch (actualRole) {
           case "admin":
-            navigate("/");
+            navigate("/doctor/dashboard");
             break;
           case "doctor":
             navigate("/doctor/dashboard");
             break;
           case "patient":
-            navigate("/appointments");
+            navigate("/patient/dashboard"); // Replaced from /appointments
             break;
           default:
-            navigate("/appointments");
+            navigate("/patient/dashboard"); // Replaced from /appointments
         }
       }
     } catch (error) {
-      // ... error handling ...
       if (axios.isAxiosError(error)) {
-        const errorMessage = error.response?.data?.msg || "Login failed";
+        const errorMessage = error.response?.data?.msg || "Invalid email or password";
         toast.error(errorMessage);
       } else {
         toast.error("Something went wrong. Please try again.");
@@ -182,23 +179,6 @@ function SignIn() {
           <div className="mb-4">
             <h2 className="text-2xl sm:text-3xl font-extrabold text-[#112429] dark:text-white font-manrope mb-1">Welcome Back</h2>
             <p className="text-[#64748B] dark:text-slate-400 text-xs sm:text-sm font-inter">Sign in to access your health portal</p>
-          </div>
-
-          {/* Role Selector Pill */}
-          <div className="bg-[#F1F5F9]/80 dark:bg-slate-800/80 backdrop-blur-sm p-1 rounded-2xl flex justify-between items-center mb-5 gap-1">
-            {["Patient", "Doctor"].map((role) => (
-              <button
-                key={role}
-                onClick={() => setActiveRole(role)}
-                className={`flex-1 py-2 text-sm font-semibold transition-all duration-300 rounded-xl font-inter ${
-                  activeRole === role
-                    ? "bg-white dark:bg-slate-700 text-[#112429] dark:text-white shadow-sm transform scale-100"
-                    : "text-[#64748B] dark:text-slate-400 hover:text-[#112429] dark:hover:text-white bg-transparent"
-                }`}
-              >
-                {role}
-              </button>
-            ))}
           </div>
 
           <div className="space-y-5">

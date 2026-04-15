@@ -4,12 +4,16 @@ const connectDB = async () => {
   try {
     const conn = await mongoose.connect(process.env.MONGO_URI, {
       tls: true,
-      family: 4, // Force IPv4 routing to bypass MongoDB Atlas IPv6 TLS issues
-      serverSelectionTimeoutMS: 5000
+      family: 4,
+      serverSelectionTimeoutMS: 15000,
+      socketTimeoutMS: 45000,
+      retryWrites: true,
+      w: "majority"
     });
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.error(`Error: ${error.message}`);
+    console.error('Make sure your MongoDB Atlas cluster is running and not paused');
     process.exit(1);
   }
 };

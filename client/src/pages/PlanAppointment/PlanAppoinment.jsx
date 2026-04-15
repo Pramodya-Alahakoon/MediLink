@@ -4,6 +4,20 @@ import customFetch from "../../utils/customFetch";
 import toast from "react-hot-toast";
 import { FiCalendar, FiUser, FiStar, FiArrowRight, FiPhone, FiCheck } from "react-icons/fi";
 
+// Default specializations from database schema
+const DEFAULT_SPECIALIZATIONS = [
+  "Cardiology",
+  "Dermatology",
+  "Neurology",
+  "Endocrinology",
+  "Gastroenterology",
+  "Pulmonology",
+  "Nephrology",
+  "Rheumatology",
+  "Hematology",
+  "Infectious Disease"
+];
+
 function PlanAppointment() {
   // ========== STATE ==========
   const [currentStep, setCurrentStep] = useState(1);
@@ -24,7 +38,7 @@ function PlanAppointment() {
   // API Data
   const [currentUser, setCurrentUser] = useState(null);
   const [allDoctors, setAllDoctors] = useState([]);
-  const [specializations, setSpecializations] = useState([]);
+  const [specializations, setSpecializations] = useState(DEFAULT_SPECIALIZATIONS);
   const [appointmentResponse, setAppointmentResponse] = useState(null);
 
   // ========== EFFECTS ==========
@@ -38,7 +52,7 @@ function PlanAppointment() {
       setIsLoading(true);
       try {
         // Fetch user data
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         try {
           const userRes = await customFetch.post("/api/auth/verify", { token });
           setCurrentUser(userRes.data.user || { _id: null, name: "" });
@@ -54,16 +68,26 @@ function PlanAppointment() {
         // Fetch doctors
         try {
           const doctorsRes = await customFetch.get("/api/doctors");
-          const doctors = doctorsRes.data.doctors || [];
+          const doctors = doctorsRes.data.data || [];
           setAllDoctors(doctors);
           
-          // Extract unique specializations
-          const specs = [...new Set(doctors.map((d) => d.specialization).filter(Boolean))];
-          setSpecializations(specs);
+          console.log("Doctors fetched successfully:", doctors.length, "doctors");
+          console.log("Sample doctor specialization:", doctors[0]?.specialization);
+          
+          // Extract unique specializations from doctors, or use defaults
+          if (doctors.length > 0) {
+            const specs = [...new Set(doctors.map((d) => d.specialization).filter(Boolean))];
+            setSpecializations(specs.length > 0 ? specs : DEFAULT_SPECIALIZATIONS);
+            console.log("Specializations extracted from doctors:", specs);
+          } else {
+            // Use default specializations if no doctors found
+            setSpecializations(DEFAULT_SPECIALIZATIONS);
+            console.warn("No doctors found in database, using default specializations");
+          }
         } catch (err) {
-          console.warn("Doctors fetch failed:", err.message);
+          console.error("Doctors fetch failed - using default specializations:", err.message);
           setAllDoctors([]);
-          setSpecializations([]);
+          setSpecializations(DEFAULT_SPECIALIZATIONS);
         }
       } finally {
         setIsLoading(false);
@@ -283,32 +307,45 @@ function PlanAppointment() {
             <h2 className="text-2xl font-semibold mb-6">Medical Specialization</h2>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                Select Specialization *
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
+                Choose Your Medical Specialization *
               </label>
+
               {specializations.length === 0 ? (
                 <p className="text-gray-500">No specializations available</p>
               ) : (
-                <select
-                  name="specialization"
-                  value={formData.specialization}
-                  onChange={handleInputChange}
-                  className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition-colors ${
-                    errors.specialization
-                      ? "border-red-500 focus:border-red-600"
-                      : "border-gray-300 dark:border-slate-600 focus:border-blue-600"
-                  } dark:bg-slate-700 dark:text-white`}
-                >
-                  <option value="">Choose a specialization</option>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {specializations.map((spec) => (
-                    <option key={spec} value={spec}>
-                      {spec}
-                    </option>
+                    <motion.button
+                      key={spec}
+                      onClick={() =>
+                        handleInputChange({
+                          target: { name: "specialization", value: spec },
+                        })
+                      }
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className={`p-4 rounded-lg border-2 transition-all font-medium text-sm ${
+                        formData.specialization === spec
+                          ? "border-blue-600 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 text-blue-900 dark:text-blue-100 shadow-lg shadow-blue-500/30"
+                          : "border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-slate-600"
+                      }`}
+                    >
+                      <div className="flex items-center justify-center gap-2">
+                        {formData.specialization === spec && (
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                        <span>{spec}</span>
+                      </div>
+                    </motion.button>
                   ))}
-                </select>
+                </div>
               )}
+
               {errors.specialization && (
-                <p className="text-red-500 text-sm mt-1">{errors.specialization}</p>
+                <p className="text-red-500 text-sm mt-3">{errors.specialization}</p>
               )}
             </div>
 
@@ -316,11 +353,18 @@ function PlanAppointment() {
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-blue-50 dark:bg-slate-700 p-4 rounded-lg"
+                className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-700 dark:to-slate-600 p-4 rounded-lg border-l-4 border-blue-600"
               >
+                <div className="flex items-center gap-2 mb-2">
+                  <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zm-7-4a1 1 0 11-2 0 1 1 0 012 0z" clipRule="evenodd" />
+                  </svg>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                    {formData.specialization}
+                  </p>
+                </div>
                 <p className="text-sm text-gray-700 dark:text-gray-300">
-                  Found <span className="font-semibold">{getFilteredDoctors().length}</span> doctor(s)
-                  in <span className="font-semibold">{formData.specialization}</span>
+                  <span className="font-semibold">{getFilteredDoctors().length}</span> qualified doctor(s) available in this specialty
                 </p>
               </motion.div>
             )}
@@ -373,7 +417,7 @@ function PlanAppointment() {
                           <div className="flex items-center gap-1">
                             <FiStar className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                              {doctor.rating.toFixed(1)}
+                              {doctor.rating.average ? doctor.rating.average.toFixed(1) : "N/A"}
                             </span>
                           </div>
                         )}

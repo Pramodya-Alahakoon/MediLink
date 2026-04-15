@@ -10,23 +10,10 @@ import axios from "axios";
 import Logo from "@/components/UI/Logo";
 import { MdErrorOutline } from "react-icons/md";
 
-const specializations = [
-  "Cardiology",
-  "Dermatology",
-  "Neurology",
-  "Pediatrics",
-  "Psychiatry",
-  "Oncology",
-  "Orthopedics",
-  "Radiology",
-  "General Surgery",
-  "Family Medicine",
-];
+
 
 function SignUp() {
   const navigate = useNavigate();
-  const [activeRole, setActiveRole] = useState("Patient");
-  const [specializationMode, setSpecializationMode] = useState("select");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [formData, setFormData] = useState({
@@ -36,7 +23,6 @@ function SignUp() {
     confirmPassword: "",
     phoneNumber: "",
     location: "",
-    specialization: "",
   });
   const [errors, setErrors] = useState({
     fullName: "",
@@ -45,7 +31,6 @@ function SignUp() {
     confirmPassword: "",
     phoneNumber: "",
     location: "",
-    specialization: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [touched, setTouched] = useState({
@@ -55,7 +40,6 @@ function SignUp() {
     confirmPassword: false,
     phoneNumber: false,
     location: false,
-    specialization: false,
   });
 
   const togglePasswordVisibility = () => {
@@ -124,12 +108,6 @@ function SignUp() {
       isValid = false;
     }
 
-    // Specialization validation
-    if (activeRole === "Doctor" && !formData.specialization.trim()) {
-      newErrors.specialization = "Specialization is required";
-      isValid = false;
-    }
-
     // Password validation
     if (!formData.password) {
       newErrors.password = "Password is required";
@@ -166,16 +144,13 @@ function SignUp() {
         password: formData.password,
         phoneNumber: formData.phoneNumber,
         location: formData.location,
-        role: activeRole.toLowerCase(),
       };
-      if (activeRole === "Doctor") {
-        payload.specialization = formData.specialization;
-      }
-      
-      const response = await customFetch.post("/api/auth/register", payload);
 
-      if (response.data) {
-        toast.success("Registration successful!");
+      // Register as patient (no role specified, backend defaults to patient)
+      const authResponse = await customFetch.post("/api/auth/register", payload);
+
+      if (authResponse.data) {
+        toast.success("Registration successful! Please sign in.");
         setTimeout(() => {
           navigate("/signin");
         }, 1500);
@@ -183,8 +158,8 @@ function SignUp() {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const backendMsg = error.response?.data?.message || error.response?.data?.msg;
-        const errorMessage = backendMsg 
-          ? (Array.isArray(backendMsg) ? backendMsg.join(', ') : backendMsg) 
+        const errorMessage = backendMsg
+          ? (Array.isArray(backendMsg) ? backendMsg.join(', ') : backendMsg)
           : `Axios Error: ${error.message} (Status: ${error.response?.status})`;
         toast.error(errorMessage);
       } else {
@@ -224,27 +199,6 @@ function SignUp() {
             <p className="text-[#64748B] dark:text-slate-400 text-xs sm:text-sm font-inter">
               Sign up to get started with your account
             </p>
-          </div>
-
-          {/* Role Selector Pill */}
-          <div className="bg-[#F1F5F9]/80 dark:bg-slate-800/80 backdrop-blur-sm p-1 rounded-2xl flex justify-between items-center mb-5 gap-1">
-            {["Patient", "Doctor"].map((role) => (
-              <button
-                key={role}
-                onClick={() => {
-                  setActiveRole(role);
-                  setFormData(prev => ({ ...prev, specialization: "" }));
-                  setSpecializationMode("select");
-                }}
-                className={`flex-1 py-2 text-sm font-semibold transition-all duration-300 rounded-xl font-inter ${
-                  activeRole === role
-                    ? "bg-white dark:bg-slate-700 text-[#112429] dark:text-white shadow-sm transform scale-100"
-                    : "text-[#64748B] dark:text-slate-400 hover:text-[#112429] dark:hover:text-white bg-transparent"
-                }`}
-              >
-                {role}
-              </button>
-            ))}
           </div>
 
           {/* Full Name Input */}
@@ -370,72 +324,6 @@ function SignUp() {
               </p>
             )}
           </div>
-
-          {/* Specialization Input (Doctor Only) */}
-          {activeRole === "Doctor" && (
-            <div className="mb-4">
-              <label className="block text-xs font-bold text-[#112429] dark:text-slate-200 mb-1.5">
-                Specialization
-              </label>
-              <div className="relative group">
-                {specializationMode === "select" ? (
-                  <select
-                    name="specialization"
-                    value={formData.specialization}
-                    onChange={(e) => {
-                      if (e.target.value === "Other") {
-                        setSpecializationMode("manual");
-                        setFormData((prev) => ({ ...prev, specialization: "" }));
-                      } else {
-                        handleInputChange(e);
-                      }
-                    }}
-                    onBlur={() => handleBlur("specialization")}
-                    className={`w-full px-4 py-2.5 text-sm font-medium bg-white/50 dark:bg-slate-800/50 dark:text-white border border-slate-200/80 dark:border-slate-700/50 rounded-xl transition-colors focus:outline-none focus:bg-white dark:focus:bg-slate-800/80 ${
-                      touched.specialization && errors.specialization
-                        ? "border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-500/10"
-                        : "focus:border-[#055153] dark:focus:border-primary focus:ring-4 focus:ring-[#055153]/10 dark:focus:ring-primary/20 hover:border-[#CBD5E1] dark:hover:border-slate-600"
-                    } font-inter appearance-none`}
-                  >
-                    <option value="" disabled hidden>Select Specialization</option>
-                    {specializations.map((spec) => (
-                      <option className="bg-white dark:bg-slate-800 text-black dark:text-white" key={spec} value={spec}>{spec}</option>
-                    ))}
-                    <option className="bg-white dark:bg-slate-800 text-black dark:text-white" value="Other">Other (Enter Manually)</option>
-                  </select>
-                ) : (
-                  <div className="relative flex items-center">
-                    <input
-                      type="text"
-                      name="specialization"
-                      value={formData.specialization}
-                      onChange={handleInputChange}
-                      onBlur={() => handleBlur("specialization")}
-                      placeholder="Enter Specialization manually"
-                      className={`w-full px-4 py-2.5 pr-24 text-sm font-medium bg-white/50 dark:bg-slate-800/50 dark:text-white border border-slate-200/80 dark:border-slate-700/50 rounded-xl transition-colors focus:outline-none focus:bg-white dark:focus:bg-slate-800/80 ${
-                        touched.specialization && errors.specialization
-                          ? "border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-500/10"
-                          : "focus:border-[#055153] dark:focus:border-primary focus:ring-4 focus:ring-[#055153]/10 dark:focus:ring-primary/20 hover:border-[#CBD5E1] dark:hover:border-slate-600"
-                      } font-inter`}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setSpecializationMode("select")}
-                      className="absolute right-3 text-[#055153] dark:text-primary font-bold text-xs"
-                    >
-                      Show List
-                    </button>
-                  </div>
-                )}
-              </div>
-              {touched.specialization && errors.specialization && (
-                <p className="text-red-500 text-sm mt-2 flex items-center gap-1">
-                  <MdErrorOutline size={16} />
-                  {errors.specialization}
-                </p>
-              )}
-            </div>
-          )}
 
           {/* Password Input */}
           <div className="mb-4">

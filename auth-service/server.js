@@ -16,7 +16,7 @@ connectDB();
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`✅ Auth Service running on port ${PORT}`);
-  console.log(`🔗 MongoDB Connection: ${process.env.MONGO_URI.split("@")[1]}`);
-  console.log(`📋 Environment: ${process.env.NODE_ENV}`);
+  console.log(`Auth Service running on port ${PORT}`);
+  console.log(`MongoDB Connection: ${process.env.MONGO_URI.split("@")[1]}`);
+  console.log(`Environment: ${process.env.NODE_ENV}`);
 });
