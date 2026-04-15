@@ -4,13 +4,14 @@ import {
   getAllAppointments, 
   getMyAppointments, 
   updateAppointment, 
-  deleteAppointment 
+  deleteAppointment,
+  getAppointmentsByDoctorId,
 } from '../controllers/appointmentController.js';
 import { authenticateUser, authorizePermissions } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// 1. Book Appointment - Patient only [cite: 42]
+// 1. Book Appointment - Patient only
 router.post(
   '/', 
   authenticateUser, 
@@ -18,14 +19,14 @@ router.post(
   bookAppointment
 );
 
-// 2. Get My Appointments - Authenticated users [cite: 16]
+// 2. Get My Appointments - Authenticated users
 router.get(
   '/my-appointments',
   authenticateUser,
   getMyAppointments
 );
 
-// 3. Get All Appointments - Admin only [cite: 20]
+// 3. Get All Appointments - Admin only
 router.get(
   '/',
   authenticateUser,
@@ -33,7 +34,15 @@ router.get(
   getAllAppointments
 );
 
-// 4. Update Appointment - Admin or Doctor [cite: 22, 23]
+// 4. Get Appointments for a specific Doctor (called by doctor-service or doctor dashboard)
+router.get(
+  '/doctor/:doctorId',
+  authenticateUser,
+  authorizePermissions('doctor', 'admin'),
+  getAppointmentsByDoctorId
+);
+
+// 5. Update Appointment - Admin or Doctor (confirm / cancel / complete)
 router.put(
   '/:id',
   authenticateUser,
@@ -41,11 +50,11 @@ router.put(
   updateAppointment
 );
 
-// 5. Delete/Cancel Appointment - Authenticated users
+// 6. Delete/Cancel Appointment - Authenticated users
 router.delete(
   '/:id',
   authenticateUser,
   deleteAppointment
 );
 
-export default router;
+export default router;

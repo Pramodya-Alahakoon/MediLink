@@ -1,61 +1,66 @@
-// import axios from 'axios';
+import axios from 'axios';
 
 /**
- * Service to handle cross-service communication with patient-service
- * Designed so that when the patient-service is ready, you uncomment Axios
- * and route to the actual URL.
+ * patientService.js
+ * ─────────────────
+ * Cross-service HTTP client for patient-service.
+ * Fetches patient-uploaded medical reports so doctors can view them
+ * directly inside the doctor dashboard.
+ *
+ * Set PATIENT_SERVICE_URL in .env; defaults to http://localhost:3000
+ * when running locally without Docker.
  */
 
-// Placeholder data representing what patient-service would return
-const MOCK_REPORTS = [
-  {
-    reportId: 'REP-001',
-    patientId: 'PAT-101',
-    fileName: 'blood_test_results.pdf',
-    fileType: 'application/pdf',
-    uploadedAt: '2026-05-01T10:00:00Z',
-    description: 'Annual complete blood count test results',
-    fileUrl: 'http://localhost:3000/uploads/blood_test_results.pdf',
-  },
-  {
-    reportId: 'REP-002',
-    patientId: 'PAT-101',
-    fileName: 'chest_xray.png',
-    fileType: 'image/png',
-    uploadedAt: '2026-05-02T14:30:00Z',
-    description: 'Chest X-Ray from City Hospital',
-    fileUrl: 'http://localhost:3000/uploads/chest_xray.png',
-  },
-  {
-    reportId: 'REP-003',
-    patientId: 'PAT-102',
-    fileName: 'mri_scan.pdf',
-    fileType: 'application/pdf',
-    uploadedAt: '2026-05-05T09:15:00Z',
-    description: 'Brain MRI Scan results',
-    fileUrl: 'http://localhost:3000/uploads/mri_scan.pdf',
-  }
-];
+const PATIENT_SERVICE_URL =
+  process.env.PATIENT_SERVICE_URL || 'http://localhost:3000';
 
-export const fetchPatientReportsUrl = async (patientId) => {
+/**
+ * Fetch all reports uploaded by a patient.
+ * @param {string} patientId   - Patient's ID (ObjectId or custom string)
+ * @param {string} [authToken] - Bearer token to forward for auth, if required
+ * @returns {Promise<Array>}   - Array of report objects
+ */
+export const fetchPatientReports = async (patientId, authToken = null) => {
   try {
-    /* 
-    // TODO: When patient-service is live, wire this up:
-    const PATIENT_SERVICE_URL = process.env.PATIENT_SERVICE_URL || 'http://localhost:3000';
-    const response = await axios.get(`${PATIENT_SERVICE_URL}/api/reports/patient/${patientId}`);
-    return response.data.data; 
-    */
+    const config = { timeout: 8000 };
+    if (authToken) {
+      config.headers = { Authorization: `Bearer ${authToken}` };
+    }
 
-    // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    const response = await axios.get(
+      `${PATIENT_SERVICE_URL}/api/reports/patient/${patientId}`,
+      config
+    );
 
-    // Return filtered mock data
-    const reports = MOCK_REPORTS.filter((report) => report.patientId === patientId);
-    return reports;
-
+    // patient-service returns { success, data: [...] } or { reports: [...] }
+    return (
+      response.data?.data ||
+      response.data?.reports ||
+      []
+    );
   } catch (error) {
-    // If the real axios call fails, you can format the error here or return empty/null
-    console.error(`Failed to fetch reports from patient service: ${error.message}`);
-    throw new Error('Could not retrieve patient reports at this time');
+    console.error(
+      `[doctor-service → patient-service] Failed to fetch reports for patient ${patientId}:`,
+      error.message
+    );
+
+    if (error.response) {
+      // Forward meaningful HTTP errors
+      const err = new Error(
+        error.response.data?.message || 'Could not retrieve patient reports'
+      );
+      err.statusCode = error.response.status;
+      throw err;
+    }
+
+    // Network error — throw a friendly 503-style error
+    const err = new Error(
+      'Patient service is temporarily unavailable. Please try again later.'
+    );
+    err.statusCode = 503;
+    throw err;
   }
 };
+
+// Backwards-compatible export for existing imports that used the old name
+export const fetchPatientReportsUrl = fetchPatientReports;

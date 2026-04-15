@@ -123,12 +123,10 @@ export const deleteFile = async (req, res, next) => {
   try {
     const { publicId } = req.params;
 
-    // Validate publicId to prevent directory traversal attacks
-    if (
-      publicId.includes("..") ||
-      publicId.includes("/") ||
-      publicId.includes("\\")
-    ) {
+    // Validate publicId to prevent directory traversal attacks.
+    // NOTE: Cloudinary public IDs legitimately include forward slashes
+    // (e.g. "medilink/doctors/abc123"), so we only reject ".." sequences.
+    if (publicId.includes("..")) {
       throw new BadRequestError("Invalid publicId format");
     }
 

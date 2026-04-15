@@ -4,25 +4,27 @@ import mongoose from 'mongoose';
  * Consultation Model — doctor-service
  *
  * Stores video consultation session details.
- * This links an appointment to a Jitsi meet room.
+ * Links an appointment to a Jitsi Meet room.
  */
 const ConsultationSchema = new mongoose.Schema(
   {
     appointmentId: {
-      type: String, // Reference to appointment ID from appointment-service
+      type: String,
       required: [true, 'Appointment ID is required'],
       unique: true,
       trim: true,
     },
     doctorId: {
-      type: String, // Reference to doctor ID
+      type: String,
       required: [true, 'Doctor ID is required'],
       trim: true,
+      index: true,
     },
     patientId: {
-      type: String, // Reference to patient ID
+      type: String,
       required: [true, 'Patient ID is required'],
       trim: true,
+      index: true,
     },
     meetingLink: {
       type: String,
@@ -40,18 +42,33 @@ const ConsultationSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: {
-        values: ['scheduled', 'completed', 'active'],
-        message: 'Status must be scheduled, completed, or active',
+        values: ['scheduled', 'active', 'completed', 'cancelled'],
+        message: 'Status must be scheduled, active, completed, or cancelled',
       },
       default: 'scheduled',
     },
+    startedAt: {
+      type: Date,
+      default: null,
+    },
+    endedAt: {
+      type: Date,
+      default: null,
+    },
+    notes: {
+      type: String,
+      trim: true,
+      maxlength: [1000, 'Notes cannot exceed 1000 characters'],
+      default: null,
+    },
   },
   {
-    timestamps: true, // Adds createdAt and updatedAt
+    timestamps: true,
   }
 );
 
-// Add index for fast retrieval by appointmentId
+// Indexes for fast retrieval
 ConsultationSchema.index({ appointmentId: 1 });
+ConsultationSchema.index({ doctorId: 1, status: 1 });
 
 export default mongoose.model('Consultation', ConsultationSchema);

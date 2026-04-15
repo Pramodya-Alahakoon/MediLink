@@ -3,6 +3,7 @@ import { getAISuggestions } from "../utils/aiSymptomChecker.js";
 import { StatusCodes } from "http-status-codes";
 import { NotFoundError, BadRequestError } from "../errors/customErrors.js";
 
+
 // Error handler wrapper for async functions
 const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
@@ -128,3 +129,32 @@ export const deleteAppointment = asyncHandler(async (req, res) => {
 
   res.status(StatusCodes.OK).json({ msg: "Appointment cancelled and deleted" });
 });
+
+// 6. Get appointments for a specific doctor (called by doctor-service)
+export const getAppointmentsByDoctorId = asyncHandler(async (req, res) => {
+  const { doctorId } = req.params;
+  const { status, page = 1, limit = 20 } = req.query;
+
+  const pageNum = Math.max(1, parseInt(page));
+  const limitNum = Math.min(50, Math.max(1, parseInt(limit)));
+  const skip = (pageNum - 1) * limitNum;
+
+  const filter = { doctorId };
+  if (status) filter.status = status;
+
+  const [appointments, total] = await Promise.all([
+    Appointment.find(filter)
+      .sort({ appointmentDate: -1 })
+      .skip(skip)
+      .limit(limitNum)
+      .lean(),
+    Appointment.countDocuments(filter),
+  ]);
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    count: appointments.length,
+    total,
+    appointments,
+  });
+});
