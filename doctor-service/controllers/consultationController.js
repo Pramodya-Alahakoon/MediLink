@@ -3,42 +3,35 @@ import { BadRequestError, NotFoundError } from '../errors/customErrors.js';
 import Consultation from '../models/Consultation.js';
 
 /**
- * ----------------------------------------------------------------------------
  * VIDEO CONSULTATION CONTROLLER
- * ----------------------------------------------------------------------------
- * This controller handles the creation and retrieval of video consultation 
- * sessions using Jitsi Meet.
+ * Handles Jitsi Meet video session creation, retrieval, and status management.
  */
 
 // @desc    Create a new video consultation session
 // @route   POST /api/doctors/consultations/create-session
-// @access  Doctor
+// @access  Doctor (Private)
 export const createConsultationSession = async (req, res, next) => {
   try {
-    const { appointmentId, doctorId, patientId } = req.body;
+    const { appointmentId, doctorId, patientId, notes } = req.body;
 
-    // 1. Validation
     if (!appointmentId || !doctorId || !patientId) {
       throw new BadRequestError('Required fields missing: appointmentId, doctorId, patientId');
     }
 
-    // 2. Check if a session already exists for this appointment
+    // Return existing session if already created for this appointment
     const existingSession = await Consultation.findOne({ appointmentId });
     if (existingSession) {
       return res.status(StatusCodes.OK).json({
         success: true,
-        message: 'Session already exists for this appointment',
+        message: 'Session already exists for this appointment — returning existing link',
         data: existingSession,
       });
     }
 
-    // 3. Generate Jitsi Meet link
-    // Format: https://meet.jit.si/medilink-{appointmentId}
-    // Note: No API key required for basic Jitsi Meet rooms.
-    // Frontend should open this link in a new browser tab for the video call.
+    // Generate Jitsi room name — unique per appointment
+    // Frontend opens this URL in a new tab; no API key required for public rooms
     const meetingLink = `https://meet.jit.si/medilink-${appointmentId}`;
-    
-    // 4. Create and Save to Database
+
     const newSession = await Consultation.create({
       appointmentId,
       doctorId,
@@ -46,6 +39,7 @@ export const createConsultationSession = async (req, res, next) => {
       meetingLink,
       platform: 'JITSI',
       status: 'scheduled',
+      notes: notes || null,
     });
 
     res.status(StatusCodes.CREATED).json({
@@ -58,19 +52,49 @@ export const createConsultationSession = async (req, res, next) => {
   }
 };
 
-// @desc    Get a consultation session link by appointment ID
+// @desc    Get all consultations for a specific doctor
+// @route   GET /api/doctors/consultations/doctor/:doctorId
+// @access  Doctor (Private)
+export const getConsultationsByDoctor = async (req, res, next) => {
+  try {
+    const { doctorId } = req.params;
+    const { status, page = 1, limit = 20 } = req.query;
+
+    const pageNum = Math.max(1, parseInt(page));
+    const limitNum = Math.min(50, Math.max(1, parseInt(limit)));
+    const skip = (pageNum - 1) * limitNum;
+
+    const filter = { doctorId };
+    if (status) filter.status = status;
+
+    const [consultations, total] = await Promise.all([
+      Consultation.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limitNum)
+        .lean(),
+      Consultation.countDocuments(filter),
+    ]);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      count: consultations.length,
+      total,
+      data: consultations,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get a consultation session by appointment ID
 // @route   GET /api/doctors/consultations/:appointmentId
-// @access  Doctor / Patient
+// @access  Doctor / Patient (Private)
 export const getConsultationByAppointment = async (req, res, next) => {
   try {
     const { appointmentId } = req.params;
 
-    if (!appointmentId) {
-      throw new BadRequestError('Appointment ID is required');
-    }
-
     const session = await Consultation.findOne({ appointmentId });
-
     if (!session) {
       throw new NotFoundError(`No video consultation found for appointment: ${appointmentId}`);
     }
@@ -84,21 +108,31 @@ export const getConsultationByAppointment = async (req, res, next) => {
   }
 };
 
-// @desc    Update consultation status
+// @desc    Update consultation status (and optional timestamps/notes)
 // @route   PATCH /api/doctors/consultations/:appointmentId/status
-// @access  Doctor
+// @access  Doctor (Private)
 export const updateConsultationStatus = async (req, res, next) => {
   try {
     const { appointmentId } = req.params;
-    const { status } = req.body;
+    const { status, notes } = req.body;
 
-    if (!['scheduled', 'completed', 'active'].includes(status)) {
-      throw new BadRequestError('Invalid status. Must be scheduled, completed, or active');
+    const VALID_STATUSES = ['scheduled', 'active', 'completed', 'cancelled'];
+    if (!VALID_STATUSES.includes(status)) {
+      throw new BadRequestError(
+        `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}`
+      );
     }
+
+    const updateData = { status };
+    if (notes !== undefined) updateData.notes = notes;
+
+    // Set timestamps automatically based on status transitions
+    if (status === 'active')    updateData.startedAt = new Date();
+    if (status === 'completed' || status === 'cancelled') updateData.endedAt = new Date();
 
     const session = await Consultation.findOneAndUpdate(
       { appointmentId },
-      { status },
+      updateData,
       { new: true, runValidators: true }
     );
 
@@ -108,7 +142,39 @@ export const updateConsultationStatus = async (req, res, next) => {
 
     res.status(StatusCodes.OK).json({
       success: true,
-      message: `Consultation status updated to ${status}`,
+      message: `Consultation status updated to '${status}'`,
+      data: session,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Add/update clinical notes to a consultation
+// @route   PATCH /api/doctors/consultations/:appointmentId/notes
+// @access  Doctor (Private)
+export const updateConsultationNotes = async (req, res, next) => {
+  try {
+    const { appointmentId } = req.params;
+    const { notes } = req.body;
+
+    if (notes === undefined) {
+      throw new BadRequestError('notes field is required');
+    }
+
+    const session = await Consultation.findOneAndUpdate(
+      { appointmentId },
+      { notes },
+      { new: true }
+    );
+
+    if (!session) {
+      throw new NotFoundError(`No video consultation found for appointment: ${appointmentId}`);
+    }
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Consultation notes updated',
       data: session,
     });
   } catch (error) {
