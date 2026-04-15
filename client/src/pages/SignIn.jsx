@@ -91,33 +91,39 @@ function SignIn() {
 
       if (response.data.token) {
         const { token, patient: userData } = response.data;
-        
+        const actualRole = userData.role;
+
+        // Validate selected tab matches actual role
+        const expectedRole = activeRole.toLowerCase();
+        if (expectedRole !== "patient" && expectedRole !== actualRole && actualRole !== "admin") {
+          toast.error(`This account is registered as a ${actualRole}. Please select the correct role tab.`);
+          setIsLoading(false);
+          return;
+        }
+
         // Use central login function
         login(userData, token);
         
         toast.success("Login successful!");
 
-        // Immediate redirection based on verified role
-        const finalRole = userData.role;
-        
-        switch (finalRole) {
+        // Redirect based on actual DB role
+        switch (actualRole) {
           case "admin":
-            navigate("/");
+            navigate("/doctor/dashboard");
             break;
           case "doctor":
             navigate("/doctor/dashboard");
             break;
           case "patient":
-            navigate("/appointments");
+            navigate("/patient/dashboard"); // Replaced from /appointments
             break;
           default:
-            navigate("/appointments");
+            navigate("/patient/dashboard"); // Replaced from /appointments
         }
       }
     } catch (error) {
-      // ... error handling ...
       if (axios.isAxiosError(error)) {
-        const errorMessage = error.response?.data?.msg || "Login failed";
+        const errorMessage = error.response?.data?.msg || "Invalid email or password";
         toast.error(errorMessage);
       } else {
         toast.error("Something went wrong. Please try again.");

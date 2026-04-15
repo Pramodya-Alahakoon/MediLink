@@ -1,4 +1,7 @@
 import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { useDoctorContext } from '../../context/DoctorContext';
 import { 
   LayoutGrid, 
   Users, 
@@ -8,17 +11,32 @@ import {
   BarChart, 
   AlertCircle, 
   HelpCircle, 
-  LogOut 
+  LogOut,
+  Clock
 } from 'lucide-react';
 
 const Sidebar = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const { doctorProfile } = useDoctorContext();
+  const doctorName = doctorProfile?.name || user?.name || user?.fullName || 'Doctor';
+  const specialization = doctorProfile?.specialization || 'Doctor Portal';
+  const currentPath = location.pathname;
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/signin');
+  };
+
   const menuItems = [
-    { icon: LayoutGrid, label: 'Dashboard', active: true },
-    { icon: Users, label: 'Patients', active: false },
-    { icon: Calendar, label: 'Schedules', active: false },
-    { icon: FileText, label: 'Clinical Notes', active: false },
-    { icon: CreditCard, label: 'Billing', active: false },
-    { icon: BarChart, label: 'Reports', active: false },
+    { icon: LayoutGrid, label: 'Dashboard', path: '/doctor/dashboard' },
+    { icon: Users, label: 'Patients', path: '/doctor/patients' },
+    { icon: Calendar, label: 'Schedules', path: '/doctor/schedules' },
+    { icon: Clock, label: 'Availability', path: '/doctor/availability' },
+    { icon: FileText, label: 'Clinical Notes', path: '/doctor/notes' },
+    { icon: CreditCard, label: 'Billing', path: '/doctor/billing' },
+    { icon: BarChart, label: 'Reports', path: '/doctor/reports' },
   ];
 
   return (
@@ -31,26 +49,30 @@ const Sidebar = () => {
           </svg>
         </div>
         <div className="flex flex-col">
-          <span className="font-extrabold text-[#055153] text-[17px] tracking-tight leading-tight">Dr. Editorial</span>
-          <span className="text-xs text-slate-500 font-semibold tracking-wide">Oncology Dept.</span>
+          <span className="font-extrabold text-[#055153] text-[17px] tracking-tight leading-tight">Dr. {doctorName}</span>
+          <span className="text-xs text-slate-500 font-semibold tracking-wide">{specialization}</span>
         </div>
       </div>
 
       {/* Main Navigation */}
       <nav className="flex-1 px-4 space-y-1">
-        {menuItems.map((item, idx) => (
-          <button 
-            key={idx}
-            className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-semibold ${
-              item.active 
-              ? 'bg-white text-[#055153] shadow-sm shadow-slate-200 border border-slate-100' 
-              : 'text-[#64748B] hover:bg-white/50 hover:text-[#055153]'
-            }`}
-          >
-            <item.icon size={20} strokeWidth={item.active ? 2.5 : 2} />
-            <span>{item.label}</span>
-          </button>
-        ))}
+        {menuItems.map((item, idx) => {
+          const isActive = currentPath === item.path;
+          return (
+            <button 
+              key={idx}
+              onClick={() => navigate(item.path)}
+              className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-semibold ${
+                isActive 
+                ? 'bg-white text-[#055153] shadow-sm shadow-slate-200 border border-slate-100' 
+                : 'text-[#64748B] hover:bg-white/50 hover:text-[#055153]'
+              }`}
+            >
+              <item.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
       </nav>
 
       {/* Bottom Actions */}
@@ -65,7 +87,7 @@ const Sidebar = () => {
           <span>Support</span>
         </button>
         
-        <button className="w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-semibold text-[#64748B] hover:bg-white/50 hover:text-[#055153]">
+        <button onClick={handleLogout} className="w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-semibold text-[#64748B] hover:bg-white/50 hover:text-[#055153]">
           <LogOut size={20} strokeWidth={2} />
           <span>Logout</span>
         </button>

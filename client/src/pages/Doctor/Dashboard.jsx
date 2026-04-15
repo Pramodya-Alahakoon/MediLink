@@ -1,5 +1,6 @@
 import React from 'react';
 import { Calendar, Briefcase, ClipboardList, Wallet, Download, Plus } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import StatCard from '../../components/DoctorDashboard/StatCard';
 import ScheduleList from '../../components/DoctorDashboard/ScheduleList';
 import ActivityFeed from '../../components/DoctorDashboard/ActivityFeed';
@@ -7,6 +8,8 @@ import QuickShortcuts from '../../components/DoctorDashboard/QuickShortcuts';
 import ResearchHub from '../../components/DoctorDashboard/ResearchHub';
 
 const Dashboard = () => {
+  const { user } = useAuth();
+  const doctorName = user?.name || user?.fullName || 'Doctor';
   return (
     <div className="w-full h-full p-8 flex lg:flex-row flex-col gap-8">
       {/* Left Column (Main Content) */}
@@ -15,7 +18,7 @@ const Dashboard = () => {
         {/* Welcome Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <h1 className="text-[32px] font-black text-[#112429] tracking-tight font-manrope leading-tight mb-2">Good Morning, Dr. Julianne Moore</h1>
+            <h1 className="text-[32px] font-black text-[#112429] tracking-tight font-manrope leading-tight mb-2">Good Morning, Dr. {doctorName}</h1>
             <p className="text-[#475569] font-medium font-inter text-[15px]">Here is what is happening with your practice today.</p>
           </div>
           <div className="flex items-center gap-3">

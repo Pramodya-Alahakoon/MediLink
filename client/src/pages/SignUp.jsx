@@ -171,11 +171,44 @@ function SignUp() {
       if (activeRole === "Doctor") {
         payload.specialization = formData.specialization;
       }
-      
-      const response = await customFetch.post("/api/auth/register", payload);
 
-      if (response.data) {
-        toast.success("Registration successful!");
+      // Step 1: Register in auth service
+      const authResponse = await customFetch.post("/api/auth/register", payload);
+
+      // Step 2: If doctor, auto-login to get userId then create doctor profile
+      if (activeRole === "Doctor" && authResponse.data) {
+        try {
+          const loginResponse = await customFetch.post("/api/auth/login", {
+            email: formData.email,
+            password: formData.password,
+          });
+
+          if (loginResponse.data?.token) {
+            const { token, patient: userData } = loginResponse.data;
+            // Store token temporarily for the doctor profile creation call
+            localStorage.setItem("token", token);
+
+            // Step 3: Create doctor profile in doctor service
+            await customFetch.post("/api/doctors/register", {
+              name: formData.fullName,
+              email: formData.email,
+              phone: formData.phoneNumber,
+              specialization: formData.specialization,
+              location: formData.location,
+              userId: userData.userId,
+            });
+
+            // Clear temp token — user must login properly
+            localStorage.removeItem("token");
+          }
+        } catch (profileError) {
+          // Doctor profile creation is non-blocking — user can still log in
+          console.warn("Doctor profile auto-create warning:", profileError.message);
+        }
+      }
+
+      if (authResponse.data) {
+        toast.success("Registration successful! Please sign in.");
         setTimeout(() => {
           navigate("/signin");
         }, 1500);
@@ -183,8 +216,8 @@ function SignUp() {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const backendMsg = error.response?.data?.message || error.response?.data?.msg;
-        const errorMessage = backendMsg 
-          ? (Array.isArray(backendMsg) ? backendMsg.join(', ') : backendMsg) 
+        const errorMessage = backendMsg
+          ? (Array.isArray(backendMsg) ? backendMsg.join(', ') : backendMsg)
           : `Axios Error: ${error.message} (Status: ${error.response?.status})`;
         toast.error(errorMessage);
       } else {

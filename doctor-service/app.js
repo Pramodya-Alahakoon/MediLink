@@ -7,6 +7,9 @@ import appointmentRouter from './routes/appointmentRoutes.js';
 import patientReportRouter from './routes/patientReportRoutes.js';
 import consultationRouter from './routes/consultationRoutes.js';
 import uploadRouter from './routes/uploadRoutes.js';
+import appointmentSettingsRouter from './routes/appointmentSettingsRoutes.js';
+import blockedDaysRouter from './routes/blockedDaysRoutes.js';
+import timeSlotRouter from './routes/timeSlotRoutes.js';
 
 const app = express();
 
@@ -21,6 +24,9 @@ app.use('/api/doctors/consultations', consultationRouter);
 app.use('/api/doctors', appointmentRouter);
 app.use('/api/doctors', patientReportRouter);
 app.use('/api/availability', availabilityRouter);
+app.use('/api/availability/settings', appointmentSettingsRouter);
+app.use('/api/availability/blocked-days', blockedDaysRouter);
+app.use('/api/availability', timeSlotRouter);
 app.use('/api/prescriptions', prescriptionRouter);
 app.use('/api/upload', uploadRouter);
 
