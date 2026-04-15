@@ -36,10 +36,15 @@ services:
     environment:
       - PORT=3003
       - CLOUDINARY_URL=cloudinary://334213839224793:6Vs2LWGTMoQ3tA87qcR7JovBs9k@dnjq7l123
+      - APPOINTMENT_SERVICE_URL=http://medilink-appointment:5002
+      - PATIENT_SERVICE_URL=http://medilink-patient:3000
     env_file:
       - ./doctor-service/.env
     networks:
       - medilink-network
+    depends_on:
+      - appointment-service
+      - patient-service
 
   patient-service:
     build:

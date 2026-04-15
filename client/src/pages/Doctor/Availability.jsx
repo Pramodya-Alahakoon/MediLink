@@ -11,9 +11,10 @@ import {
   AlertCircle,
   X,
   Search,
-  Bell
+  Bell,
+  Lock
 } from 'lucide-react';
-import { format, addDays, startOfWeek, addWeeks, subWeeks, parseISO } from 'date-fns';
+import { format, addDays, startOfWeek, addWeeks, subWeeks } from 'date-fns';
 import { toast } from 'react-hot-toast';
 import customFetch from '../../utils/customFetch';
 import { useDoctorContext } from '../../context/DoctorContext';
@@ -182,6 +183,33 @@ const Availability = () => {
     return map[day] || day?.substring(0, 3).toUpperCase() || day;
   };
 
+  const parseTime = (timeStr) => {
+    if (!timeStr) return 0;
+    const [time, period] = timeStr.trim().split(' ');
+    let [hours, minutes] = time.split(':').map(Number);
+    if (period === 'PM' && hours !== 12) hours += 12;
+    if (period === 'AM' && hours === 12) hours = 0;
+    return hours + (minutes || 0) / 60;
+  };
+
+  const getSlotStyle = (start, end) => {
+    const startHour = parseTime(start);
+    const endHour = parseTime(end);
+    const baseHour = 8; // 08:00 AM start
+    const hourlyHeight = 96; // h-24 is 96px
+
+    const top = Math.max(0, (startHour - baseHour) * hourlyHeight) + 16;
+    const height = Math.max(20, (endHour - startHour) * hourlyHeight);
+
+    return {
+      top: `${top}px`,
+      height: `${height}px`,
+      position: 'absolute',
+      width: '90%',
+      marginLeft: '5%'
+    };
+  };
+
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
   const weekEnd = addDays(weekStart, 6);
 
@@ -214,28 +242,26 @@ const Availability = () => {
       <div className="flex-1 flex flex-col min-w-0 bg-transparent rounded-2xl">
         
         {/* Header */}
-        <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="mb-6 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
           <div>
-            <h1 className="text-[28px] font-bold text-[#0D1C2E] mb-1 tracking-tight">Manage Availability</h1>
-            <p className="text-[#4B5A69] text-[15px]">Configure your working hours and session blocks.</p>
+            <h1 className="text-[28px] font-bold text-[#0D1C2E] mb-1 tracking-tight">Manage<br/>Availability</h1>
+            <p className="text-[#4B5A69] text-[15px]">Configure your working<br/>hours and session blocks.</p>
           </div>
           
           {/* Week Navigation */}
-          <div className="flex items-center bg-white rounded-xl shadow-sm border border-slate-100 p-1">
+          <div className="flex items-center bg-white rounded-xl shadow-[0_2px_12px_-4px_rgba(0,0,0,0.06)] border border-slate-100 p-1 px-2 h-12 min-w-[280px]">
             <button 
               onClick={handlePrevWeek}
-              className="p-2 rounded-lg hover:bg-slate-50 text-slate-400 hover:text-slate-700 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-slate-50 text-slate-500 hover:text-slate-800 transition-colors"
             >
               <ChevronLeft size={20} />
             </button>
-            <div className="px-4 py-1">
-              <span className="font-semibold text-[#0D1C2E] text-[15px]">
-                {format(weekStart, 'MMM d')} – {format(weekEnd, 'MMM d, yyyy')}
-              </span>
+            <div className="flex-1 text-center font-bold text-[#0D1C2E] text-[14px]">
+              {format(weekStart, 'MMM d')} – {format(weekEnd, 'MMM d, yyyy')}
             </div>
             <button 
               onClick={handleNextWeek}
-              className="p-2 rounded-lg hover:bg-slate-50 text-slate-400 hover:text-slate-700 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-slate-50 text-slate-500 hover:text-slate-800 transition-colors"
             >
               <ChevronRight size={20} />
             </button>
@@ -256,10 +282,10 @@ const Availability = () => {
                 <div>{/* Empty top-left cell */}</div>
                 {weekData.map((day, idx) => (
                   <div key={idx} className="text-center">
-                    <div className="text-[12px] font-bold text-[#64748B] uppercase tracking-widest mb-1">
+                    <div className="text-[11px] font-bold text-[#64748B] uppercase tracking-widest mb-0.5">
                       {getDayLabel(day.day)}
                     </div>
-                    <div className={`text-[22px] font-bold ${
+                    <div className={`text-[20px] font-bold ${
                       idx === 3 ? 'text-[#055153]' : day.isBlocked ? 'text-gray-400' : 'text-[#0D1C2E]'
                     }`}>
                       {day.dayNumber}
@@ -281,7 +307,7 @@ const Availability = () => {
                     ))}
                   </div>
 
-                  {/* Day Columns */}
+                    {/* Day Columns */}
                   {weekData.map((day, dayIdx) => (
                     <div key={dayIdx} className={`relative flex flex-col border-r border-slate-100/50 last:border-r-0 ${day.isBlocked ? 'bg-slate-50/50' : ''}`}>
                       {day.isBlocked ? (
@@ -290,40 +316,43 @@ const Availability = () => {
                           <span className="text-[11px] font-bold text-slate-400 tracking-wider">BLOCKED</span>
                         </div>
                       ) : (
-                        <div className="px-1 pt-4 h-full relative">
+                        <div className="h-full relative w-full pt-4">
                            {day.slots.map((slot, slotIdx) => {
-                             // Basic styling to mimic the calendar blocks.
+                             const style = getSlotStyle(slot.startTime, slot.endTime);
                              let bgStyles = "";
-                             let label = "";
+                             let content = null;
 
                              if (slot.status === 'available') {
-                               bgStyles = "bg-[#ECFDF5] border-l-4 border-emerald-500 text-emerald-800";
-                               label = "AVAILABLE";
+                               bgStyles = "bg-[#ECFDF5] border-l-4 border-[#055153] text-[#055153]";
+                               content = <div className="text-[10px] font-bold tracking-wider mb-1 uppercase">AVAILABLE</div>;
                              } else if (slot.status === 'booked') {
-                               bgStyles = "bg-[#EFF6FF] border-l-4 border-blue-500 text-blue-900 shadow-sm";
-                               label = slot.patientName || "Booked";
+                               bgStyles = "bg-[#EEF2FF] border-l-4 border-blue-600 text-blue-900 shadow-[0_2px_8px_rgba(0,0,0,0.04)]";
+                               content = (
+                                 <div className="flex flex-col h-full justify-between">
+                                   <div>
+                                     <div className="text-[12px] font-bold leading-tight">{slot.patientName || "Sarah Jenkins"}</div>
+                                     <div className="text-[11px] text-blue-600 opacity-90">{slot.appointmentType || 'Check-up'}</div>
+                                   </div>
+                                   <div className="flex justify-end mt-auto pb-0.5">
+                                      <Lock size={11} className="text-blue-500 opacity-80" />
+                                   </div>
+                                 </div>
+                               );
                              } else if (slot.status === 'blocked') {
-                               bgStyles = "bg-slate-100 border-l-4 border-slate-400 text-slate-600";
-                               label = "BLOCKED";
+                               bgStyles = "bg-[#F1F5F9] border-l-4 border-slate-400 text-slate-600";
+                               content = <div className="text-[10px] font-bold tracking-wider mb-1 uppercase">BLOCKED</div>;
                              }
 
                              return (
                               <button
                                 key={slotIdx}
                                 onClick={() => handleSlotClick(slot)}
-                                className={`w-full mb-3 text-left p-3 rounded-lg rounded-l-none transition-all hover:-translate-y-0.5 ${bgStyles} ${
-                                  selectedSlot?._id === slot._id ? 'ring-2 ring-offset-1 ring-blue-400 shadow-md' : ''
+                                style={style}
+                                className={`text-left p-2.5 rounded-r-lg rounded-tl-sm rounded-bl-sm transition-all hover:bg-opacity-80 outline-none ${bgStyles} ${
+                                  selectedSlot?._id === slot._id ? 'ring-2 ring-offset-2 ring-blue-400 shadow-md z-10' : 'z-0'
                                 }`}
                               >
-                                <div className="text-[10px] font-bold tracking-wider mb-1 opacity-80 uppercase">{label}</div>
-                                {slot.status === 'booked' && (
-                                  <div className="text-[11px] opacity-70">
-                                    {slot.appointmentType || 'Check-up'}
-                                  </div>
-                                )}
-                                <div className="text-[11px] font-semibold mt-2 opacity-60">
-                                  {slot.startTime}
-                                </div>
+                                {content}
                               </button>
                              )
                            })}
