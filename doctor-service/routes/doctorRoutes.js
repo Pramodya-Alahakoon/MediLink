@@ -7,27 +7,22 @@ import {
   getDoctorByUserId,
   updateDoctorProfile,
   deleteDoctorProfile,
+  requestDoctorDeletion,
+  rejectDoctorDeletion,
 } from '../controllers/doctorController.js';
 import { asyncHandler } from '../middleware/asyncHandler.js';
 import { authenticateUser, authorizePermissions } from '../middleware/authMiddleware.js';
 
 const router = Router();
 
-/**
- * Doctor Routes — mounted at /api/doctors
- *
- * Public:    GET /  |  GET /specialty/:s  |  GET /user/:userId  |  GET /:id
- * Protected: POST /register  |  PUT /:id  |  DELETE /:id
- */
-
 // ── Public routes ──────────────────────────────────────────────────────────
 router.get('/', asyncHandler(getAllDoctors));
 
-// NOTE: /specialty/:specialty and /user/:userId MUST come before /:id
+// NOTE: named routes MUST come before /:id wildcard
 router.get('/specialty/:specialty', asyncHandler(getDoctorsBySpecialty));
 router.get('/user/:userId', asyncHandler(getDoctorByUserId));
 
-// ── Protected: only doctors / admins can register and modify profiles ─────
+// ── Protected: doctors / admins ────────────────────────────────────────────
 router.post(
   '/register',
   authenticateUser,
@@ -42,6 +37,7 @@ router.put(
   asyncHandler(updateDoctorProfile)
 );
 
+// ── Admin-only: permanent delete ───────────────────────────────────────────
 router.delete(
   '/:id',
   authenticateUser,
@@ -49,7 +45,23 @@ router.delete(
   asyncHandler(deleteDoctorProfile)
 );
 
-// Single doctor lookup — public (must be last to avoid catching named routes)
+// ── Doctor: request soft deletion (admin review required) ──────────────────
+router.patch(
+  '/:id/request-deletion',
+  authenticateUser,
+  authorizePermissions('doctor', 'admin'),
+  asyncHandler(requestDoctorDeletion)
+);
+
+// ── Admin: reject (restore) a deletion request ─────────────────────────────
+router.patch(
+  '/:id/reject-deletion',
+  authenticateUser,
+  authorizePermissions('admin'),
+  asyncHandler(rejectDoctorDeletion)
+);
+
+// Single doctor lookup — public (must be LAST to avoid catching named routes)
 router.get('/:id', asyncHandler(getDoctorById));
 
 export default router;

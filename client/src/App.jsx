@@ -16,12 +16,16 @@ import DoctorLayout from './layouts/DoctorLayout';
 import Dashboard from './pages/Doctor/Dashboard';
 import Availability from './pages/Doctor/Availability';
 import Schedule from './pages/Doctor/Schedule';
+import DoctorProfile from './pages/Doctor/Profile';
+import AdminDeletionReview from './pages/Doctor/AdminDeletionReview';
 import PatientLayout from './layouts/PatientLayout';
 import PatientDashboard from './pages/Patient/Dashboard';
 import PatientPrescriptions from './pages/Patient/Prescriptions';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/UI/ProtectedRoute';
+import { Toaster } from 'react-hot-toast';
+
 
 class AppErrorBoundary extends Component {
   constructor(props) {
@@ -57,7 +61,9 @@ function App() {
       <ThemeProvider>
         <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <div className="app">
+            <Toaster position="top-right" reverseOrder={false} />
             <AppErrorBoundary>
+
             <Routes>
               {/* Public Routes with General Layout */}
               <Route element={<Layout />}>
@@ -82,6 +88,8 @@ function App() {
                   <Route path="/doctor/dashboard" element={<Dashboard />} />
                   <Route path="/doctor/availability" element={<Availability />} />
                   <Route path="/doctor/schedules" element={<Schedule />} />
+                  <Route path="/doctor/profile" element={<DoctorProfile />} />
+                  <Route path="/doctor/admin/deletions" element={<AdminDeletionReview />} />
                 </Route>
               </Route>
 
