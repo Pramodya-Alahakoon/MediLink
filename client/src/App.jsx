@@ -5,6 +5,8 @@ import Layout from './components/UI/Layout';
 import Homepage from './pages/Homepage';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
+import SignInRestricted from './pages/SignInRestricted';
+import SignUpRestricted from './pages/SignUpRestricted';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Privacy from './pages/Privacy';
@@ -35,6 +37,12 @@ function App() {
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />
+              </Route>
+              
+              {/* Restricted Routes - Doctor & Admin Only */}
+              <Route element={<Layout />}>
+                <Route path="/signin/restricted" element={<SignInRestricted />} />
+                <Route path="/signup/restricted" element={<SignUpRestricted />} />
               </Route>
               
               {/* Doctor Dashboard Routes - Securely protected */}

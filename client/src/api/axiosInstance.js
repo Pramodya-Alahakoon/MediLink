@@ -7,7 +7,7 @@ const API = axios.create({
 
 // Request Interceptor
 API.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token'); // Login weddi save karagaththa token eka
+    const token = sessionStorage.getItem('token'); // Login weddi save karagaththa token eka
     if (token) {
         config.headers.Authorization = `Bearer ${token}`; // Header ekata token eka add kirima
     }

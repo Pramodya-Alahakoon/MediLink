@@ -11,13 +11,11 @@ import {
   IoCheckmarkCircle
 } from "react-icons/io5";
 import { MdErrorOutline } from "react-icons/md";
-import { FcGoogle } from "react-icons/fc";
-import { FiShield, FiLock, FiCpu } from "react-icons/fi";
 import { FaArrowRight } from "react-icons/fa6";
 
 import { useAuth } from "../context/AuthContext";
 
-function SignIn() {
+function SignInRestricted() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -92,6 +90,13 @@ function SignIn() {
         const { token, patient: userData } = response.data;
         const actualRole = userData.role;
 
+        // Only allow doctor or admin to login via restricted endpoint
+        if (actualRole !== "doctor" && actualRole !== "admin") {
+          toast.error("This login is restricted to doctors and admins only. Please use regular login.");
+          setIsLoading(false);
+          return;
+        }
+
         // Use central login function
         login(userData, token);
         
@@ -105,11 +110,8 @@ function SignIn() {
           case "doctor":
             navigate("/doctor/dashboard");
             break;
-          case "patient":
-            navigate("/patient/dashboard"); // Replaced from /appointments
-            break;
           default:
-            navigate("/patient/dashboard"); // Replaced from /appointments
+            navigate("/doctor/dashboard");
         }
       }
     } catch (error) {
@@ -148,23 +150,23 @@ function SignIn() {
             <div className="inline-flex items-center gap-2 bg-white/20 dark:bg-black/20 backdrop-blur-md px-4 py-2 rounded-full mb-8 border border-white/30 dark:border-white/10">
               <IoCheckmarkCircle className="text-teal-200" />
               <span className="text-white/90 text-sm font-semibold tracking-wider font-manrope uppercase">
-                Trusted by 2M+ Patients
+                Professional Access
               </span>
             </div>
 
             {/* Main Headline */}
             <h1 className="text-white text-4xl xl:text-5xl font-black font-manrope leading-[1.1] tracking-tight mb-16 drop-shadow-lg">
-              Exceptional care starts with a single connection.
+              Healthcare professionals portal.
             </h1>
             
             {/* Quote Block */}
             <div className="border-l-4 border-white/50 pl-6 mt-12 drop-shadow-md">
               <p className="text-white text-xl xl:text-2xl font-serif italic leading-relaxed mb-4">
-                "MediLink Cloud has transformed how I manage my health. The interface is as intuitive as the care is compassionate."
+                "Manage your practice efficiently with MediLink Cloud - powering healthcare professionals worldwide."
               </p>
               <p className="text-white/80 text-sm font-inter uppercase tracking-widest font-semibold flex items-center gap-2 drop-shadow-sm">
                 <span className="w-4 h-[1px] bg-white/70 inline-block"></span>
-                Dr. Prasanna Gunasena
+                Healthcare Professionals
               </p>
             </div>
           </div>
@@ -177,8 +179,8 @@ function SignIn() {
           
           {/* Titles */}
           <div className="mb-4">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#112429] dark:text-white font-manrope mb-1">Welcome Back</h2>
-            <p className="text-[#64748B] dark:text-slate-400 text-xs sm:text-sm font-inter">Sign in to access your health portal</p>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#112429] dark:text-white font-manrope mb-1">Professional Login</h2>
+            <p className="text-[#64748B] dark:text-slate-400 text-xs sm:text-sm font-inter">Sign in to your professional dashboard</p>
           </div>
 
           <div className="space-y-5">
@@ -298,27 +300,14 @@ function SignIn() {
           {/* Register Link */}
           <p className="text-center text-[#475569] dark:text-slate-400 text-sm font-medium mt-6 font-inter">
             Don't have an account?{" "}
-            <Link to="/signup" className="text-[#055153] dark:text-primary font-bold hover:underline transition-colors block mx-auto py-1">
+            <Link to="/signup/restricted" className="text-[#055153] dark:text-primary font-bold hover:underline transition-colors block mx-auto py-1">
               Register Now
             </Link>
           </p>
-
-          {/* Trust Badges Footer */}
-          <div className="flex items-center justify-center gap-6 mt-8 pt-4 border-t border-slate-200/80 dark:border-slate-700/50 text-[10px] font-bold text-[#94A3B8] dark:text-slate-500 tracking-widest uppercase font-inter">
-            <span className="flex items-center gap-1.5">
-              <FiCpu className="w-3.5 h-3.5" /> AI Powered
-            </span>
-            <span className="w-1 h-1 rounded-full bg-[#CBD5E1] dark:bg-slate-700" />
-            <span className="flex items-center gap-1.5">
-              <FiLock className="w-3.5 h-3.5" /> Secure Data
-            </span>
-          </div>
-
         </div>
       </div>
     </div>
   );
 }
 
-export default SignIn;
-
+export default SignInRestricted;

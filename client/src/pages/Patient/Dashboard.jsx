@@ -93,10 +93,10 @@ const PatientDashboard = () => {
     <div className="w-full animate-fade-in pb-10">
       {/* Header Greeting */}
       <div className="mb-8">
-        <h1 className="text-[32px] font-bold text-[#0D1C2E] mb-1">
-          Good morning, {user?.fullName?.split(' ')[0] || 'Sarah'}
+        <h1 className="text-4xl font-extrabold text-black mb-2 select-none" style={{color: '#000000'}}>
+          Good morning, {user?.name?.split(' ')[0] || user?.fullName?.split(' ')[0] || 'Patient'}
         </h1>
-        <p className="text-[#4B5A69] text-[15px]">
+        <p className="text-base font-medium text-slate-700">
           {format(today, 'EEEE, MMMM do, yyyy')} • You have 1 appointment today.
         </p>
       </div>

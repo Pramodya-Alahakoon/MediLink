@@ -52,7 +52,7 @@ function PlanAppointment() {
       setIsLoading(true);
       try {
         // Fetch user data
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         try {
           const userRes = await customFetch.post("/api/auth/verify", { token });
           setCurrentUser(userRes.data.user || { _id: null, name: "" });

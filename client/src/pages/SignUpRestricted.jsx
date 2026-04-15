@@ -1,19 +1,28 @@
 import hero from "/Images/main.jpg";
 import { useState } from "react";
-import CustomButton from "@/components/UI/Button";
-import { IoEyeOutline } from "react-icons/io5";
-import { IoEyeOffOutline } from "react-icons/io5";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import customFetch from "@/utils/customFetch";
 import axios from "axios";
-import Logo from "@/components/UI/Logo";
 import { MdErrorOutline } from "react-icons/md";
+import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
 
+const specializations = [
+  "Cardiology",
+  "Dermatology",
+  "Neurology",
+  "Pediatrics",
+  "Psychiatry",
+  "Oncology",
+  "Orthopedics",
+  "Radiology",
+  "General Surgery",
+  "Family Medicine",
+];
 
-
-function SignUp() {
+function SignUpRestricted() {
   const navigate = useNavigate();
+  const [specializationMode, setSpecializationMode] = useState("select");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [formData, setFormData] = useState({
@@ -23,6 +32,7 @@ function SignUp() {
     confirmPassword: "",
     phoneNumber: "",
     location: "",
+    specialization: "",
   });
   const [errors, setErrors] = useState({
     fullName: "",
@@ -31,6 +41,7 @@ function SignUp() {
     confirmPassword: "",
     phoneNumber: "",
     location: "",
+    specialization: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [touched, setTouched] = useState({
@@ -40,6 +51,7 @@ function SignUp() {
     confirmPassword: false,
     phoneNumber: false,
     location: false,
+    specialization: false,
   });
 
   const togglePasswordVisibility = () => {
@@ -108,6 +120,12 @@ function SignUp() {
       isValid = false;
     }
 
+    // Specialization validation (Doctor only)
+    if (!formData.specialization.trim()) {
+      newErrors.specialization = "Specialization is required";
+      isValid = false;
+    }
+
     // Password validation
     if (!formData.password) {
       newErrors.password = "Password is required";
@@ -144,15 +162,49 @@ function SignUp() {
         password: formData.password,
         phoneNumber: formData.phoneNumber,
         location: formData.location,
+        role: "doctor",
+        specialization: formData.specialization,
       };
 
-      // Register as patient (no role specified, backend defaults to patient)
+      // Step 1: Register in auth service
       const authResponse = await customFetch.post("/api/auth/register", payload);
 
+      // Step 2: Auto-login to get userId then create doctor profile
       if (authResponse.data) {
-        toast.success("Registration successful! Please sign in.");
+        try {
+          const loginResponse = await customFetch.post("/api/auth/login", {
+            email: formData.email,
+            password: formData.password,
+          });
+
+          if (loginResponse.data?.token) {
+            const { token, patient: userData } = loginResponse.data;
+            // Store token temporarily for the doctor profile creation call
+            sessionStorage.setItem("token", token);
+
+            // Step 3: Create doctor profile in doctor service
+            await customFetch.post("/api/doctors/register", {
+              name: formData.fullName,
+              email: formData.email,
+              phone: formData.phoneNumber,
+              specialization: formData.specialization,
+              location: formData.location,
+              userId: userData.userId,
+            });
+
+            // Clear temp token — user must login properly
+            sessionStorage.removeItem("token");
+          }
+        } catch (profileError) {
+          // Doctor profile creation is non-blocking — user can still log in
+          console.warn("Doctor profile auto-create warning:", profileError.message);
+        }
+      }
+
+      if (authResponse.data) {
+        toast.success("Doctor registration successful! Please sign in.");
         setTimeout(() => {
-          navigate("/signin");
+          navigate("/signin/restricted");
         }, 1500);
       }
     } catch (error) {
@@ -183,8 +235,8 @@ function SignUp() {
         <div className="absolute inset-0 bg-gradient-to-tr from-[#012022] via-[#054E50]/95 to-[#087D80]/70" />
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-white text-center px-8 font-manrope max-w-xl drop-shadow-xl">
-            <h2 className="text-4xl xl:text-5xl font-black mb-4 drop-shadow-lg text-white">Join Us Today</h2>
-            <p className="text-lg xl:text-xl font-inter drop-shadow-md text-white/95">Create an account to access premium healthcare services tailored for you.</p>
+            <h2 className="text-4xl xl:text-5xl font-black mb-4 drop-shadow-lg text-white">Register as Professional</h2>
+            <p className="text-lg xl:text-xl font-inter drop-shadow-md text-white/95">Join our network of healthcare professionals providing exceptional care.</p>
           </div>
         </div>
       </div>
@@ -195,9 +247,9 @@ function SignUp() {
           
           {/* Header */}
           <div className="mb-4 font-manrope">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#112429] dark:text-white mb-1">Create Account</h1>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#112429] dark:text-white mb-1">Doctor Registration</h1>
             <p className="text-[#64748B] dark:text-slate-400 text-xs sm:text-sm font-inter">
-              Sign up to get started with your account
+              Register as a healthcare professional
             </p>
           </div>
 
@@ -325,6 +377,70 @@ function SignUp() {
             )}
           </div>
 
+          {/* Specialization Input */}
+          <div className="mb-4">
+            <label className="block text-xs font-bold text-[#112429] dark:text-slate-200 mb-1.5">
+              Specialization
+            </label>
+            <div className="relative group">
+              {specializationMode === "select" ? (
+                <select
+                  name="specialization"
+                  value={formData.specialization}
+                  onChange={(e) => {
+                    if (e.target.value === "Other") {
+                      setSpecializationMode("manual");
+                      setFormData((prev) => ({ ...prev, specialization: "" }));
+                    } else {
+                      handleInputChange(e);
+                    }
+                  }}
+                  onBlur={() => handleBlur("specialization")}
+                  className={`w-full px-4 py-2.5 text-sm font-medium bg-white/50 dark:bg-slate-800/50 dark:text-white border border-slate-200/80 dark:border-slate-700/50 rounded-xl transition-colors focus:outline-none focus:bg-white dark:focus:bg-slate-800/80 ${
+                    touched.specialization && errors.specialization
+                      ? "border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-500/10"
+                      : "focus:border-[#055153] dark:focus:border-primary focus:ring-4 focus:ring-[#055153]/10 dark:focus:ring-primary/20 hover:border-[#CBD5E1] dark:hover:border-slate-600"
+                  } font-inter appearance-none`}
+                >
+                  <option value="" disabled hidden>Select Specialization</option>
+                  {specializations.map((spec) => (
+                    <option className="bg-white dark:bg-slate-800 text-black dark:text-white" key={spec} value={spec}>{spec}</option>
+                  ))}
+                  <option className="bg-white dark:bg-slate-800 text-black dark:text-white" value="Other">Other (Enter Manually)</option>
+                </select>
+              ) : (
+                <div className="relative flex items-center">
+                  <input
+                    type="text"
+                    name="specialization"
+                    value={formData.specialization}
+                    onChange={handleInputChange}
+                    onBlur={() => handleBlur("specialization")}
+                    placeholder="Enter Specialization manually"
+                    className={`w-full px-4 py-2.5 pr-24 text-sm font-medium bg-white/50 dark:bg-slate-800/50 dark:text-white border border-slate-200/80 dark:border-slate-700/50 rounded-xl transition-colors focus:outline-none focus:bg-white dark:focus:bg-slate-800/80 ${
+                      touched.specialization && errors.specialization
+                        ? "border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-500/10"
+                        : "focus:border-[#055153] dark:focus:border-primary focus:ring-4 focus:ring-[#055153]/10 dark:focus:ring-primary/20 hover:border-[#CBD5E1] dark:hover:border-slate-600"
+                    } font-inter`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setSpecializationMode("select")}
+                    className="absolute right-3 text-[#055153] dark:text-primary font-bold text-xs"
+                  >
+                    Show List
+                  </button>
+                </div>
+              )}
+            </div>
+            {touched.specialization && errors.specialization && (
+              <p className="text-red-500 text-sm mt-2 flex items-center gap-1">
+                <MdErrorOutline size={16} />
+                {errors.specialization}
+              </p>
+            )}
+          </div>
+
           {/* Password Input */}
           <div className="mb-4">
             <label className="block text-xs font-bold text-[#112429] dark:text-slate-200 mb-1.5">
@@ -403,59 +519,36 @@ function SignUp() {
             )}
           </div>
 
-          {/* Sign Up Button */}
+          {/* Submit Button */}
           <button
             onClick={handleFormSubmit}
             disabled={isLoading}
-            className="w-full bg-[#055153] dark:bg-primary hover:bg-[#044143] dark:hover:bg-primary/90 disabled:bg-gray-300 dark:disabled:bg-slate-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 transform active:scale-[0.98] disabled:active:scale-100 flex items-center justify-center gap-2 shadow-lg shadow-[#055153]/20 dark:shadow-primary/20 mt-1 font-inter"
+            className="w-full bg-[#055153] dark:bg-primary hover:bg-[#044143] dark:hover:bg-primary/90 disabled:bg-gray-300 dark:disabled:bg-slate-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 transform active:scale-[0.98] disabled:active:scale-100 flex items-center justify-center gap-2 shadow-lg shadow-[#055153]/20 dark:shadow-primary/20 mt-2"
           >
-            {isLoading && (
-              <svg
-                className="animate-spin h-5 w-5"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                  fill="none"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
+            {isLoading ? (
+              <span className="flex items-center gap-2">
+                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                Registering...
+              </span>
+            ) : (
+              "Register as Doctor"
             )}
-            <span>{isLoading ? "Creating Account..." : "Sign Up"}</span>
           </button>
 
           {/* Sign In Link */}
           <p className="text-center text-[#475569] dark:text-slate-400 text-sm font-medium mt-6 font-inter">
             Already have an account?{" "}
-            <button
-              onClick={() => navigate("/signin")}
-              className="text-[#055153] dark:text-primary font-bold hover:underline transition-colors block mx-auto py-1"
-            >
+            <Link to="/signin/restricted" className="text-[#055153] dark:text-primary font-bold hover:underline transition-colors">
               Sign In
-            </button>
+            </Link>
           </p>
-
-          {/* Security Notice */}
-          <div className="mt-4 pt-3 border-t border-[#E2E8F0] dark:border-slate-700">
-            <p className="text-xs text-[#94A3B8] dark:text-slate-500 text-center leading-relaxed">
-              This site is protected by reCAPTCHA and the Google Privacy Policy
-              and Terms of Service apply.
-              <br /> © 2026 All rights reserved
-            </p>
-          </div>
         </div>
       </div>
     </div>
   );
 }
 
-export default SignUp;
+export default SignUpRestricted;

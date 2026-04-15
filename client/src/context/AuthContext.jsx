@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkUserStatus = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       if (!token) {
         setUser(null);
         setIsLoading(false);
@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
       setUser(data);
     } catch (error) {
       console.warn("Auth verification failed:", error.message);
-      localStorage.removeItem('token');
+      sessionStorage.removeItem('token');
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (userData, token) => {
-    localStorage.setItem('token', token);
+    sessionStorage.setItem('token', token);
     setUser(userData);
   };
 
@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.warn("Logout API failed:", error.message);
     } finally {
-      localStorage.removeItem('token');
+      sessionStorage.removeItem('token');
       setUser(null);
       toast.success("Logged out successfully");
     }

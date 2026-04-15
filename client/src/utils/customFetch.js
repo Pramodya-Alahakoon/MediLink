@@ -14,7 +14,7 @@ const customFetch = axios.create();
 // Add request interceptor to include token
 customFetch.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -37,7 +37,7 @@ customFetch.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Clear token and redirect to signin if unauthorized
-      localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
       window.location.href = "/signin";
     }
     return Promise.reject(error);
