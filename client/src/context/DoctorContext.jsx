@@ -6,17 +6,21 @@ const DoctorContext = createContext();
 
 export const DoctorProvider = ({ children }) => {
   const { user } = useAuth();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [doctorProfile, setDoctorProfile] = useState(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   const [profileError, setProfileError] = useState(null);
 
   useEffect(() => {
     if (user && (user.role === 'doctor' || user.role === 'admin')) {
+
       fetchDoctorProfile();
     } else {
       setDoctorProfile(null);
     }
   }, [user]);
+
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   const fetchDoctorProfile = async () => {
     if (!user?.userId) return;
@@ -53,11 +57,14 @@ export const DoctorProvider = ({ children }) => {
         isLoadingProfile,
         profileError,
         refreshDoctorProfile,
+        isSidebarOpen,
+        toggleSidebar,
       }}
     >
       {children}
     </DoctorContext.Provider>
   );
+
 };
 
 export const useDoctorContext = () => {
