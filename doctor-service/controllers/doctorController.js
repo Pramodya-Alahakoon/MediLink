@@ -82,6 +82,68 @@ export const getAllDoctors = async (req, res, next) => {
   }
 };
 
+// @desc    Get doctors by specialty (optimized for microservices)
+// @route   GET /api/doctors/specialty/:specialty
+// @query   ?status=active&page=1&limit=10&sortBy=rating
+// @access  Public
+export const getDoctorsBySpecialty = async (req, res, next) => {
+  try {
+    const { specialty } = req.params;
+    const { status = 'active', page = 1, limit = 10, sortBy = '-rating' } = req.query;
+
+    // Validate pagination parameters
+    const pageNum = Math.max(1, parseInt(page));
+    const limitNum = Math.min(50, Math.max(1, parseInt(limit))); // Max 50 per page
+    const skip = (pageNum - 1) * limitNum;
+
+    // Build filter object
+    const filter = {
+      specialization: { $regex: specialty, $options: 'i' }, // Case-insensitive search
+    };
+
+    // Only include active doctors by default (unless status is explicitly changed)
+    if (status) {
+      filter.status = status;
+    }
+
+    // Support sorting by field name (use '-' prefix for descending)
+    let sort = {};
+    if (sortBy) {
+      const sortField = sortBy.startsWith('-') ? sortBy.slice(1) : sortBy;
+      const sortOrder = sortBy.startsWith('-') ? -1 : 1;
+      sort[sortField] = sortOrder;
+    } else {
+      sort = { 'rating.average': -1, sessionCount: -1 }; // Default: highest rated, most experienced
+    }
+
+    // Execute query with pagination
+    const [doctors, total] = await Promise.all([
+      Doctor.find(filter)
+        .select('doctorId name specialization hospital experience rating consultationFee languages profileImage')
+        .sort(sort)
+        .limit(limitNum)
+        .skip(skip)
+        .lean(), // Use lean() for better performance in microservices
+      Doctor.countDocuments(filter),
+    ]);
+
+    // Return 200 with paginated results
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      message: `Found ${doctors.length} doctors in ${specialty}`,
+      data: doctors,
+      pagination: {
+        currentPage: pageNum,
+        pageSize: limitNum,
+        totalRecords: total,
+        totalPages: Math.ceil(total / limitNum),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Get a single doctor by ID
 // @route   GET /api/doctors/:id
 // @access  Public
