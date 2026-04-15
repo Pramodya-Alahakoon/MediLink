@@ -3,6 +3,7 @@ import {
   registerDoctor,
   getAllDoctors,
   getDoctorById,
+  getDoctorByUserId,
   updateDoctorProfile,
   deleteDoctorProfile,
 } from '../controllers/doctorController.js';
@@ -15,6 +16,7 @@ const router = Router();
 // Public / General routes
 router.post('/register', registerDoctor);
 router.get('/', getAllDoctors);
+router.get('/user/:userId', getDoctorByUserId); // Must be before /:id
 router.get('/:id', getDoctorById);
 
 // Update/Delete routes (Typically protected by authMiddleware in production)

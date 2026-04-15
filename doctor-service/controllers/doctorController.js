@@ -111,6 +111,31 @@ export const getDoctorById = async (req, res, next) => {
 };
 
 
+// @desc    Get doctor profile by auth-service userId
+// @route   GET /api/doctors/user/:userId
+// @access  Private (doctor/admin)
+export const getDoctorByUserId = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const doctor = await Doctor.findOne({ userId });
+
+    if (!doctor) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: 'No doctor profile found for this user. Please complete your profile.',
+        data: null,
+      });
+    }
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: doctor,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Update doctor profile completely
 // @route   PUT /api/doctors/:id
 // @access  Private (doctor/admin)

@@ -1,17 +1,27 @@
 import React from 'react';
 import { Search, Bell, Settings, HelpCircle } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { useDoctorContext } from '../../context/DoctorContext';
+import { useAuth } from '../../context/AuthContext';
 
 const TopHeader = () => {
+  const { doctorProfile } = useDoctorContext();
+  const { user } = useAuth();
+
+  const doctorName = doctorProfile?.name || user?.name || user?.fullName || 'Doctor';
+  const specialization = doctorProfile?.specialization || 'General Practice';
+  const profileImage = doctorProfile?.profileImage?.startsWith('http')
+    ? doctorProfile.profileImage
+    : 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&h=150&fit=crop&crop=faces';
+
   return (
-    <header className="w-full h-20 bg-white sticky top-0 z-40 flex items-center justify-between px-8">
+    <header className="w-full h-20 bg-white sticky top-0 z-40 flex items-center justify-between px-8 border-b border-slate-100">
       {/* Search Bar */}
       <div className="relative w-96 group">
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
           <Search size={18} className="text-slate-400 group-focus-within:text-[#055153] transition-colors" />
         </div>
-        <input 
-          type="text" 
+        <input
+          type="text"
           placeholder="Search patients, reports..."
           className="w-full pl-11 pr-4 py-3 bg-[#F8FAFB] border-transparent focus:border-[#055153]/20 focus:bg-white focus:ring-4 focus:ring-[#055153]/5 rounded-2xl text-sm font-medium text-slate-700 placeholder-slate-400 transition-all font-inter"
         />
@@ -39,13 +49,17 @@ const TopHeader = () => {
         {/* User Profile */}
         <button className="flex items-center gap-3 group text-start pl-2">
           <div className="flex flex-col">
-            <span className="text-sm font-bold text-[#112429] group-hover:text-[#055153] transition-colors font-manrope">Dr. Julianne Moore</span>
-            <span className="text-[10px] font-extrabold text-[#055153] uppercase tracking-wider text-right uppercase bg-[#055153]/10 px-1.5 py-0.5 rounded-md mt-0.5 w-fit ml-auto">Senior Oncologist</span>
+            <span className="text-sm font-bold text-[#112429] group-hover:text-[#055153] transition-colors font-manrope">
+              Dr. {doctorName}
+            </span>
+            <span className="text-[10px] font-extrabold text-[#055153] uppercase tracking-wider bg-[#055153]/10 px-1.5 py-0.5 rounded-md mt-0.5 w-fit ml-auto">
+              {specialization}
+            </span>
           </div>
           <div className="w-11 h-11 bg-teal-100 rounded-full overflow-hidden border-2 border-transparent group-hover:border-[#055153]/20 transition-all">
-            <img 
-              src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&h=150&fit=crop&crop=faces" 
-              alt="Profile" 
+            <img
+              src={profileImage}
+              alt="Profile"
               className="w-full h-full object-cover"
             />
           </div>
