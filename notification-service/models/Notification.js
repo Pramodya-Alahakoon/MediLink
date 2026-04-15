@@ -1,50 +1,50 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
+// Stores delivery history for observability and troubleshooting.
 const notificationSchema = new mongoose.Schema(
   {
-    recipientName: {
+    name: {
       type: String,
       trim: true,
+      required: true,
     },
-    recipientEmail: {
+    email: {
       type: String,
       trim: true,
       lowercase: true,
-    },
-    recipientPhone: {
-      type: String,
-      trim: true,
-    },
-    recipientType: {
-      type: String,
-      enum: ["patient", "doctor", "unknown"],
-      default: "unknown",
-    },
-    eventType: {
-      type: String,
-      enum: ["appointment_booked", "consultation_completed"],
       required: true,
     },
-    channels: {
-      email: {
-        sent: { type: Boolean, default: false },
-        error: { type: String, default: null },
-      },
-      sms: {
-        sent: { type: Boolean, default: false },
-        error: { type: String, default: null },
-      },
+    phone: {
+      type: String,
+      trim: true,
+      required: true,
     },
-    metadata: {
-      appointmentId: String,
-      consultationId: String,
-      doctorName: String,
-      patientName: String,
-      appointmentDate: String,
-      appointmentTime: String,
+    type: {
+      type: String,
+      enum: ["APPOINTMENT_BOOKED", "CONSULTATION_COMPLETED"],
+      required: true,
     },
+    message: {
+      type: String,
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: ["SUCCESS", "FAILED", "PARTIAL_SUCCESS"],
+      required: true,
+    },
+    error: {
+      type: String,
+      default: null,
+    },
+    timestamp: {
+      type: Date,
+      default: Date.now,
+    }
   },
-  { timestamps: true }
+  { versionKey: false }
 );
 
-module.exports = mongoose.model("Notification", notificationSchema);
+const Notification = mongoose.model("Notification", notificationSchema);
+
+export default Notification;
