@@ -278,3 +278,89 @@ export const deleteDoctorProfile = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Doctor requests their own account deletion (soft flag — admin must approve)
+// @route   PATCH /api/doctors/:id/request-deletion
+// @access  Private (doctor only)
+export const requestDoctorDeletion = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+
+    if (!reason || !reason.trim()) {
+      throw new BadRequestError('Please provide a reason for the deletion request');
+    }
+
+    let doctor;
+    if (id.match(/^[0-9a-fA-F]{24}$/)) {
+      doctor = await Doctor.findById(id);
+    } else {
+      doctor = await Doctor.findOne({ doctorId: id });
+    }
+
+    if (!doctor) {
+      throw new NotFoundError(`No doctor found with id: ${id}`);
+    }
+
+    if (doctor.status === 'pending_deletion') {
+      throw new BadRequestError('A deletion request has already been submitted and is pending admin review');
+    }
+
+    // Soft-flag: schema enum now includes 'pending_deletion'
+    doctor.status = 'pending_deletion';
+    doctor.deletionReason = reason.trim();
+    doctor.deletionRequestedAt = new Date();
+    await doctor.save();
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Your account deletion request has been submitted. An admin will review it within 24–48 hours.',
+      data: {
+        status: doctor.status,
+        deletionReason: doctor.deletionReason,
+        deletionRequestedAt: doctor.deletionRequestedAt,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Admin rejects a doctor deletion request (restores the account)
+// @route   PATCH /api/doctors/:id/reject-deletion
+// @access  Private (admin only)
+export const rejectDoctorDeletion = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { adminNote } = req.body;
+
+    let doctor;
+    if (id.match(/^[0-9a-fA-F]{24}$/)) {
+      doctor = await Doctor.findById(id);
+    } else {
+      doctor = await Doctor.findOne({ doctorId: id });
+    }
+
+    if (!doctor) {
+      throw new NotFoundError(`No doctor found with id: ${id}`);
+    }
+
+    if (doctor.status !== 'pending_deletion') {
+      throw new BadRequestError('This doctor does not have a pending deletion request');
+    }
+
+    // Restore to active and clear deletion request fields
+    doctor.status = 'active';
+    doctor.deletionReason = null;
+    doctor.deletionRequestedAt = null;
+    await doctor.save();
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Deletion request rejected. Doctor account has been restored to active.',
+      data: { status: doctor.status, adminNote: adminNote || null },
+    });
+  } catch (error) {
+    next(error);
+  }
+};

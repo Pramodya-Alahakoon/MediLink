@@ -189,7 +189,7 @@ export const resetPassword = async (req, res) => {
     }
 
     // Find user with valid token and not expired
-    const user = await User.findOne({
+    const user = await Patient.findOne({
       resetPasswordToken: token,
       resetPasswordExpiry: { $gt: Date.now() },
     });
@@ -211,5 +211,62 @@ export const resetPassword = async (req, res) => {
   } catch (error) {
     console.error("Reset password error:", error);
     throw new BadRequestError("Failed to reset password");
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  try {
+    const { email, phoneNumber, password } = req.body;
+    const userId = req.patient?.userId;
+
+    if (!userId) {
+      throw new UnauthenticatedError("Not authorized");
+    }
+
+    const user = await Patient.findById(userId);
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+
+    // Check if email is changing and if it's already taken
+    if (email && email !== user.email) {
+      const existing = await Patient.findOne({ email });
+      if (existing) {
+        throw new BadRequestError("Email is already in use by another account");
+      }
+      user.email = email;
+    }
+
+    if (phoneNumber) user.phoneNumber = phoneNumber;
+
+    if (password) {
+      if (password.length < 6) {
+        throw new BadRequestError("Password must be at least 6 characters");
+      }
+      user.password = await hashPassword(password);
+    }
+
+    await user.save();
+
+    res.status(StatusCodes.OK).json({
+      msg: "Profile updated successfully",
+      patient: {
+        userId: user._id,
+        role: user.role,
+        name: user.fullName,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+      },
+    });
+  } catch (error) {
+    console.error("Update profile error:", error);
+    if (
+      error.name === "NotFoundError" ||
+      error.name === "BadRequestError" ||
+      error.name === "UnauthenticatedError"
+    ) {
+      throw error;
+    }
+    throw new BadRequestError("Failed to update profile settings");
   }
 };
