@@ -18,6 +18,7 @@ import Availability from './pages/Doctor/Availability';
 import Schedule from './pages/Doctor/Schedule';
 import PatientLayout from './layouts/PatientLayout';
 import PatientDashboard from './pages/Patient/Dashboard';
+import PatientPrescriptions from './pages/Patient/Prescriptions';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/UI/ProtectedRoute';
@@ -88,6 +89,7 @@ function App() {
               <Route element={<ProtectedRoute allowedRoles={['patient', 'admin']} />}>
                 <Route element={<PatientLayout />}>
                   <Route path="/patient/dashboard" element={<PatientDashboard />} />
+                  <Route path="/patient/prescriptions" element={<PatientPrescriptions />} />
                   <Route path="/appointments" element={<PlanAppointment />} />
                 </Route>
               </Route>

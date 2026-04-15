@@ -26,7 +26,7 @@ const PatientLayout = () => {
   const navItems = [
     { name: 'Appointments', icon: Calendar, path: '/patient/dashboard' }, // We'll highlight this for the dashboard view for now
     { name: 'Doctors', icon: Users, path: '/patient/doctors' },
-    { name: 'Reports', icon: FileText, path: '/patient/reports' },
+    { name: 'My Prescriptions', icon: FileText, path: '/patient/prescriptions' },
     { name: 'AI Checker', icon: Activity, path: '/patient/ai-checker' },
     { name: 'Payments', icon: CreditCard, path: '/patient/payments' },
     { name: 'Profile', icon: User, path: '/patient/profile' },
