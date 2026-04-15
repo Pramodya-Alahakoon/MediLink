@@ -1,5 +1,6 @@
-import { Router } from 'express';
-import { getPatientReports } from '../controllers/patientReportController.js';
+import { Router } from "express";
+import { getPatientReports } from "../controllers/patientReportController.js";
+import { asyncHandler } from "../middleware/asyncHandler.js";
 
 const router = Router();
 
@@ -9,6 +10,6 @@ const router = Router();
 // ------------------------------------------------------------------
 
 // GET /api/doctors/patient/:patientId/reports
-router.get('/patient/:patientId/reports', getPatientReports);
+router.get("/patient/:patientId/reports", asyncHandler(getPatientReports));
 
 export default router;

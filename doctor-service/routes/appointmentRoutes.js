@@ -1,9 +1,10 @@
-import { Router } from 'express';
+import { Router } from "express";
 import {
   getDoctorAppointments,
   acceptAppointment,
   rejectAppointment,
-} from '../controllers/appointmentController.js';
+} from "../controllers/appointmentController.js";
+import { asyncHandler } from "../middleware/asyncHandler.js";
 
 const router = Router();
 
@@ -13,12 +14,12 @@ const router = Router();
 // ------------------------------------------------------------------
 
 // GET /api/doctors/:doctorId/appointments
-router.get('/:doctorId/appointments', getDoctorAppointments);
+router.get("/:doctorId/appointments", asyncHandler(getDoctorAppointments));
 
 // PUT /api/doctors/appointments/:id/accept
-router.put('/appointments/:id/accept', acceptAppointment);
+router.put("/appointments/:id/accept", asyncHandler(acceptAppointment));
 
 // PUT /api/doctors/appointments/:id/reject
-router.put('/appointments/:id/reject', rejectAppointment);
+router.put("/appointments/:id/reject", asyncHandler(rejectAppointment));
 
 export default router;

@@ -1,19 +1,20 @@
-import { Router } from 'express';
+import { Router } from "express";
 import {
   createAvailability,
   getAvailabilityByDoctor,
   updateAvailability,
   deleteAvailability,
-} from '../controllers/availabilityController.js';
+} from "../controllers/availabilityController.js";
+import { asyncHandler } from "../middleware/asyncHandler.js";
 
 const router = Router();
 
-// Availability Routes 
+// Availability Routes
 // Base path: /api/availability
 
-router.post('/', createAvailability);
-router.get('/:doctorId', getAvailabilityByDoctor);
-router.put('/:id', updateAvailability);
-router.delete('/:id', deleteAvailability);
+router.post("/", asyncHandler(createAvailability));
+router.get("/:doctorId", asyncHandler(getAvailabilityByDoctor));
+router.put("/:id", asyncHandler(updateAvailability));
+router.delete("/:id", asyncHandler(deleteAvailability));
 
 export default router;
