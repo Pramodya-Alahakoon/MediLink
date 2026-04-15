@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 import Notification from "../models/Notification.js";
 import { sendEmailNotification } from "../services/emailService.js";
 import { sendSmsNotification } from "../services/smsService.js";
+import {
+  isValidEmail,
+  normalizeLkPhone,
+} from "../utils/validation.js";
 
 const ALLOWED_TYPES = ["APPOINTMENT_BOOKED", "CONSULTATION_COMPLETED"];
 
@@ -22,18 +26,33 @@ function buildNotificationMessage(type, name) {
 
 // Persists notification record if MongoDB is connected.
 async function saveNotificationLog(payload) {
-  if (mongoose.connection.readyState !== 1) return null;
-  const log = new Notification(payload);
-  return log.save();
+  try {
+    if (mongoose.connection.readyState !== 1) return null;
+    const log = new Notification(payload);
+    return await log.save();
+  } catch (err) {
+    console.error("Notification log save failed:", err.message);
+    return null;
+  }
 }
 
-// Validates required payload fields for notify endpoint.
+// Validates required payload fields and formats for notify endpoint.
 function validateBody({ email, phone, name, type }) {
   if (!email || !phone || !name || !type) {
     return "email, phone, name, and type are required.";
   }
+  if (typeof email !== "string" || typeof phone !== "string" || typeof name !== "string") {
+    return "email, phone, and name must be strings.";
+  }
   if (!ALLOWED_TYPES.includes(type)) {
     return "type must be APPOINTMENT_BOOKED or CONSULTATION_COMPLETED.";
+  }
+  if (!isValidEmail(email)) {
+    return "Invalid email format.";
+  }
+  const normalizedPhone = normalizeLkPhone(phone);
+  if (!normalizedPhone) {
+    return "Invalid phone number. Use a Sri Lankan mobile in international form 947XXXXXXXX (11 digits, e.g. 94712345678) or domestic 0712345678.";
   }
   return null;
 }
@@ -51,6 +70,7 @@ export async function sendNotification(req, res) {
       });
     }
 
+    const normalizedPhone = normalizeLkPhone(phone);
     const { subject, text } = buildNotificationMessage(type, name);
 
     let emailStatus = "FAILED";
@@ -58,14 +78,14 @@ export async function sendNotification(req, res) {
     let errorMessage = null;
 
     try {
-      await sendEmailNotification({ to: email, subject, text });
+      await sendEmailNotification({ to: email.trim(), subject, text });
       emailStatus = "SUCCESS";
     } catch (error) {
       errorMessage = error.message;
     }
 
     try {
-      await sendSmsNotification({ to: phone, message: text });
+      await sendSmsNotification({ to: normalizedPhone, message: text });
       smsStatus = "SUCCESS";
     } catch (error) {
       errorMessage = errorMessage
@@ -81,9 +101,9 @@ export async function sendNotification(req, res) {
         : "FAILED";
 
     await saveNotificationLog({
-      name,
-      email,
-      phone,
+      name: String(name).trim(),
+      email: email.trim().toLowerCase(),
+      phone: normalizedPhone,
       type,
       message: text,
       status: finalStatus,
