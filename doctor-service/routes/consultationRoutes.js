@@ -5,6 +5,7 @@ import {
   getConsultationByAppointment,
   updateConsultationStatus,
   updateConsultationNotes,
+  getConsultationsByPatient,
 } from '../controllers/consultationController.js';
 import { asyncHandler } from '../middleware/asyncHandler.js';
 import { authenticateUser, authorizePermissions } from '../middleware/authMiddleware.js';
@@ -31,6 +32,13 @@ router.get(
   asyncHandler(getConsultationsByDoctor)
 );
 
+// Get all consultations for a specific patient (patient, doctor, or admin)
+router.get(
+  '/by-patient/:patientId',
+  authenticateUser,
+  asyncHandler(getConsultationsByPatient)
+);
+
 // Update consultation status (scheduled → active → completed / cancelled)
 router.patch(
   '/:appointmentId/status',
@@ -55,3 +63,4 @@ router.get(
 );
 
 export default router;
+

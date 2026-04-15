@@ -46,6 +46,19 @@ services:
       - appointment-service
       - patient-service
 
+  telemedicine-service:
+    build:
+      context: ./telemedicine-service
+    container_name: medilink-telemedicine
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+    env_file:
+      - ./telemedicine-service/.env
+    networks:
+      - medilink-network
+
   patient-service:
     build:
       context: ./patient-service
@@ -72,8 +85,10 @@ services:
       - auth-service
       - appointment-service
       - doctor-service
+      - telemedicine-service
       - patient-service
 
 networks:
   medilink-network:
     driver: bridge
+

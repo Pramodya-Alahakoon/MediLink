@@ -181,3 +181,39 @@ export const updateConsultationNotes = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Get all consultations for a specific patient
+// @route   GET /api/doctors/consultations/by-patient/:patientId
+// @access  Patient / Doctor / Admin (Private)
+export const getConsultationsByPatient = async (req, res, next) => {
+  try {
+    const { patientId } = req.params;
+    const { status, page = 1, limit = 20 } = req.query;
+
+    const pageNum = Math.max(1, parseInt(page));
+    const limitNum = Math.min(50, Math.max(1, parseInt(limit)));
+    const skip = (pageNum - 1) * limitNum;
+
+    const filter = { patientId };
+    if (status) filter.status = status;
+
+    const [consultations, total] = await Promise.all([
+      Consultation.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limitNum)
+        .lean(),
+      Consultation.countDocuments(filter),
+    ]);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      count: consultations.length,
+      total,
+      data: consultations,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
