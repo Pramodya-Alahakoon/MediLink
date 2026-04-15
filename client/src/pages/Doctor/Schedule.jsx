@@ -11,13 +11,15 @@ import {
   Loader2,
   Clock,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  FolderOpen
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { toast } from 'react-hot-toast';
 import customFetch from '../../utils/customFetch';
 import { useDoctorContext } from '../../context/DoctorContext';
 import PrescriptionBuilderModal from '../../components/DoctorDashboard/PrescriptionBuilderModal';
+import PatientReportsViewerModal from '../../components/DoctorDashboard/PatientReportsViewerModal';
 
 const Schedule = () => {
   const { doctorId } = useDoctorContext();
@@ -29,6 +31,7 @@ const Schedule = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [prescriptionModalApt, setPrescriptionModalApt] = useState(null);
+  const [reportModalApt, setReportModalApt] = useState(null);
 
   const statusMap = {
     'Upcoming': 'Confirmed',
@@ -336,9 +339,16 @@ const Schedule = () => {
                     <button 
                       onClick={() => setPrescriptionModalApt(apt)}
                       className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white text-emerald-600 hover:text-emerald-700 transition-colors shadow-sm bg-transparent border border-transparent hover:border-emerald-200"
-                      title="Issue Prescription"
+                      title="Issue E-Prescription"
                     >
                       <FileText size={18} />
+                    </button>
+                    <button 
+                      onClick={() => setReportModalApt(apt)}
+                      className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white text-indigo-600 hover:text-indigo-700 transition-colors shadow-sm bg-transparent border border-transparent hover:border-indigo-200"
+                      title="View Patient Records"
+                    >
+                      <FolderOpen size={18} />
                     </button>
                     <button 
                       onClick={() => handleAction('reject', apt._id)}
@@ -399,6 +409,13 @@ const Schedule = () => {
           fetchAppointments();
           fetchAllCounts();
         }}
+      />
+
+      {/* Patient Reports Viewer Modal */}
+      <PatientReportsViewerModal 
+        isOpen={!!reportModalApt}
+        appointment={reportModalApt}
+        onClose={() => setReportModalApt(null)}
       />
     </div>
   );
