@@ -22,6 +22,8 @@ import PatientLayout from './layouts/PatientLayout';
 import PatientDashboard from './pages/Patient/Dashboard';
 import PatientPrescriptions from './pages/Patient/Prescriptions';
 import PatientTelemedicine from './pages/Patient/Telemedicine';
+import PaymentSuccess from './pages/Payment/PaymentSuccess';
+import PaymentCancel from './pages/Payment/PaymentCancel';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/UI/ProtectedRoute';
@@ -101,6 +103,8 @@ function App() {
                   <Route path="/patient/prescriptions" element={<PatientPrescriptions />} />
                   <Route path="/patient/telemedicine" element={<PatientTelemedicine />} />
                   <Route path="/appointments" element={<PlanAppointment />} />
+                  <Route path="/payment/success" element={<PaymentSuccess />} />
+                  <Route path="/payment/cancel" element={<PaymentCancel />} />
                 </Route>
               </Route>
             </Routes>
