@@ -4,18 +4,16 @@ import { createProxyMiddleware } from "http-proxy-middleware";
 const router = Router();
 
 /**
- * Proxy all /api/doctors/* requests to the doctor-service.
- * Express strips the mount prefix ("/api/doctors") before this middleware runs,
- * so we use pathRewrite to prepend /api/doctors back onto the path.
+ * Proxy all /api/upload/* requests to the doctor-service.
  */
 router.use(
   createProxyMiddleware({
     target: process.env.DOCTOR_SERVICE,
     changeOrigin: true,
-    pathRewrite: (path) => `/api/doctors${path === "/" ? "" : path}`,
+    pathRewrite: (path) => `/api/upload${path === "/" ? "" : path}`,
     on: {
       error: (err, req, res) => {
-        console.error("[Gateway] Doctor service proxy error:", err.message);
+        console.error("[Gateway] Upload proxy error:", err.message);
         res.status(502).json({ message: "Doctor service unavailable" });
       },
     },

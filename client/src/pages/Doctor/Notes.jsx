@@ -211,14 +211,6 @@ const Notes = () => {
                     ? `Created ${formatDate(note.createdAt)}`
                     : ''}
                 </span>
-                <button
-                  type="button"
-                  onClick={() => handleDelete(note._id)}
-                  className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/40 transition-colors"
-                >
-                  <Trash2 size={13} />
-                  Delete
-                </button>
               </div>
             </div>
           );
