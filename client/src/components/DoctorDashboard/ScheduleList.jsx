@@ -1,9 +1,8 @@
-import React, { useState } from "react";
-import { Video, User, Activity } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import { Video, User, Activity, Clock } from "lucide-react";
 import customFetch from "@/utils/customFetch";
 import toast from "react-hot-toast";
-import { format, parseISO } from "date-fns";
-import { useDoctorContext } from "@/context/DoctorContext";
+import { format, parseISO, isToday } from "date-fns";
 
 const getInitials = (name = "") => {
   const parts = name.trim().split(" ").filter(Boolean);
@@ -12,78 +11,35 @@ const getInitials = (name = "") => {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
 
-const ScheduleList = () => {
-  const { doctorId } = useDoctorContext();
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [loading] = useState(false);
+const STATUS_STYLES = {
+  Pending: "bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  Confirmed: "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  Completed: "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400",
+  Cancelled: "bg-red-50 dark:bg-red-500/10 text-red-500 dark:text-red-400",
+};
 
-  // Mock appointments updated with IDs for the Telemedicine demo
-  const appointments = [
-    {
-      id: "demo-apt-101",
-      time: "09:00",
-      period: "AM",
-      patientData: {
-        id: "pat-123",
-        name: "Sarah Jenkins",
-        typeLabel: "Video Call",
-        typeIcon: Video,
-        subtext: "Follow-up Check",
-        image:
-          "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=faces",
-      },
-      action: {
-        label: "Join Call",
-        style: "bg-[#055153] text-white hover:bg-[#044143]",
-      },
-      status: "normal",
-    },
-    // ... other mock data
-    {
-      id: 2,
-      time: "10:30",
-      period: "AM",
-      patientData: {
-        name: "Mark Thompson",
-        typeLabel: "In-person",
-        typeIcon: User,
-        subtext: "New Consultation",
-        image:
-          "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=faces",
-      },
-      action: {
-        label: "View Profile",
-        style:
-          "border border-[#055153] text-[#055153] hover:bg-[#055153]/5 bg-transparent",
-      },
-      status: "normal",
-    },
-    {
-      id: 3,
-      time: "01:15",
-      period: "PM",
-      patientData: {
-        name: "Alex Rivera",
-        typeLabel: "Post-op Checkup",
-        typeIcon: Activity,
-        isUrgent: true,
-        image:
-          "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=faces",
-      },
-      action: {
-        label: "Emergency Review",
-        style:
-          "bg-[#C62828] text-white shadow-md shadow-red-500/20 hover:bg-[#B71C1C]",
-      },
-      status: "urgent",
-    },
-    {
-      id: 4,
-      time: "03:00",
-      period: "PM",
-      isAvailable: true,
-    },
-  ];
+const ScheduleList = ({ appointments = [], doctorId }) => {
+  const [isConnecting, setIsConnecting] = useState(false);
+
+  // Filter to today's appointments, sorted by date
+  const todayAppointments = useMemo(() => {
+    return appointments
+      .filter((a) => {
+        if (!a.appointmentDate) return false;
+        try {
+          return isToday(parseISO(a.appointmentDate));
+        } catch {
+          return false;
+        }
+      })
+      .sort(
+        (a, b) =>
+          new Date(a.appointmentDate).getTime() -
+          new Date(b.appointmentDate).getTime(),
+      );
+  }, [appointments]);
+
+  const todayStr = format(new Date(), "EEEE, MMM d");
 
   const handleJoinCall = async (appointmentId, patientId) => {
     if (!doctorId || !patientId) {
@@ -94,23 +50,14 @@ const ScheduleList = () => {
     try {
       const response = await customFetch.post(
         "/api/consultations/create-session",
-        {
-          appointmentId,
-          doctorId,
-          patientId,
-        },
+        { appointmentId, doctorId, patientId },
       );
-
       if (response.data.success) {
-        const session = response.data.data;
-        const meetingLink = session?.meetingLink;
+        const meetingLink = response.data.data?.meetingLink;
         if (meetingLink) {
           toast.success("Consultation session ready!");
           window.open(meetingLink, "_blank", "noopener,noreferrer");
         }
-        await customFetch.patch(`/api/telemedicine/${appointmentId}/status`, {
-          status: "active",
-        });
       }
     } catch (error) {
       console.error("Failed to start consultation:", error);
@@ -120,20 +67,12 @@ const ScheduleList = () => {
     }
   };
 
-  const handleCompleteCall = async (appointmentId) => {
+  const handleAccept = async (id) => {
     try {
-      const response = await customFetch.patch(
-        `/api/telemedicine/${appointmentId}/status`,
-        {
-          status: "completed",
-        },
-      );
-      if (response.data.success) {
-        toast.success("Consultation marked as completed");
-      }
-    } catch (error) {
-      console.error("Failed to complete consultation:", error);
-      toast.error("Failed to update status.");
+      await customFetch.put(`/api/doctors/appointments/${id}/accept`);
+      toast.success("Appointment confirmed");
+    } catch (err) {
+      toast.error("Failed to accept appointment");
     }
   };
 
@@ -144,53 +83,28 @@ const ScheduleList = () => {
           Today's Schedule
         </h2>
         <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">
-          Tuesday, Oct 24
+          {todayStr}
         </span>
       </div>
 
       <div className="space-y-4 overflow-y-auto pr-1 flex-1">
-        {loading && !appointments.length && (
-          <div className="text-sm text-slate-500 dark:text-slate-400 text-center py-8">
-            Loading today&apos;s appointments…
+        {todayAppointments.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-12 gap-2">
+            <Clock size={36} className="text-slate-300 dark:text-slate-600" />
+            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+              No appointments scheduled for today.
+            </p>
           </div>
         )}
 
-        {!loading && appointments.length === 0 && (
-          <div className="text-sm text-slate-500 dark:text-slate-400 text-center py-8">
-            No appointments scheduled for today.
-          </div>
-        )}
-
-        {appointments.map((apt) => {
-          if (apt.isAvailable) {
-            return (
-              <div
-                key={apt.id}
-                className="flex gap-4 p-5 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 opacity-60"
-              >
-                <div className="w-20 text-center border-r border-slate-200 dark:border-slate-800 pr-5 opacity-40">
-                  <p className="text-xl font-extrabold text-[#112429] dark:text-white">
-                    {apt.time}
-                  </p>
-                  <p className="text-[10px] font-bold text-slate-500 uppercase">
-                    {apt.period}
-                  </p>
-                </div>
-                <div className="flex items-center justify-center flex-1">
-                  <p className="text-sm font-semibold text-slate-400 dark:text-slate-500 italic">
-                    Available for Appointment Slot
-                  </p>
-                </div>
-              </div>
-            );
-          }
-
-          const isUrgent = apt.status === "urgent";
-          const isVideoCall = apt.patientData?.typeLabel === "Video Call";
+        {todayAppointments.map((apt) => {
+          const isUrgent = apt.urgencyLevel === "high";
+          const timeStr = format(parseISO(apt.appointmentDate), "hh:mm");
+          const period = format(parseISO(apt.appointmentDate), "a").toUpperCase();
 
           return (
             <div
-              key={apt.id}
+              key={apt._id}
               className={`flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 p-5 rounded-2xl transition-all hover:shadow-md border ${
                 isUrgent
                   ? "border-red-200 dark:border-red-900/50 bg-red-50/30 dark:bg-red-500/5"
@@ -202,20 +116,21 @@ const ScheduleList = () => {
                 <p
                   className={`text-xl font-extrabold transition-colors ${isUrgent ? "text-[#C62828] dark:text-red-400" : "text-[#112429] dark:text-white"}`}
                 >
-                  {apt.time}
+                  {timeStr}
                 </p>
                 <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">
-                  {apt.period}
+                  {period}
                 </p>
               </div>
 
+              {/* Mobile time */}
               <div className="flex items-center gap-3 sm:hidden mb-2">
                 <span
                   className={`text-lg font-black ${isUrgent ? "text-[#C62828] dark:text-red-400" : "text-[#112429] dark:text-white"}`}
                 >
-                  {apt.time} {apt.period}
+                  {timeStr} {period}
                 </span>
-                {apt.patientData.isUrgent && (
+                {isUrgent && (
                   <span className="bg-[#C62828] text-white text-[8px] font-black uppercase px-2 py-0.5 rounded-full tracking-wider">
                     Urgent
                   </span>
@@ -223,19 +138,18 @@ const ScheduleList = () => {
               </div>
 
               <div className="flex items-center flex-1 gap-4">
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden flex-shrink-0 relative group border-2 border-transparent shadow-sm">
-                  <img
-                    src={apt.patientData.image}
-                    alt={apt.patientData.name}
-                    className="w-full h-full object-cover"
-                  />
+                {/* Avatar with initials */}
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden flex-shrink-0 relative shadow-sm bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center border-2 border-transparent">
+                  <span className="text-sm font-bold text-teal-700 dark:text-teal-300">
+                    {getInitials(apt.patientName)}
+                  </span>
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <h4 className="text-[15px] font-bold text-[#112429] dark:text-slate-200 font-manrope">
-                      {apt.patientData.name}
+                      {apt.patientName || "Unknown Patient"}
                     </h4>
-                    {apt.patientData.isUrgent && (
+                    {isUrgent && (
                       <span className="hidden sm:inline-block bg-[#C62828] text-white text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-full tracking-wider">
                         Urgent
                       </span>
@@ -243,20 +157,13 @@ const ScheduleList = () => {
                   </div>
                   <div className="flex items-center gap-3">
                     <span
-                      className={`flex items-center gap-1.5 text-[11px] font-bold px-2 py-0.5 rounded-md ${
-                        isUrgent
-                          ? "bg-red-100 dark:bg-red-500/10 text-[#C62828] dark:text-red-400"
-                          : "text-[#055153] dark:text-teal-400 bg-[#E6F3F3] dark:bg-teal-500/10"
-                      }`}
+                      className={`flex items-center gap-1.5 text-[11px] font-bold px-2 py-0.5 rounded-md ${STATUS_STYLES[apt.status] || STATUS_STYLES.Pending}`}
                     >
-                      {apt.patientData.typeIcon && (
-                        <apt.patientData.typeIcon size={12} strokeWidth={3} />
-                      )}
-                      {apt.patientData.typeLabel}
+                      {apt.status}
                     </span>
-                    {apt.patientData.subtext && (
+                    {apt.specialization && (
                       <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                        {apt.patientData.subtext}
+                        {apt.specialization}
                       </span>
                     )}
                   </div>
@@ -264,26 +171,21 @@ const ScheduleList = () => {
               </div>
 
               <div className="flex flex-shrink-0 gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-                <button
-                  onClick={() =>
-                    isVideoCall
-                      ? handleJoinCall(apt.id, apt.patientData.id)
-                      : null
-                  }
-                  disabled={isConnecting && isVideoCall}
-                  className={`flex-1 sm:flex-none px-5 py-2 rounded-full text-[13px] font-bold transition-all shadow-sm ${apt.action.style} ${isConnecting && isVideoCall ? "opacity-50 cursor-not-allowed" : ""} dark:shadow-black/20`}
-                >
-                  {isConnecting && isVideoCall
-                    ? "Connecting..."
-                    : apt.action.label}
-                </button>
-
-                {isVideoCall && (
+                {apt.status === "Pending" && (
                   <button
-                    onClick={() => handleCompleteCall(apt.id)}
-                    className="px-4 py-2.5 rounded-full text-[13px] font-bold border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all font-inter"
+                    onClick={() => handleAccept(apt._id)}
+                    className="flex-1 sm:flex-none px-5 py-2 rounded-full text-[13px] font-bold transition-all shadow-sm bg-[#055153] text-white hover:bg-[#044143] dark:shadow-black/20"
                   >
-                    Complete
+                    Accept
+                  </button>
+                )}
+                {apt.status === "Confirmed" && (
+                  <button
+                    onClick={() => handleJoinCall(apt._id, apt.patientId)}
+                    disabled={isConnecting}
+                    className={`flex-1 sm:flex-none px-5 py-2 rounded-full text-[13px] font-bold transition-all shadow-sm bg-[#055153] text-white hover:bg-[#044143] ${isConnecting ? "opacity-50 cursor-not-allowed" : ""} dark:shadow-black/20`}
+                  >
+                    {isConnecting ? "Connecting..." : "Join Call"}
                   </button>
                 )}
               </div>
