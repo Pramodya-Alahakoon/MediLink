@@ -23,8 +23,13 @@ import DoctorPatients from './pages/Doctor/Patients';
 import Notes from './pages/Doctor/Notes';
 import PatientLayout from './layouts/PatientLayout';
 import PatientDashboard from './pages/Patient/Dashboard';
+import PatientProfile from './pages/Patient/Profile';
+import PatientAppointments from './pages/Patient/Appointments';
+import PatientReports from './pages/Patient/Reports';
 import PatientPrescriptions from './pages/Patient/Prescriptions';
 import PatientTelemedicine from './pages/Patient/Telemedicine';
+import PatientFindDoctorsPage from './pages/Patient/PatientFindDoctorsPage';
+import PatientPayments from './pages/Patient/Payments';
 import PaymentSuccess from './pages/Payment/PaymentSuccess';
 import PaymentCancel from './pages/Payment/PaymentCancel';
 import { ThemeProvider } from './context/ThemeContext';
@@ -105,8 +110,13 @@ function App() {
               <Route element={<ProtectedRoute allowedRoles={['patient', 'admin']} />}>
                 <Route element={<PatientLayout />}>
                   <Route path="/patient/dashboard" element={<PatientDashboard />} />
+                  <Route path="/patient/profile" element={<PatientProfile />} />
+                  <Route path="/patient/appointments" element={<PatientAppointments />} />
+                  <Route path="/patient/reports" element={<PatientReports />} />
                   <Route path="/patient/prescriptions" element={<PatientPrescriptions />} />
                   <Route path="/patient/telemedicine" element={<PatientTelemedicine />} />
+                  <Route path="/patient/doctors" element={<PatientFindDoctorsPage />} />
+                  <Route path="/patient/payments" element={<PatientPayments />} />
                   <Route path="/appointments" element={<PlanAppointment />} />
                   <Route path="/viewAppointments" element={<ViewAppointments />} />
                   <Route path="/payment/success" element={<PaymentSuccess />} />

@@ -21,7 +21,7 @@ mongoose.connect(MONGO_URI, {
 // Start the server
 app.listen(PORT, () => {
   console.log('\n======================================');
-  console.log('Patient Service running');
+  console.log(' Patient Service running on port ' + PORT);
   console.log('======================================');
   console.log(`Port          : ${PORT}`);
   console.log(`Environment   : ${process.env.NODE_ENV || 'development'}`);

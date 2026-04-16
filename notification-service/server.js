@@ -23,6 +23,8 @@ async function startServer() {
 
   app.listen(PORT, () => {
     console.log('\n======================================');
+    console.log('  Notification Service running on port ' + PORT);
+    console.log('======================================\n');
     console.log('Notification Service running');
     console.log('======================================');
     console.log(`Port          : ${PORT}`);

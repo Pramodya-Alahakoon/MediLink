@@ -16,7 +16,9 @@ const startServer = async () => {
 
     // Only start listening after a successful DB connection
     app.listen(PORT, () => {
-      console.log(`Doctor Service running on port ${PORT}`);
+      console.log("\n======================================");
+      console.log(` Doctor Service running on port ${PORT}`);
+      console.log("======================================");
       console.log(`Environment  : ${process.env.NODE_ENV}`);
       console.log(`Base URL     : http://localhost:${PORT}/api/doctors`);
       console.log(`Health check : http://localhost:${PORT}/health`);

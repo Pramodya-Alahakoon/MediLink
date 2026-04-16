@@ -15,7 +15,9 @@ const startServer = async () => {
     await connectDB();
 
     app.listen(PORT, () => {
-      console.log(`Telemedicine Service running on port ${PORT}`);
+      console.log("\n======================================");
+      console.log(` Telemedicine Service running on port ${PORT}`);
+      console.log("======================================");
       console.log(`Environment  : ${process.env.NODE_ENV}`);
       console.log(`Base URL     : http://localhost:${PORT}/api/consultations`);
       console.log(`Health check : http://localhost:${PORT}/health`);
