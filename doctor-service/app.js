@@ -9,6 +9,7 @@ import uploadRouter from './routes/uploadRoutes.js';
 import appointmentSettingsRouter from './routes/appointmentSettingsRoutes.js';
 import blockedDaysRouter from './routes/blockedDaysRoutes.js';
 import timeSlotRouter from './routes/timeSlotRoutes.js';
+import doctorNotesRouter from './routes/doctorNotesRoutes.js';
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/doctors', doctorRouter);
 app.use('/api/doctors', appointmentRouter);
+app.use('/api/doctors', doctorNotesRouter);
 app.use('/api/doctors', patientReportRouter);
 app.use('/api/availability', availabilityRouter);
 app.use('/api/availability/settings', appointmentSettingsRouter);
