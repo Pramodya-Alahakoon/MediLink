@@ -72,6 +72,7 @@ export const verifyToken = async (req, res) => {
 /*............................................................................................................................................ */
 
 export const login = async (req, res) => {
+  console.log(`[AUTH] Login attempt received for: ${req.body.email}`);
   const patient = await Patient.findOne({ email: req.body.email });
   const isValidUser =
     patient && (await bcrypt.compare(req.body.password, patient.password));
