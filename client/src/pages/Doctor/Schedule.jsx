@@ -127,8 +127,8 @@ const Schedule = () => {
 
   const handleStartCall = async (apt) => {
     try {
-      // 1. Create or fetch video consultation session
-      const { data } = await customFetch.post('/api/doctors/consultations/create-session', {
+      // Create or fetch existing video consultation session via telemedicine-service
+      const { data } = await customFetch.post('/api/consultations/create-session', {
         appointmentId: apt._id,
         doctorId: doctorId,
         patientId: apt.patientId?._id || apt.patientId,
@@ -136,15 +136,21 @@ const Schedule = () => {
       });
 
       if (data.success && data.data?.meetingLink) {
-        // Automatically set status to active/started in the background if possible, or just open URL
-        window.open(data.data.meetingLink, '_blank');
+        const link = data.data.meetingLink;
+        // Frontend should open meetingLink in browser for video call
+        window.open(link, '_blank');
+        toast.success(
+          `Video session started! 🎥\nRoom: ${link.split('/').pop()}`,
+          { duration: 6000, icon: '🩺' }
+        );
       } else {
-        toast.error('Failed to generate meeting link');
+        toast.error('Failed to generate meeting link. Please try again.');
       }
     } catch (error) {
       toast.error(error?.response?.data?.message || 'Could not start video call');
     }
   };
+
 
   const getFilteredAppointments = () => {
     if (!searchQuery) return appointments;

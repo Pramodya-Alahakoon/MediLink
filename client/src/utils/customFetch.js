@@ -3,11 +3,13 @@ import axios from "axios";
 // Static mapping for production-like builds so the browser can reach backends directly over localhost
 const getServiceBaseURL = (path) => {
   if (path.includes("/api/auth")) return "http://localhost:5000";
-  if (path.includes("/api/appointments")) return "http://localhost:5002";
+  if (path.includes("/api/appointments")) return "http://localhost:3002";
+  if (path.includes("/api/consultations")) return "http://localhost:4000";   // telemedicine-service
   if (path.includes("/api/doctors") || path.includes("/api/availability") || path.includes("/api/prescriptions")) return "http://localhost:3003";
-  if (path.includes("/api/patients") || path.includes("/api/upload") || path.includes("/api/reports") || path.includes("/api/video-consultation")) return "http://localhost:3000";
-  return "http://localhost:5000"; // Fallback URL
+  if (path.includes("/api/patients") || path.includes("/api/upload") || path.includes("/api/reports")) return "http://localhost:3000";
+  return "http://localhost:5000"; // Fallback
 };
+
 
 const customFetch = axios.create();
 
@@ -36,6 +38,7 @@ customFetch.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      alert("401 Unauthorized captured! URL: " + error.config?.url);
       // Clear token and redirect to signin if unauthorized
       sessionStorage.removeItem("token");
       window.location.href = "/signin";

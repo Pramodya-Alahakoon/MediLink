@@ -9,16 +9,18 @@ import {
   FileText, 
   BarChart, 
   LogOut,
-  Clock
+  Clock,
+  UserCog,
+  ShieldAlert
 } from 'lucide-react';
 
 const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const { doctorProfile, isSidebarOpen, toggleSidebar } = useDoctorContext();
   
-  const specialization = doctorProfile?.specialization || 'Doctor Portal';
+  const isAdmin = user?.role === 'admin';
   const currentPath = location.pathname;
 
   const handleLogout = async () => {
@@ -32,13 +34,39 @@ const Sidebar = () => {
   };
 
   const menuItems = [
-    { icon: LayoutGrid, label: 'Dashboard', path: '/doctor/dashboard' },
-    { icon: Users, label: 'Patients', path: '/doctor/patients' },
-    { icon: Calendar, label: 'Schedules', path: '/doctor/schedules' },
-    { icon: Clock, label: 'Availability', path: '/doctor/availability' },
-    { icon: FileText, label: 'Clinical Notes', path: '/doctor/notes' },
-    { icon: BarChart, label: 'Reports', path: '/doctor/reports' },
+    { icon: LayoutGrid, label: 'Dashboard',      path: '/doctor/dashboard' },
+    { icon: Users,       label: 'Patients',       path: '/doctor/patients' },
+    { icon: Calendar,    label: 'Schedules',      path: '/doctor/schedules' },
+    { icon: Clock,       label: 'Availability',   path: '/doctor/availability' },
+    { icon: FileText,    label: 'Clinical Notes', path: '/doctor/notes' },
+    { icon: BarChart,    label: 'Reports',        path: '/doctor/reports' },
+    { icon: UserCog,     label: 'Manage Profile', path: '/doctor/profile' },
   ];
+
+  // Admin-only items
+  const adminItems = [
+    { icon: ShieldAlert, label: 'Deletion Requests', path: '/doctor/admin/deletions', badge: true },
+  ];
+
+  const NavButton = ({ item }) => {
+    const isActive = currentPath === item.path;
+    return (
+      <button
+        onClick={() => handleItemClick(item.path)}
+        className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-semibold ${
+          isActive 
+          ? 'bg-white dark:bg-slate-800 text-[#055153] dark:text-teal-400 shadow-sm shadow-slate-200 dark:shadow-black/20 border border-slate-100 dark:border-slate-700' 
+          : 'text-[#64748B] dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-800/50 hover:text-[#055153] dark:hover:text-teal-400'
+        }`}
+      >
+        <item.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+        <span className="flex-1 text-left">{item.label}</span>
+        {item.badge && (
+          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" title="Pending items" />
+        )}
+      </button>
+    );
+  };
 
   return (
     <div className="w-[260px] h-screen bg-[#F8FAFB] dark:bg-slate-900 flex flex-col pt-6 font-inter border-r border-[#E2E8F0] dark:border-slate-800 transition-colors duration-300">
@@ -49,31 +77,30 @@ const Sidebar = () => {
         </div>
         <div className="flex flex-col">
           <span className="font-extrabold text-[#055153] dark:text-teal-400 text-[18px] tracking-tight leading-tight uppercase font-manrope">MediLink</span>
-          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold tracking-[0.1em] uppercase">Doctor Portal</span>
+          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold tracking-[0.1em] uppercase">
+            {isAdmin ? 'Admin Portal' : 'Doctor Portal'}
+          </span>
         </div>
       </div>
 
       {/* Main Navigation */}
-      <nav className="flex-1 px-4 space-y-1">
-        {menuItems.map((item, idx) => {
-          const isActive = currentPath === item.path;
-          return (
-            <button 
-              key={idx}
-              onClick={() => handleItemClick(item.path)}
-              className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-semibold ${
-                isActive 
-                ? 'bg-white dark:bg-slate-800 text-[#055153] dark:text-teal-400 shadow-sm shadow-slate-200 dark:shadow-black/20 border border-slate-100 dark:border-slate-700' 
-                : 'text-[#64748B] dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-800/50 hover:text-[#055153] dark:hover:text-teal-400'
-              }`}
-            >
-              <item.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
-      </nav>
+      <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
+        {menuItems.map((item, idx) => <NavButton key={idx} item={item} />)}
 
+        {/* Admin-only section */}
+        {isAdmin && (
+          <>
+            <div className="pt-4 pb-1 px-1">
+              <p className="text-[10px] font-extrabold text-slate-400 dark:text-slate-600 uppercase tracking-[0.15em]">
+                Admin Controls
+              </p>
+            </div>
+            {adminItems.map((item, idx) => (
+              <NavButton key={`admin-${idx}`} item={item} />
+            ))}
+          </>
+        )}
+      </nav>
 
       {/* Bottom Actions */}
       <div className="px-4 pb-6 space-y-2">
@@ -87,4 +114,3 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
-
