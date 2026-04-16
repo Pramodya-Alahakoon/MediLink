@@ -1,5 +1,5 @@
 import Appointment from "../models/Appointment.js";
-import { getAISuggestions } from "../utils/aiSymptomChecker.js";
+import { fetchAISuggestions } from "../services/aiSymptomClient.js";
 import { StatusCodes } from "http-status-codes";
 import { NotFoundError, BadRequestError } from "../errors/customErrors.js";
 
@@ -22,8 +22,8 @@ export const bookAppointment = asyncHandler(async (req, res) => {
   req.body.patientId = req.user.userId;
 
   try {
-    // AI Symptom Checker eka call kireema [cite: 30, 31]
-    const aiResponse = await getAISuggestions(symptoms);
+    // AI Symptom Checker (external microservice)
+    const aiResponse = await fetchAISuggestions(symptoms);
     
     // Extract data from AI response
     if (aiResponse && typeof aiResponse === 'object') {
@@ -157,4 +157,4 @@ export const getAppointmentsByDoctorId = asyncHandler(async (req, res) => {
     total,
     appointments,
   });
-});
+});
