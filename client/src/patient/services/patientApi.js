@@ -9,6 +9,7 @@ const ENDPOINTS = {
   doctors: "/api/doctor",
   telemedicine: "/api/telemedicine",
   payments: "/api/payment",
+  ai: "/api/ai",
 };
 
 export const patientApi = {
@@ -246,6 +247,12 @@ export const patientApi = {
       `${ENDPOINTS.payments}/${paymentId}/refund`,
       payload,
     );
+    return data;
+  },
+
+  // ========== AI SYMPTOM CHECKER ==========
+  async analyzeSymptoms(symptoms) {
+    const { data } = await customFetch.post(ENDPOINTS.ai, { symptoms });
     return data;
   },
 };
