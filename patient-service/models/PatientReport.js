@@ -9,13 +9,13 @@ const patientReportSchema = new mongoose.Schema({
   fileUrl: {
     type: String,
     required: true,
-    match: /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
+    trim: true,
   },
   description: {
     type: String,
     required: true,
     trim: true,
-    minlength: 10,
+    minlength: 3,
     maxlength: 500
   },
   reportType: {

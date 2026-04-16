@@ -1,91 +1,56 @@
-import React, { useEffect, useState } from 'react';
-import { FileText, CalendarClock } from 'lucide-react';
-import { useDoctorContext } from '@/context/DoctorContext';
-import customFetch from '@/utils/customFetch';
-import { format, parseISO } from 'date-fns';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import { FileText, FileBadge, BellRing } from 'lucide-react';
 
 const ActivityFeed = () => {
-  const { doctorId } = useDoctorContext();
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const load = async () => {
-      if (!doctorId) return;
-      setLoading(true);
-      try {
-        const { data } = await customFetch.get(`/api/doctors/${doctorId}/appointments?status=Confirmed&page=1&limit=10`);
-        const appointments = data.data || data.appointments || [];
-        const mapped = appointments.map((apt) => ({
-          id: apt._id,
-          icon: FileText,
-          iconBg: 'bg-emerald-100 dark:bg-emerald-500/10',
-          iconColor: 'text-emerald-600 dark:text-emerald-400',
-          title: `${apt.patientName || 'Patient'} — ${apt.specialization || 'Consultation'}`,
-          subtitle: apt.symptoms ? apt.symptoms.slice(0, 70) : '',
-          time: apt.appointmentDate
-            ? format(typeof apt.appointmentDate === 'string' ? parseISO(apt.appointmentDate) : new Date(apt.appointmentDate), 'dd MMM, hh:mm a')
-            : 'No date',
-        }));
-        setItems(mapped);
-      } catch (e) {
-        console.error('Failed to load recent activity', e);
-        setItems([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [doctorId]);
-
-  const handleSeeAll = () => {
-    navigate('/doctor/schedules');
-  };
+  const activities = [
+    {
+      id: 1,
+      icon: FileText,
+      iconColor: 'text-emerald-600 dark:text-emerald-400',
+      iconBg: 'bg-emerald-100 dark:bg-emerald-500/10',
+      title: <span className="text-[#112429] dark:text-slate-200"><strong>Sarah Jenkins</strong> uploaded a lab report</span>,
+      time: '24 MINS AGO'
+    },
+    {
+      id: 2,
+      icon: FileBadge,
+      iconColor: 'text-blue-600 dark:text-blue-400',
+      iconBg: 'bg-blue-100 dark:bg-blue-500/10',
+      title: <span className="text-[#112429] dark:text-slate-200"><strong>Mark Thompson</strong> settled pending invoice</span>,
+      time: '1 HOUR AGO'
+    },
+    {
+      id: 3,
+      icon: BellRing,
+      iconColor: 'text-yellow-600 dark:text-yellow-400',
+      iconBg: 'bg-yellow-100 dark:bg-yellow-500/10',
+      title: <span className="text-[#112429] dark:text-slate-200"><strong>Pharmacy Alert:</strong> Refill request for Room 302</span>,
+      time: '2 HOURS AGO'
+    }
+  ];
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 font-inter transition-all duration-300">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-bold text-[#112429] dark:text-white font-manrope">Recent Patient Activity</h3>
-        <button
-          onClick={handleSeeAll}
-          className="inline-flex items-center gap-1 text-xs font-bold text-[#055153] dark:text-teal-400 hover:underline"
-        >
-          <CalendarClock size={14} />
-          See All
-        </button>
+        <button className="text-xs font-bold text-[#055153] dark:text-teal-400 hover:underline">See All</button>
       </div>
 
-      <div className="space-y-4">
-        {loading && (
-          <p className="text-sm text-slate-500 dark:text-slate-400">Loading recent activity…</p>
-        )}
-
-        {!loading && items.length === 0 && (
-          <p className="text-sm text-slate-500 dark:text-slate-400">No recent activity yet.</p>
-        )}
-
-        {items.map((item) => (
-          <div key={item.id} className="flex items-start gap-3 rounded-2xl p-3 hover:bg-slate-50 dark:hover:bg-slate-900/60 transition-colors">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${item.iconBg}`}>
-              <item.icon size={14} className={item.iconColor} />
+      <div className="space-y-6 relative before:absolute before:inset-0 before:ml-[17px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-slate-100 dark:before:bg-slate-800 pl-2">
+        {activities.map((activity, index) => (
+          <div key={activity.id} className="relative flex items-start gap-4">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10 ${activity.iconBg} border-4 border-white dark:border-slate-900`}>
+              <activity.icon size={12} className={activity.iconColor} strokeWidth={3} />
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[13px] text-slate-700 dark:text-slate-300 font-medium truncate">{item.title}</p>
-              {item.subtitle && (
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">{item.subtitle}</p>
-              )}
-              <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 mt-1 uppercase tracking-wider">
-                {item.time}
-              </p>
+            <div className="pt-1 pb-2">
+              <p className="text-[13px] text-slate-600 dark:text-slate-400 leading-snug">{activity.title}</p>
+              <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 mt-1 uppercase tracking-wider">{activity.time}</p>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
 };
 
 export default ActivityFeed;
-
