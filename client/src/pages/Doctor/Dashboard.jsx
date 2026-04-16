@@ -1,114 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Calendar, Briefcase, ClipboardList, Wallet, Download } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { useDoctorContext } from '../../context/DoctorContext';
-import customFetch from '../../utils/customFetch';
 import StatCard from '../../components/DoctorDashboard/StatCard';
 import ScheduleList from '../../components/DoctorDashboard/ScheduleList';
 import ActivityFeed from '../../components/DoctorDashboard/ActivityFeed';
 import QuickShortcuts from '../../components/DoctorDashboard/QuickShortcuts';
-import { startOfDay, endOfDay, isWithinInterval } from 'date-fns';
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const { doctorProfile, doctorId, isLoadingProfile, profileError } = useDoctorContext();
-  const doctorName = doctorProfile?.name || user?.name || 'Doctor';
-
-  const [loading, setLoading] = useState(false);
-  const [stats, setStats] = useState({
-    totalAppointments: null,
-    todayCount: null,
-    remainingToday: null,
-    pendingRequests: null,
-    monthlyEarnings: null,
-  });
-  const [todayAppointments, setTodayAppointments] = useState([]);
-  const [activityItems, setActivityItems] = useState([]);
-
-  useEffect(() => {
-    if (!doctorId) return;
-
-    const load = async () => {
-      setLoading(true);
-      try {
-        const [allRes, pendRes, payRes] = await Promise.all([
-          customFetch.get(`/api/doctors/${doctorId}/appointments?limit=500`),
-          customFetch.get(`/api/doctors/${doctorId}/appointments?status=Pending&limit=1`),
-          customFetch
-            .get(`/api/payment/doctor/summary?doctorId=${encodeURIComponent(doctorId)}`)
-            .catch(() => ({ data: { data: { monthlyTotal: 0 } } })),
-        ]);
-
-        const apps = allRes.data?.data || [];
-        const total = allRes.data?.total ?? apps.length;
-        const pendingTotal = pendRes.data?.total ?? 0;
-
-        const todayStart = startOfDay(new Date());
-        const todayEnd = endOfDay(new Date());
-        const todayApps = apps.filter((a) => {
-          const d = new Date(a.appointmentDate);
-          return isWithinInterval(d, { start: todayStart, end: todayEnd });
-        });
-
-        const activeToday = todayApps.filter((a) =>
-          ['Pending', 'Confirmed'].includes(a.status)
-        );
-        const todayCount = activeToday.length;
-        const now = new Date();
-        const remainingToday = activeToday.filter(
-          (a) => new Date(a.appointmentDate) > now && a.status !== 'Completed'
-        ).length;
-
-        const monthlyEarnings = payRes.data?.data?.monthlyTotal ?? 0;
-
-        setStats({
-          totalAppointments: total,
-          todayCount,
-          remainingToday,
-          pendingRequests: pendingTotal,
-          monthlyEarnings,
-        });
-
-        const sortedToday = [...activeToday].sort(
-          (a, b) => new Date(a.appointmentDate) - new Date(b.appointmentDate)
-        );
-        setTodayAppointments(sortedToday);
-
-        const recent = [...apps]
-          .sort(
-            (a, b) =>
-              new Date(b.createdAt || b.updatedAt || 0) -
-              new Date(a.createdAt || a.updatedAt || 0)
-          )
-          .slice(0, 8);
-
-        setActivityItems(
-          recent.map((a) => ({
-            id: a._id,
-            patientName: a.patientName || 'Patient',
-            status: a.status,
-            appointmentDate: a.appointmentDate,
-            createdAt: a.createdAt,
-            specialization: a.specialization,
-          }))
-        );
-      } catch (e) {
-        console.error('Dashboard load failed:', e);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    load();
-  }, [doctorId]);
-
-  const fmt = (n) => (n === null || n === undefined ? '—' : String(n));
-  const fmtMoney = (n) =>
-    n === null || n === undefined
-      ? '—'
-      : Number(n).toLocaleString(undefined, { maximumFractionDigits: 0 });
-
-  const statsLoading = isLoadingProfile || loading;
+  const doctorName = user?.name || user?.fullName || 'Doctor';
 
   return (
     <div className="w-full h-full p-4 md:p-8 flex lg:flex-row flex-col gap-8 bg-[#F8FAFB] dark:bg-slate-950 transition-colors duration-300">
@@ -127,56 +27,46 @@ const Dashboard = () => {
             )}
           </div>
           <div className="flex items-center gap-3">
-            <button
-              type="button"
-              className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 rounded-full shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all font-bold text-[#055153] dark:text-teal-400 text-[13px] font-inter"
-            >
+            <button className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 rounded-full shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all font-bold text-[#055153] dark:text-teal-400 text-[13px] font-inter">
               <Download size={16} strokeWidth={2.5} />
-              Daily Summary
+              Daily Summary (PDF)
             </button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6">
-          <StatCard
-            title="Total Appointments"
-            value={statsLoading ? '—' : fmt(stats.totalAppointments)}
-            icon={Calendar}
+          <StatCard 
+            title="Total Appointments" 
+            value="342" 
+            badgeText="+12%" 
+            badgeColor="green" 
+            icon={Calendar} 
           />
-          <StatCard
-            title="Today's Consultations"
-            value={statsLoading ? '—' : fmt(stats.todayCount)}
-            badgeText={
-              statsLoading || !stats.remainingToday
-                ? undefined
-                : `${stats.remainingToday} remaining`
-            }
-            badgeColor="blue"
-            icon={Briefcase}
+          <StatCard 
+            title="Today's Consultations" 
+            value="12" 
+            badgeText="4 remaining" 
+            badgeColor="blue" 
+            icon={Briefcase} 
           />
-          <StatCard
-            title="Pending Requests"
-            value={statsLoading ? '—' : fmt(stats.pendingRequests)}
-            badgeText={
-              stats.pendingRequests > 0 && !statsLoading ? 'Action needed' : undefined
-            }
-            badgeColor="red"
-            icon={ClipboardList}
+          <StatCard 
+            title="Pending Requests" 
+            value="8" 
+            badgeText="New" 
+            badgeColor="red" 
+            icon={ClipboardList} 
           />
-          <StatCard
-            title="Monthly Earnings (LKR)"
-            value={statsLoading ? '—' : fmtMoney(stats.monthlyEarnings)}
-            icon={Wallet}
+          <StatCard 
+            title="Monthly Earnings" 
+            value="450,200" 
+            icon={Wallet} 
             isHighlighted={true}
           />
         </div>
 
+        {/* Today's Schedule */}
         <div className="mt-2 bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 dark:border-slate-800 transition-all">
-          <ScheduleList
-            appointments={todayAppointments}
-            loading={statsLoading}
-            doctorId={doctorId}
-          />
+          <ScheduleList />
         </div>
       </div>
 

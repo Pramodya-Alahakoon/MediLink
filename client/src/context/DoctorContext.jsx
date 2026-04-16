@@ -10,6 +10,7 @@ export const DoctorProvider = ({ children }) => {
   const [doctorProfile, setDoctorProfile] = useState(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   const [profileError, setProfileError] = useState(null);
+  const [routeLoading, setRouteLoading] = useState(false);
 
   useEffect(() => {
     if (user && (user.role === 'doctor' || user.role === 'admin')) {
@@ -21,6 +22,8 @@ export const DoctorProvider = ({ children }) => {
   }, [user]);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const startRouteLoading = () => setRouteLoading(true);
+  const stopRouteLoading = () => setRouteLoading(false);
 
   const fetchDoctorProfile = async () => {
     const uid = user?.userId || user?.id || user?._id;
@@ -68,6 +71,9 @@ export const DoctorProvider = ({ children }) => {
         refreshDoctorProfile,
         isSidebarOpen,
         toggleSidebar,
+        routeLoading,
+        startRouteLoading,
+        stopRouteLoading,
       }}
     >
       {children}
