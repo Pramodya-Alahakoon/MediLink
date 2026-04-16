@@ -11,14 +11,21 @@ mongoose.connect(MONGO_URI, {
   useUnifiedTopology: true,
 })
 .then(() => {
-  console.log('Connected to MongoDB');
+  console.log(`MongoDB Connected: ${mongoose.connection.host}`);
 })
 .catch((error) => {
-  console.error('Error connecting to MongoDB:', error);
+  console.error('❌ Error connecting to MongoDB:', error.message);
   process.exit(1);
 });
 
 // Start the server
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log('\n======================================');
+  console.log('🚀 Patient Service running');
+  console.log('======================================');
+  console.log(`📍 Port          : ${PORT}`);
+  console.log(`📋 Environment   : ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔗 Base URL      : http://localhost:${PORT}/api/patients`);
+  console.log(`❤️  Health Check : http://localhost:${PORT}/health`);
+  console.log('======================================\n');
 });

@@ -14,6 +14,19 @@ services:
     networks:
       - medilink-network
 
+  ai-symptom-service:
+    build:
+      context: ./ai-symptom-service
+    container_name: medilink-ai-symptom
+    ports:
+      - "5006:5006"
+    environment:
+      - PORT=5006
+    env_file:
+      - ./ai-symptom-service/.env
+    networks:
+      - medilink-network
+
   appointment-service:
     build:
       context: ./appointment-service
@@ -22,10 +35,13 @@ services:
       - "3002:3002"
     environment:
       - PORT=3002
+      - AI_SYMPTOM_SERVICE_URL=http://medilink-ai-symptom:5006
     env_file:
       - ./appointment-service/.env
     networks:
       - medilink-network
+    depends_on:
+      - ai-symptom-service
 
   doctor-service:
     build:
@@ -70,6 +86,7 @@ services:
       - medilink-network
     depends_on:
       - auth-service
+      - ai-symptom-service
       - appointment-service
       - doctor-service
       - patient-service
