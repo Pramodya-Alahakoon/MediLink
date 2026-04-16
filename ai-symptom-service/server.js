@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 5006;
 
 app.listen(PORT, () => {
   console.log('\n======================================');
-  console.log('AI Symptom Service running');
+  console.log(' AI Symptom Service running on port ' + PORT);
   console.log('======================================');
   console.log(`Port          : ${PORT}`);
   console.log(`Environment   : ${process.env.NODE_ENV || 'development'}`);

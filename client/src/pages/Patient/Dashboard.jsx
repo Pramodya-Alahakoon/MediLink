@@ -28,7 +28,7 @@ const PatientDashboard = () => {
   useEffect(() => {
     const loadNextAppointment = async () => {
       try {
-        const { data } = await customFetch.get('/api/appointments/my-appointments');
+        const { data } = await customFetch.get('/api/appointment/my-appointments');
         const apts = data.appointments || data.data || data || [];
         
         // Find the next upcoming confirmed appointment
