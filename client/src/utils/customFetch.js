@@ -38,6 +38,7 @@ customFetch.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      alert("401 Unauthorized captured! URL: " + error.config?.url);
       // Clear token and redirect to signin if unauthorized
       sessionStorage.removeItem("token");
       window.location.href = "/signin";

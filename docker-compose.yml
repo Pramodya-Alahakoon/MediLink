@@ -22,6 +22,7 @@ services:
       - "3002:3002"
     environment:
       - PORT=3002
+      - AUTH_SERVICE_URL=http://medilink-auth:5000
     env_file:
       - ./appointment-service/.env
     networks:
@@ -36,7 +37,7 @@ services:
     environment:
       - PORT=3003
       - CLOUDINARY_URL=cloudinary://334213839224793:6Vs2LWGTMoQ3tA87qcR7JovBs9k@dnjq7l123
-      - APPOINTMENT_SERVICE_URL=http://medilink-appointment:5002
+      - APPOINTMENT_SERVICE_URL=http://medilink-appointment:3002
       - PATIENT_SERVICE_URL=http://medilink-patient:3000
     env_file:
       - ./doctor-service/.env
@@ -56,6 +57,19 @@ services:
       - PORT=4000
     env_file:
       - ./telemedicine-service/.env
+    networks:
+      - medilink-network
+
+  notification-service:
+    build:
+      context: ./notification-service
+    container_name: medilink-notification
+    ports:
+      - "5005:5005"
+    environment:
+      - PORT=5005
+    env_file:
+      - ./notification-service/.env
     networks:
       - medilink-network
 
@@ -87,6 +101,7 @@ services:
       - doctor-service
       - telemedicine-service
       - patient-service
+      - notification-service
 
 networks:
   medilink-network:
