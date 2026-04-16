@@ -65,7 +65,7 @@ const ScheduleList = () => {
     try {
       const doctorId = 'demo-doc-789'; 
 
-      const response = await customFetch.post('/api/doctors/consultations/create-session', {
+      const response = await customFetch.post('/api/consultations/create-session', {
         appointmentId,
         doctorId,
         patientId
@@ -77,7 +77,7 @@ const ScheduleList = () => {
         window.open(meetingLink, '_blank', 'noopener,noreferrer');
         
         // After opening, mark as active in the backend
-        await customFetch.patch(`/api/doctors/consultations/${appointmentId}/status`, { status: 'active' });
+        await customFetch.patch(`/api/consultations/${appointmentId}/status`, { status: 'active' });
       }
     } catch (error) {
       console.error('Failed to start consultation:', error);
@@ -89,7 +89,7 @@ const ScheduleList = () => {
 
   const handleCompleteCall = async (appointmentId) => {
     try {
-      const response = await customFetch.patch(`/api/doctors/consultations/${appointmentId}/status`, { status: 'completed' });
+      const response = await customFetch.patch(`/api/consultations/${appointmentId}/status`, { status: 'completed' });
       if (response.data.success) {
         toast.success('Consultation marked as completed');
       }

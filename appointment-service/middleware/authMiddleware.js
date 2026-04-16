@@ -44,11 +44,14 @@ export const authenticateUser = asyncHandler(async (req, res, next) => {
     next();
   } catch (error) {
     if (error.response?.status === 401) {
+      console.error("[AUTH MIDDLEWARE] 401 Unauthorized from auth-service");
       throw new UnauthenticatedError("Invalid or expired token - auth-service rejected it");
     }
     if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
+      console.error(`[AUTH MIDDLEWARE] Connection error to auth-service: ${error.code}`);
       throw new UnauthenticatedError(`Cannot connect to auth-service at ${AUTH_SERVICE_URL}. Make sure auth-service is running on port 5000`);
     }
+    console.error("[AUTH MIDDLEWARE] General authentication error:", error.message);
     throw new UnauthenticatedError(`Authentication failed: ${error.message}`);
   }
 });

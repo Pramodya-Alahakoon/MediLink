@@ -21,54 +21,75 @@ const PatientDashboard = () => {
   const navigate = useNavigate();
   const today = new Date();
   const [isJoining, setIsJoining] = useState(false);
-  const [consultationStatus, setConsultationStatus] = useState('scheduled');
-
-  // Demo appointment ID matching the doctor's schedule
-  const nextAppointmentId = 'demo-apt-101';
+  const [consultationStatus, setConsultationStatus] = useState('none');
+  const [nextAppointment, setNextAppointment] = useState(null);
+  const [nextConsultation, setNextConsultation] = useState(null);
 
   useEffect(() => {
-    const checkStatus = async () => {
+    const loadNextAppointment = async () => {
       try {
-        const response = await customFetch.get(`/api/doctors/consultations/${nextAppointmentId}`);
-        if (response.data.success) {
-          setConsultationStatus(response.data.data.status);
+        const { data } = await customFetch.get('/api/appointments/my-appointments');
+        const apts = data.appointments || data.data || data || [];
+        
+        // Find the next upcoming confirmed appointment
+        const confirmed = apts
+          .filter(a => a.status === 'Confirmed')
+          .sort((a, b) => new Date(a.appointmentDate) - new Date(b.appointmentDate));
+        
+        const apt = confirmed[0] || null;
+        setNextAppointment(apt);
+
+        if (apt) {
+          try {
+            const { data: cData } = await customFetch.get(`/api/consultations/${apt._id}`);
+            if (cData.success) {
+              setNextConsultation(cData.data);
+              setConsultationStatus(cData.data.status);
+            }
+          } catch {
+            // No session yet — doctor hasn't started it
+            setConsultationStatus('none');
+          }
         }
       } catch (err) {
-        // Session likely not created yet, default to scheduled
+        // Appointment service unavailable — graceful degradation
       }
     };
-    checkStatus();
+    loadNextAppointment();
   }, []);
 
   const handleJoinVideoCall = async () => {
+    if (!nextAppointment) {
+      toast.error('No upcoming appointment found.');
+      return;
+    }
     if (consultationStatus === 'completed') {
       toast.error('This session has already ended.');
+      return;
+    }
+    if (consultationStatus === 'none' || !nextConsultation) {
+      toast.error('Your doctor has not started the session yet. Please wait.');
       return;
     }
 
     setIsJoining(true);
     try {
-      const response = await customFetch.get(`/api/doctors/consultations/${nextAppointmentId}`);
-      
-      if (response.data.success) {
-        const { meetingLink, status } = response.data.data;
-        
-        if (status === 'completed') {
-          setConsultationStatus('completed');
-          toast.error('This session has already ended.');
-          return;
-        }
-
-        toast.success('Joining consultation...');
-        window.open(meetingLink, '_blank', 'noopener,noreferrer');
+      const { meetingLink, status } = nextConsultation;
+      if (status === 'completed') {
+        setConsultationStatus('completed');
+        toast.error('This session has already ended.');
+        return;
       }
+      toast.success('Opening video consultation…');
+      // Frontend should open meetingLink in browser for video call
+      window.open(meetingLink, '_blank', 'noopener,noreferrer');
     } catch (error) {
-      console.error('Failed to join video call:', error);
       toast.error('Video call is not ready yet. Please wait for the doctor.');
     } finally {
       setIsJoining(false);
     }
   };
+
 
   // Mock data ...
   const stats = [
@@ -109,23 +130,41 @@ const PatientDashboard = () => {
             <div className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[11px] font-bold tracking-wider uppercase mb-4">
               Next Appointment
             </div>
-            <h2 className="text-[32px] font-bold leading-tight mb-2">Dr. Sarah Jenkins</h2>
+            <h2 className="text-[32px] font-bold leading-tight mb-2">
+              {nextAppointment
+                ? (nextAppointment.specialization || nextAppointment.recommendedSpecialty || 'Consultation')
+                : 'No Upcoming Appointments'}
+            </h2>
             <p className="text-white/80 text-[15px] mb-8">
-              Cardiology Specialist • 10:30 AM <br/> Today
+              {nextAppointment
+                ? (() => {
+                    try {
+                      const d = new Date(nextAppointment.appointmentDate);
+                      return `${nextAppointment.recommendedSpecialty || 'General'} • ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}\n${d.toDateString()}`;
+                    } catch { return 'Date TBD'; }
+                  })()
+                : 'Book an appointment to get started'}
             </p>
             <button 
               onClick={handleJoinVideoCall}
-              disabled={isJoining || consultationStatus === 'completed'}
+              disabled={isJoining || consultationStatus === 'completed' || !nextAppointment}
               className={`flex items-center gap-2 px-6 py-3.5 rounded-full font-bold text-[15px] transition-all shadow-sm disabled:opacity-50 ${
-                consultationStatus === 'completed' 
-                  ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
+                consultationStatus === 'completed' || !nextAppointment
+                  ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                  : consultationStatus === 'none'
+                  ? 'bg-white/20 text-white border border-white/40 cursor-not-allowed'
                   : 'bg-white text-[#0D877B] hover:bg-emerald-50'
               }`}
             >
               <Video size={18} />
-              {isJoining ? 'Connecting...' : consultationStatus === 'completed' ? 'Session Ended' : 'Join Video Call'}
+              {isJoining ? 'Connecting…'
+                : !nextAppointment ? 'No Appointment'
+                : consultationStatus === 'completed' ? 'Session Ended'
+                : consultationStatus === 'none' ? 'Waiting for Doctor…'
+                : 'Join Video Call'}
             </button>
           </div>
+
 
           <div className="relative z-10 w-full md:w-auto flex justify-end">
              {/* Doctor Portrait styled like the image */}

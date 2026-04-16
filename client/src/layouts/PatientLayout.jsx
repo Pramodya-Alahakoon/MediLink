@@ -9,7 +9,8 @@ import {
   User,
   LogOut,
   Bell,
-  Settings
+  Settings,
+  Video,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Logo from '../components/UI/Logo';
@@ -24,13 +25,15 @@ const PatientLayout = () => {
   };
 
   const navItems = [
-    { name: 'Appointments', icon: Calendar, path: '/patient/dashboard' }, // We'll highlight this for the dashboard view for now
+    { name: 'Appointments', icon: Calendar, path: '/patient/dashboard' },
+    { name: 'Telemedicine', icon: Video, path: '/patient/telemedicine' },
     { name: 'Doctors', icon: Users, path: '/patient/doctors' },
     { name: 'My Prescriptions', icon: FileText, path: '/patient/prescriptions' },
     { name: 'AI Checker', icon: Activity, path: '/patient/ai-checker' },
     { name: 'Payments', icon: CreditCard, path: '/patient/payments' },
     { name: 'Profile', icon: User, path: '/patient/profile' },
   ];
+
 
   return (
     <div className="min-h-screen bg-[#F4F7F9] font-inter">

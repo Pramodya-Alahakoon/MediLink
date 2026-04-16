@@ -102,8 +102,8 @@ const DoctorSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: {
-        values: ['active', 'inactive', 'pending'],
-        message: 'Status must be active, inactive, or pending',
+        values: ['active', 'inactive', 'pending', 'pending_deletion'],
+        message: 'Status must be active, inactive, pending, or pending_deletion',
       },
       default: 'pending',
     },
@@ -144,6 +144,17 @@ const DoctorSchema = new mongoose.Schema(
       type: Number,
       default: 0,
       min: 0,
+    },
+
+    // ─── Deletion Request (soft-delete workflow) ───────────────────
+    deletionReason: {
+      type: String,
+      trim: true,
+      default: null,
+    },
+    deletionRequestedAt: {
+      type: Date,
+      default: null,
     },
   },
   {
