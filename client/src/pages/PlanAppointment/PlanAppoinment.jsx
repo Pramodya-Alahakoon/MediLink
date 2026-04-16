@@ -81,7 +81,7 @@ function PlanAppointment() {
     try {
       // Use doctorId if it exists, fallback to _id
       const idToUse = doctor.doctorId || doctor._id;
-      const res = await customFetch.get(`/api/doctor/availability/week/${idToUse}`);
+      const res = await customFetch.get(`/api/availability/week/${idToUse}`);
       
       if (res.data.success) {
          const days = res.data.data || [];
@@ -189,7 +189,7 @@ function PlanAppointment() {
 
       // ── STEP B: Mark the TimeSlot as booked in doctor-service ──
       try {
-        await customFetch.post(`/api/doctor/availability/slots/${selectedSlot._id}/book`, {
+        await customFetch.post(`/api/availability/slots/${selectedSlot._id}/book`, {
           appointmentId: createdAppointment._id,
           patientId: createdAppointment.patientId,
           patientName,

@@ -350,6 +350,7 @@ const Patients = () => {
   // Core data
   const [allPatients, setAllPatients]           = useState([]);
   const [doctorPrescriptions, setDoctorPrescriptions] = useState([]);
+  const [doctorAppointments, setDoctorAppointments]   = useState([]);
   const [loading, setLoading]                   = useState(true);
 
   // Filter / search
@@ -372,14 +373,18 @@ const Patients = () => {
       setLoading(true);
       startRouteLoading();
       try {
-        const [pRes, rxRes] = await Promise.allSettled([
-          customFetch.get('/api/patients/patients'),
+        const [pRes, rxRes, aptRes] = await Promise.allSettled([
+          customFetch.get('/api/patient/patients'),
           effectiveDoctorId
             ? customFetch.get(`/api/prescriptions/doctor/${effectiveDoctorId}?limit=500`)
+            : Promise.resolve({ data: { data: [] } }),
+          effectiveDoctorId
+            ? customFetch.get(`/api/doctors/${effectiveDoctorId}/appointments?limit=500`)
             : Promise.resolve({ data: { data: [] } }),
         ]);
         setAllPatients(pRes.status === 'fulfilled' ? (pRes.value.data?.data || []) : []);
         setDoctorPrescriptions(rxRes.status === 'fulfilled' ? (rxRes.value.data?.data || []) : []);
+        setDoctorAppointments(aptRes.status === 'fulfilled' ? (aptRes.value.data?.data || []) : []);
       } catch {
         toast.error('Failed to load patient data');
       } finally {
@@ -390,14 +395,19 @@ const Patients = () => {
     load();
   }, [effectiveDoctorId]);
 
-  // ── Derived: doctor's patients (those in any prescription) ─────────────────
-  const doctorPatientIds = useMemo(
-    () => new Set(doctorPrescriptions.map(p => p.patientId)),
-    [doctorPrescriptions]
-  );
+  // ── Derived: doctor's patients (from prescriptions OR appointments) ────────
+  const doctorPatientIds = useMemo(() => {
+    const ids = new Set(doctorPrescriptions.map(p => p.patientId));
+    // Also include patients from appointments
+    doctorAppointments.forEach(a => {
+      const pid = typeof a.patientId === 'object' ? a.patientId?._id : a.patientId;
+      if (pid) ids.add(String(pid));
+    });
+    return ids;
+  }, [doctorPrescriptions, doctorAppointments]);
 
   const doctorPatients = useMemo(
-    () => allPatients.filter(p => doctorPatientIds.has(p._id)),
+    () => allPatients.filter(p => doctorPatientIds.has(p._id) || doctorPatientIds.has(String(p._id))),
     [allPatients, doctorPatientIds]
   );
 
@@ -580,7 +590,7 @@ const Patients = () => {
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Search by name, ID or phone..."
-            className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium placeholder-slate-400 focus:ring-2 focus:ring-[#055153]/20 focus:border-[#055153] outline-none" />
+            className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-[#055153]/20 focus:border-[#055153] outline-none" />
         </div>
       </div>
 

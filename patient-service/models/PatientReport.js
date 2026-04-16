@@ -4,7 +4,17 @@ const patientReportSchema = new mongoose.Schema({
   patientId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Patient',
-    required: true
+    required: true,
+  },
+  doctorId: {
+    type: String,
+    trim: true,
+    default: null,
+  },
+  doctorName: {
+    type: String,
+    trim: true,
+    default: null,
   },
   fileUrl: {
     type: String,
@@ -16,20 +26,20 @@ const patientReportSchema = new mongoose.Schema({
     required: true,
     trim: true,
     minlength: 3,
-    maxlength: 500
+    maxlength: 500,
   },
   reportType: {
     type: String,
     required: true,
     enum: ['Lab Test', 'X-Ray', 'MRI', 'CT Scan', 'Ultrasound', 'ECG', 'Blood Test', 'Other'],
-    default: 'Other'
+    default: 'Other',
   },
   fileSize: {
     type: Number,
-    default: 0
-  }
+    default: 0,
+  },
 }, {
-  timestamps: true
+  timestamps: true,
 });
 
 module.exports = mongoose.model('PatientReport', patientReportSchema);

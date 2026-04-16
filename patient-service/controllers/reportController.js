@@ -63,8 +63,12 @@ exports.createReport = async (req, res) => {
       });
     }
 
+    const { doctorId, doctorName } = req.body;
+
     const report = new PatientReport({
       patientId: resolvedPatientId,
+      doctorId: doctorId || null,
+      doctorName: doctorName || null,
       fileUrl,
       description,
       reportType: reportType || 'Other',

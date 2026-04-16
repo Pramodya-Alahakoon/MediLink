@@ -136,7 +136,7 @@ export const patientApi = {
   },
 
   async getDoctorAvailability(doctorId) {
-    const { data } = await customFetch.get(`/api/doctor/availability/${doctorId}`);
+    const { data } = await customFetch.get(`/api/availability/${doctorId}`);
     return data;
   },
 

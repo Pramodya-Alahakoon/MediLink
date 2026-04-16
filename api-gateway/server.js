@@ -34,14 +34,20 @@ async function setupRoutes() {
   app.use("/api/users", verifyToken, userRoutes);
   app.use("/api/notification", notificationRoutes);
 
+  const doctorExtraRoutes = await import("./routes/doctor-extra.routes.js").then(m => m.default);
+
   app.use("/api/patient", verifyToken, patientRoutes);
   app.use("/api/doctor", verifyToken, doctorRoutes);
   app.use("/api/doctors", verifyToken, doctorRoutes);
+  // Doctor-service sub-resources (availability, prescriptions, etc.)
+  app.use("/api/availability", verifyToken, doctorExtraRoutes);
+  app.use("/api/prescriptions", verifyToken, doctorExtraRoutes);
   app.use("/api/appointment", verifyToken, appointmentRoutes);
   app.use("/api/appointments", verifyToken, appointmentRoutes); // Support both singular and plural
   app.use("/api/payment", verifyToken, paymentRoutes);
   app.use("/api/ai", verifyToken, aiRoutes);
   app.use("/api/telemedicine", verifyToken, telemedicineRoutes);
+  app.use("/api/consultations", verifyToken, telemedicineRoutes);
   
   app.get("/health", (req, res) => {
     res.status(200).json({ success: true, message: "API Gateway running" });

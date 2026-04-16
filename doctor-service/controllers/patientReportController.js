@@ -47,6 +47,9 @@ export const getIncomingPatientReports = async (req, res, next) => {
         const reps = await fetchPatientReports(userId, token);
         const list = Array.isArray(reps) ? reps : [];
         for (const r of list) {
+          // Only include reports addressed to this doctor (or reports with no doctor — legacy)
+          if (r.doctorId && String(r.doctorId) !== String(doctorId)) continue;
+
           const rid = r._id ? String(r._id) : null;
           if (rid && seenIds.has(rid)) continue;
           if (rid) seenIds.add(rid);
