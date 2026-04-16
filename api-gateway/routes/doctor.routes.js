@@ -3,16 +3,15 @@ import { createProxyMiddleware } from "http-proxy-middleware";
 
 const router = Router();
 
+/**
+ * Proxy all /api/doctors/* requests to the doctor-service.
+ * Express strips the mount prefix ("/api/doctors") before this middleware runs,
+ * so we use pathRewrite to prepend /api/doctors back onto the path.
+ */
 router.use(
   createProxyMiddleware({
     target: process.env.DOCTOR_SERVICE,
     changeOrigin: true,
-    // Express strips the mount prefix (/api/doctor or /api/doctors) before the
-    // proxy sees it, so pathname is "/" or "/user/xyz" etc.
-    // Doctor-service expects everything under /api/doctors/...
-    pathRewrite: (pathname) => {
-      return `/api/doctors${pathname === "/" ? "" : pathname}`;
-    },
   })
 );
 

@@ -211,56 +211,27 @@ const Notes = () => {
                   />
                 </div>
 
-                {/* Footer */}
-                <div className="flex items-center justify-between px-4 py-3 border-t border-black/5 dark:border-white/5">
-                  <span className="text-[11px] text-slate-400 dark:text-slate-500">
-                    {note.updatedAt
-                      ? `Updated ${formatDate(note.updatedAt)}`
-                      : note.createdAt
-                      ? `Created ${formatDate(note.createdAt)}`
-                      : ''}
-                  </span>
-
-                  <div className="flex items-center gap-1.5">
-                    {/* Save status indicator */}
-                    {isSaved && (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-                        <Check size={12} /> Saved
-                      </span>
-                    )}
-
-                    {/* Save button */}
-                    <button
-                      type="button"
-                      onClick={() => handleManualSave(note._id)}
-                      disabled={!isDirty}
-                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${
-                        isDirty
-                          ? 'bg-teal-600 text-white hover:bg-teal-700 shadow-sm'
-                          : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500 cursor-default'
-                      }`}
-                      title={isDirty ? 'Save now' : 'No unsaved changes'}
-                    >
-                      <Save size={12} />
-                      Save
-                    </button>
-
-                    {/* Delete button */}
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(note._id)}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/40 transition"
-                    >
-                      <Trash2 size={12} />
-                      Delete
-                    </button>
-                  </div>
-                </div>
+              <div className="flex items-center justify-between mt-2 text-[11px] text-slate-500 dark:text-slate-400">
+                <span>
+                  {note.updatedAt
+                    ? `Updated ${formatDate(note.updatedAt)}`
+                    : note.createdAt
+                    ? `Created ${formatDate(note.createdAt)}`
+                    : ''}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleDelete(note._id)}
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/40 transition-colors"
+                >
+                  <Trash2 size={13} />
+                  Delete
+                </button>
               </div>
-            );
-          })}
-        </div>
-      )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };

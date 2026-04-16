@@ -67,8 +67,15 @@ const Sidebar = () => {
     if (!confirmed) return;
     try {
       await logout();
+    } catch (e) {
+      console.warn('Logout handler error:', e);
     } finally {
-      navigate('/signin');
+      try {
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('user');
+      } catch (_) {}
+      // Use hard redirect to guarantee navigation even if React Router is in a bad state
+      window.location.href = '/signin';
     }
   };
 
