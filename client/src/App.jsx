@@ -12,6 +12,7 @@ import Contact from './pages/Contact';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import PlanAppointment from './pages/PlanAppointment/PlanAppoinment';
+import ViewAppointments from './pages/PlanAppointment/viewAppoinments';
 import DoctorLayout from './layouts/DoctorLayout';
 import Dashboard from './pages/Doctor/Dashboard';
 import Availability from './pages/Doctor/Availability';
@@ -103,6 +104,7 @@ function App() {
                   <Route path="/patient/prescriptions" element={<PatientPrescriptions />} />
                   <Route path="/patient/telemedicine" element={<PatientTelemedicine />} />
                   <Route path="/appointments" element={<PlanAppointment />} />
+                  <Route path="/viewAppointments" element={<ViewAppointments />} />
                   <Route path="/payment/success" element={<PaymentSuccess />} />
                   <Route path="/payment/cancel" element={<PaymentCancel />} />
                 </Route>
