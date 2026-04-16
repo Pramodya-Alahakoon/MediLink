@@ -21,6 +21,7 @@ import LoadingState from "@/patient/components/ui/LoadingState";
 import ErrorState from "@/patient/components/ui/ErrorState";
 import ModalCard from "@/patient/components/ui/ModalCard";
 import { usePatientAuth } from "@/patient/context/PatientAuthContext";
+import { useAuth } from "@/context/AuthContext";
 
 const ACCENT_COLORS = [
   "from-teal-500 to-emerald-400",
@@ -252,6 +253,7 @@ function DoctorCardSkeleton() {
 
 export default function PatientFindDoctorsPage() {
   const { patientId, isLoadingAuth, authError } = usePatientAuth();
+  const { user } = useAuth();
   const [specialtyFilter, setSpecialtyFilter] = useState("");
   const [nameFilter, setNameFilter] = useState("");
   const [selectedDoctor, setSelectedDoctor] = useState(null);
@@ -305,6 +307,7 @@ export default function PatientFindDoctorsPage() {
         patientId,
         doctorId: selectedDoctor._id || selectedDoctor.id,
         appointmentDate,
+        patientEmail: user?.email || "",
       });
       toast.success("Appointment booked successfully!");
       setSelectedDoctor(null);

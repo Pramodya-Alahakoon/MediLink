@@ -81,6 +81,7 @@ const PatientAppointments = () => {
         appointmentDate: appointmentDateTime,
         symptoms: bookingForm.symptoms,
         patientId: user.id,
+        patientEmail: user.email || "",
       });
 
       if (response.success || response.appointment) {

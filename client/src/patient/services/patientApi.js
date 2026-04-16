@@ -10,6 +10,7 @@ const ENDPOINTS = {
   telemedicine: "/api/telemedicine",
   payments: "/api/payment",
   ai: "/api/ai",
+  notification: "/api/notification",
 };
 
 export const patientApi = {
@@ -253,6 +254,23 @@ export const patientApi = {
   // ========== AI SYMPTOM CHECKER ==========
   async analyzeSymptoms(symptoms) {
     const { data } = await customFetch.post(ENDPOINTS.ai, { symptoms });
+    return data;
+  },
+
+  // ========== NOTIFICATIONS ==========
+  async getNotificationHistory(email) {
+    const { data } = await customFetch.get(
+      `${ENDPOINTS.notification}/history`,
+      { params: { email } },
+    );
+    return data;
+  },
+
+  async sendNotification(payload) {
+    const { data } = await customFetch.post(
+      `${ENDPOINTS.notification}/notify`,
+      payload,
+    );
     return data;
   },
 };

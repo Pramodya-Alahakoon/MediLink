@@ -7,7 +7,6 @@ import {
   CreditCard,
   User,
   LogOut,
-  Bell,
   Settings,
   Video,
   Upload,
@@ -21,6 +20,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { PatientAuthProvider } from "../patient/context/PatientAuthContext";
 import { useTheme } from "../context/ThemeContext";
+import NotificationBell from "../components/NotificationBell";
 
 const navItems = [
   { name: "Dashboard", icon: LayoutGrid, path: "/patient/dashboard" },
@@ -165,10 +165,7 @@ const PatientLayout = () => {
               >
                 {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
               </button>
-              <button className="relative p-2 text-slate-700 dark:text-slate-300 hover:text-[#055153] dark:hover:text-teal-400 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors rounded-full">
-                <Bell size={22} strokeWidth={2.5} />
-                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 border-2 border-white dark:border-slate-950 rounded-full"></span>
-              </button>
+              <NotificationBell />
               <button className="p-2 text-slate-700 dark:text-slate-300 hover:text-[#055153] dark:hover:text-teal-400 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors rounded-full hidden md:block">
                 <Settings size={22} strokeWidth={2.5} />
               </button>
