@@ -59,7 +59,7 @@ function PlanAppointment() {
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
-        const { data } = await customFetch.get('/api/doctors');
+        const { data } = await customFetch.get('/api/doctor');
         const docs = data.data || [];
         setDoctors(docs);
 
@@ -81,7 +81,7 @@ function PlanAppointment() {
     try {
       // Use doctorId if it exists, fallback to _id
       const idToUse = doctor.doctorId || doctor._id;
-      const res = await customFetch.get(`/api/availability/week/${idToUse}`);
+      const res = await customFetch.get(`/api/doctor/availability/week/${idToUse}`);
       
       if (res.data.success) {
          const days = res.data.data || [];
@@ -189,7 +189,7 @@ function PlanAppointment() {
 
       // ── STEP B: Mark the TimeSlot as booked in doctor-service ──
       try {
-        await customFetch.post(`/api/availability/slots/${selectedSlot._id}/book`, {
+        await customFetch.post(`/api/doctor/availability/slots/${selectedSlot._id}/book`, {
           appointmentId: createdAppointment._id,
           patientId: createdAppointment.patientId,
           patientName,
@@ -202,7 +202,7 @@ function PlanAppointment() {
 
       // ── STEP C: Create Stripe Checkout Session (payment-service on :3005) ──
       try {
-        const paymentRes = await customFetch.post('/api/payments/checkout', {
+        const paymentRes = await customFetch.post('/api/payment/checkout', {
           amount: totalAmount,
           currency: 'lkr',
           paymentType: 'appointment',

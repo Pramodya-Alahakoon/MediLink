@@ -18,16 +18,45 @@ const PatientReports = () => {
   });
   const [previewFile, setPreviewFile] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  /** MongoDB Patient document _id resolved from the user's auth id */
+  const [patientMongoId, setPatientMongoId] = useState(null);
+
+  /** Auth-service user id (ObjectId string) */
+  const authUserId = user?.userId || user?.id || user?._id;
+
+  useEffect(() => {
+    if (!authUserId) return;
+
+    const resolvePatient = async () => {
+      try {
+        const res = await patientApi.getPatientProfile(authUserId);
+        const mongoId = res?.data?._id || res?._id;
+        if (mongoId) {
+          setPatientMongoId(String(mongoId));
+        } else {
+          // Profile not created yet — fall back to auth userId
+          setPatientMongoId(authUserId);
+        }
+      } catch {
+        // 404 means no profile yet — use auth userId as fallback
+        setPatientMongoId(authUserId);
+      }
+    };
+
+    resolvePatient();
+  }, [authUserId]);
+
+  const patientKey = patientMongoId || authUserId;
 
   useEffect(() => {
     loadReports();
-  }, [user]);
+  }, [patientKey]);
 
   const loadReports = async () => {
     try {
       setLoading(true);
-      if (user?.id) {
-        const response = await patientApi.getPatientReports(user.id);
+      if (patientKey) {
+        const response = await patientApi.getPatientReports(patientKey);
         setReports(response.data || response.reports || []);
       }
     } catch (error) {
@@ -62,25 +91,26 @@ const PatientReports = () => {
         return;
       }
 
-      const formData = new FormData();
-      selectedFiles.forEach(file => {
-        formData.append('files', file);
-      });
-
-      // First upload files to cloud storage
+      // First upload files to storage (multer expects `file` for single, `files` for multiple)
       let uploadedFiles = [];
       if (selectedFiles.length === 1) {
-        const response = await patientApi.uploadReport(formData);
-        uploadedFiles = [response.data];
+        const fd = new FormData();
+        fd.append('file', selectedFiles[0]);
+        const body = await patientApi.uploadReport(fd);
+        const meta = body.data || body;
+        uploadedFiles = [meta];
       } else {
-        const response = await patientApi.uploadMultipleReports(formData);
-        uploadedFiles = response.data.uploadedFiles || response.data;
+        const formData = new FormData();
+        selectedFiles.forEach((file) => formData.append('files', file));
+        const body = await patientApi.uploadMultipleReports(formData);
+        uploadedFiles = Array.isArray(body.data) ? body.data : [];
       }
 
       // Then create report records in database
+      // patientId is resolved server-side from the Authorization header; no need to send it
       for (const file of uploadedFiles) {
         await patientApi.createReport({
-          patientId: user.id,
+          patientId: patientKey || undefined,   // best-effort; gateway injects X-User-Id anyway
           fileUrl: file.fileUrl,
           description: uploadForm.description,
           reportType: uploadForm.reportType,
@@ -126,7 +156,7 @@ const PatientReports = () => {
       'CT Scan': 'bg-blue-100 text-blue-700',
       'MRI': 'bg-indigo-100 text-indigo-700',
       'Ultrasound': 'bg-teal-100 text-teal-700',
-      'Other': 'bg-gray-100 text-gray-700',
+      'Other': 'bg-gray-100 text-[#334155]',
     };
     return colors[type] || colors['Other'];
   };
@@ -143,14 +173,7 @@ const PatientReports = () => {
     <div className="w-full max-w-6xl mx-auto p-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold text-gray-800">Medical Reports</h1>
-        <button
-          onClick={() => setShowUploadModal(true)}
-          className="flex items-center gap-2 bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition font-semibold"
-        >
-          <Upload size={20} />
-          Upload Report
-        </button>
+        <h1 className="text-4xl font-bold text-[#1e293b]">Medical Reports</h1>
       </div>
 
       {/* Reports Grid */}
@@ -181,7 +204,7 @@ const PatientReports = () => {
 
               {/* Card Body */}
               <div className="p-4">
-                <h3 className="font-semibold text-gray-800 mb-2 line-clamp-2">
+                <h3 className="font-semibold text-[#1e293b] mb-2 line-clamp-2">
                   {report.description || 'Medical Report'}
                 </h3>
                 <p className="text-sm text-gray-500 mb-4">
@@ -230,12 +253,12 @@ const PatientReports = () => {
       {showUploadModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Upload Medical Reports</h2>
+            <h2 className="text-2xl font-bold text-[#1e293b] mb-4">Upload Medical Reports</h2>
 
             <form onSubmit={handleUpload} className="space-y-4">
               {/* File Upload */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Select Files *</label>
+                <label className="block text-sm font-semibold text-[#334155] mb-2">Select Files *</label>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition cursor-pointer"
                   onClick={() => document.getElementById('fileInput').click()}
                 >
@@ -255,11 +278,11 @@ const PatientReports = () => {
                 {/* Selected Files List */}
                 {selectedFiles.length > 0 && (
                   <div className="mt-4 space-y-2">
-                    <h4 className="font-semibold text-gray-700">Selected Files ({selectedFiles.length})</h4>
+                    <h4 className="font-semibold text-[#334155]">Selected Files ({selectedFiles.length})</h4>
                     {selectedFiles.map((file, idx) => (
                       <div key={idx} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
                         <FileText size={16} className="text-blue-500" />
-                        <span className="flex-1 text-sm text-gray-700">{file.name}</span>
+                        <span className="flex-1 text-sm text-[#334155]">{file.name}</span>
                         <span className="text-xs text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
                       </div>
                     ))}
@@ -269,7 +292,7 @@ const PatientReports = () => {
 
               {/* Report Type */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Report Type</label>
+                <label className="block text-sm font-semibold text-[#334155] mb-2">Report Type</label>
                 <select
                   value={uploadForm.reportType}
                   onChange={(e) => setUploadForm({ ...uploadForm, reportType: e.target.value })}
@@ -286,7 +309,7 @@ const PatientReports = () => {
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Description *</label>
+                <label className="block text-sm font-semibold text-[#334155] mb-2">Description *</label>
                 <textarea
                   value={uploadForm.description}
                   onChange={(e) => setUploadForm({ ...uploadForm, description: e.target.value })}
@@ -306,7 +329,7 @@ const PatientReports = () => {
                     setSelectedFiles([]);
                     setUploadForm({ files: [], description: '', reportType: 'Other' });
                   }}
-                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-semibold"
+                  className="px-6 py-2 border border-gray-300 text-[#334155] rounded-lg hover:bg-gray-50 transition font-semibold"
                 >
                   Cancel
                 </button>
@@ -327,7 +350,7 @@ const PatientReports = () => {
       {previewFile && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">{previewFile.description}</h2>
+            <h2 className="text-2xl font-bold text-[#1e293b] mb-4">{previewFile.description}</h2>
             <div className="mb-4 bg-gray-100 rounded p-4">
               <iframe
                 src={previewFile.fileUrl}

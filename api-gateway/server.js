@@ -36,6 +36,7 @@ async function setupRoutes() {
 
   app.use("/api/patient", verifyToken, patientRoutes);
   app.use("/api/doctor", verifyToken, doctorRoutes);
+  app.use("/api/doctors", verifyToken, doctorRoutes);
   app.use("/api/appointment", verifyToken, appointmentRoutes);
   app.use("/api/appointments", verifyToken, appointmentRoutes); // Support both singular and plural
   app.use("/api/payment", verifyToken, paymentRoutes);
