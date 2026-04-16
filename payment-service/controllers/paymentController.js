@@ -16,7 +16,7 @@ import { v4 as uuidv4 } from 'uuid';
 // Create checkout session for payment
 export const createCheckoutSession = async (req, res, next) => {
   try {
-    const { amount, paymentType, referenceId, metadata } = req.body;
+    const { amount, currency = 'lkr', paymentType, referenceId, metadata } = req.body;
     const userId = req.user?.userId || req.user?._id;
 
     if (!amount || !paymentType || !referenceId) {
@@ -31,6 +31,7 @@ export const createCheckoutSession = async (req, res, next) => {
     // Create Stripe checkout session
     const checkoutSession = await createStripeCheckoutSession(
       amount,
+      currency,
       paymentType,
       referenceId,
       {
@@ -45,7 +46,7 @@ export const createCheckoutSession = async (req, res, next) => {
     const payment = await Payment.create({
       userId,
       amount,
-      currency: 'usd',
+      currency,
       paymentType,
       referenceId,
       stripeCheckoutSessionId: checkoutSession.id,
@@ -63,7 +64,7 @@ export const createCheckoutSession = async (req, res, next) => {
         checkoutSessionId: checkoutSession.id,
         checkoutUrl: checkoutSession.url,
         amount: amount,
-        currency: 'usd',
+        currency: currency,
       },
     });
   } catch (error) {

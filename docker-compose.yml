@@ -88,6 +88,22 @@ services:
     networks:
       - medilink-network
 
+  payment-service:
+    build:
+      context: ./payment-service
+    container_name: medilink-payment
+    ports:
+      - "3005:3005"
+    environment:
+      - PORT=3005
+      - APPOINTMENT_SERVICE_URL=http://medilink-appointment:3002
+    env_file:
+      - ./payment-service/.env
+    networks:
+      - medilink-network
+    depends_on:
+      - appointment-service
+
   patient-service:
     build:
       context: ./patient-service
@@ -118,6 +134,7 @@ services:
       - telemedicine-service
       - patient-service
       - notification-service
+      - payment-service
 
 networks:
   medilink-network:
