@@ -4,7 +4,7 @@ const ENDPOINTS = {
   patient: "/api/patient/patients",
   reports: "/api/patient/reports",
   upload: "/api/patient/upload",
-  prescriptions: "/api/patient/prescriptions",
+  prescriptions: "/api/prescriptions",
   appointments: "/api/appointment",
   doctors: "/api/doctor",
   telemedicine: "/api/telemedicine",
@@ -19,7 +19,10 @@ export const patientApi = {
   },
 
   async updatePatientProfile(patientId, payload) {
-    const { data } = await customFetch.put(`${ENDPOINTS.patient}/${patientId}`, payload);
+    const { data } = await customFetch.put(
+      `${ENDPOINTS.patient}/${patientId}`,
+      payload,
+    );
     return data;
   },
 
@@ -30,17 +33,25 @@ export const patientApi = {
 
   // ========== REPORTS & UPLOADS ==========
   async uploadReport(formData) {
-    const { data } = await customFetch.post(`${ENDPOINTS.upload}/single`, formData);
+    const { data } = await customFetch.post(
+      `${ENDPOINTS.upload}/single`,
+      formData,
+    );
     return data;
   },
 
   async uploadMultipleReports(formData) {
-    const { data } = await customFetch.post(`${ENDPOINTS.upload}/multiple`, formData);
+    const { data } = await customFetch.post(
+      `${ENDPOINTS.upload}/multiple`,
+      formData,
+    );
     return data;
   },
 
   async deleteUploadedFile(publicId) {
-    const { data } = await customFetch.delete(`${ENDPOINTS.upload}/delete/${publicId}`);
+    const { data } = await customFetch.delete(
+      `${ENDPOINTS.upload}/delete/${publicId}`,
+    );
     return data;
   },
 
@@ -50,7 +61,9 @@ export const patientApi = {
   },
 
   async getPatientReports(patientId) {
-    const { data } = await customFetch.get(`${ENDPOINTS.reports}/patient/${patientId}`);
+    const { data } = await customFetch.get(
+      `${ENDPOINTS.reports}/patient/${patientId}`,
+    );
     return data;
   },
 
@@ -60,19 +73,24 @@ export const patientApi = {
   },
 
   async updateReport(reportId, payload) {
-    const { data } = await customFetch.put(`${ENDPOINTS.reports}/${reportId}`, payload);
+    const { data } = await customFetch.put(
+      `${ENDPOINTS.reports}/${reportId}`,
+      payload,
+    );
     return data;
   },
 
   async deleteReport(reportId) {
-    const { data } = await customFetch.delete(`${ENDPOINTS.reports}/${reportId}`);
+    const { data } = await customFetch.delete(
+      `${ENDPOINTS.reports}/${reportId}`,
+    );
     return data;
   },
 
   /** Reports uploaded by patients who have appointments with this doctor */
   async getIncomingReportsForDoctor(doctorId) {
     const { data } = await customFetch.get(
-      `${ENDPOINTS.doctors}/incoming-patient-reports/${doctorId}`
+      `${ENDPOINTS.doctors}/incoming-patient-reports/${doctorId}`,
     );
     return data;
   },
@@ -81,46 +99,60 @@ export const patientApi = {
   async getPrescriptions(patientId, params = {}) {
     const { data } = await customFetch.get(
       `${ENDPOINTS.prescriptions}/patient/${patientId}`,
-      { params }
+      { params },
     );
     return data;
   },
 
   async getActivePrescriptions(patientId) {
     const { data } = await customFetch.get(
-      `${ENDPOINTS.prescriptions}/patient/${patientId}/active`
+      `${ENDPOINTS.prescriptions}/patient/${patientId}/active`,
     );
     return data;
   },
 
   async getPrescriptionById(prescriptionId) {
-    const { data } = await customFetch.get(`${ENDPOINTS.prescriptions}/${prescriptionId}`);
+    const { data } = await customFetch.get(
+      `${ENDPOINTS.prescriptions}/${prescriptionId}`,
+    );
     return data;
   },
 
   // ========== APPOINTMENTS ==========
   async bookAppointment(payload) {
-    const { data } = await customFetch.post(`${ENDPOINTS.appointments}`, payload);
+    const { data } = await customFetch.post(
+      `${ENDPOINTS.appointments}`,
+      payload,
+    );
     return data;
   },
 
   async getMyAppointments() {
-    const { data } = await customFetch.get(`${ENDPOINTS.appointments}/my-appointments`);
+    const { data } = await customFetch.get(
+      `${ENDPOINTS.appointments}/my-appointments`,
+    );
     return data;
   },
 
   async getAppointmentById(appointmentId) {
-    const { data } = await customFetch.get(`${ENDPOINTS.appointments}/${appointmentId}`);
+    const { data } = await customFetch.get(
+      `${ENDPOINTS.appointments}/${appointmentId}`,
+    );
     return data;
   },
 
   async updateAppointment(appointmentId, payload) {
-    const { data } = await customFetch.put(`${ENDPOINTS.appointments}/${appointmentId}`, payload);
+    const { data } = await customFetch.put(
+      `${ENDPOINTS.appointments}/${appointmentId}`,
+      payload,
+    );
     return data;
   },
 
   async cancelAppointment(appointmentId) {
-    const { data } = await customFetch.delete(`${ENDPOINTS.appointments}/${appointmentId}`);
+    const { data } = await customFetch.delete(
+      `${ENDPOINTS.appointments}/${appointmentId}`,
+    );
     return data;
   },
 
@@ -144,7 +176,7 @@ export const patientApi = {
   async createConsultationSession(payload) {
     const { data } = await customFetch.post(
       `${ENDPOINTS.telemedicine}/create-session`,
-      payload
+      payload,
     );
     return data;
   },
@@ -152,20 +184,22 @@ export const patientApi = {
   async getConsultationsByPatient(patientId, params = {}) {
     const { data } = await customFetch.get(
       `${ENDPOINTS.telemedicine}/patient/${patientId}`,
-      { params }
+      { params },
     );
     return data;
   },
 
   async getConsultationByAppointment(appointmentId) {
-    const { data } = await customFetch.get(`${ENDPOINTS.telemedicine}/${appointmentId}`);
+    const { data } = await customFetch.get(
+      `${ENDPOINTS.telemedicine}/${appointmentId}`,
+    );
     return data;
   },
 
   async updateConsultationStatus(appointmentId, status) {
     const { data } = await customFetch.patch(
       `${ENDPOINTS.telemedicine}/${appointmentId}/status`,
-      { status }
+      { status },
     );
     return data;
   },
@@ -173,7 +207,7 @@ export const patientApi = {
   async updateConsultationNotes(appointmentId, notes) {
     const { data } = await customFetch.patch(
       `${ENDPOINTS.telemedicine}/${appointmentId}/notes`,
-      { notes }
+      { notes },
     );
     return data;
   },
@@ -185,22 +219,33 @@ export const patientApi = {
   },
 
   async getPaymentById(paymentId) {
-    const { data } = await customFetch.get(`${ENDPOINTS.payments}/${paymentId}`);
+    const { data } = await customFetch.get(
+      `${ENDPOINTS.payments}/${paymentId}`,
+    );
     return data;
   },
 
   async createCheckout(payload) {
-    const { data } = await customFetch.post(`${ENDPOINTS.payments}/checkout`, payload);
+    const { data } = await customFetch.post(
+      `${ENDPOINTS.payments}/checkout`,
+      payload,
+    );
     return data;
   },
 
   async verifyCheckout(sessionId) {
-    const { data } = await customFetch.post(`${ENDPOINTS.payments}/verify-checkout`, { sessionId });
+    const { data } = await customFetch.post(
+      `${ENDPOINTS.payments}/verify-checkout`,
+      { sessionId },
+    );
     return data;
   },
 
   async requestRefund(paymentId, payload) {
-    const { data } = await customFetch.post(`${ENDPOINTS.payments}/${paymentId}/refund`, payload);
+    const { data } = await customFetch.post(
+      `${ENDPOINTS.payments}/${paymentId}/refund`,
+      payload,
+    );
     return data;
   },
 };
