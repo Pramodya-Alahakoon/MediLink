@@ -42,22 +42,37 @@ export const createCheckoutSession = async (req, res, next) => {
       cancelUrl
     );
 
-    // Save payment to DB with pending status
-    const payment = await Payment.create({
-      userId,
-      amount,
-      currency,
-      paymentType,
-      referenceId,
-      stripeCheckoutSessionId: checkoutSession.id,
-      status: 'pending',
-      metadata: {
-        ...metadata,
-        description: `${paymentType} payment`,
-      },
-    });
+    // Save payment to DB with pending status (Non-fatal fallback)
+    let paymentId = 'pending_in_stripe';
+    try {
+      const payment = await Payment.create({
+        userId,
+        amount,
+        currency,
+        paymentType,
+        referenceId,
+        stripeCheckoutSessionId: checkoutSession.id,
+        status: 'pending',
+        metadata: {
+          ...metadata,
+          description: `${paymentType} payment`,
+        },
+      });
+      paymentId = payment._id;
+    } catch (dbError) {
+      console.error('⚠️ DB Error: Could not save payment record, but continuing with Stripe redirect:', dbError.message);
+    }
 
     res.status(201).json({
+      status: 'success',
+      data: {
+        paymentId,
+        checkoutSessionId: checkoutSession.id,
+        checkoutUrl: checkoutSession.url,
+        amount: amount,
+        currency: currency,
+      },
+    });
       status: 'success',
       data: {
         paymentId: payment._id,
