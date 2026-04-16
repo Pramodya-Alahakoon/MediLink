@@ -73,15 +73,6 @@ export const createCheckoutSession = async (req, res, next) => {
         currency: currency,
       },
     });
-      status: 'success',
-      data: {
-        paymentId: payment._id,
-        checkoutSessionId: checkoutSession.id,
-        checkoutUrl: checkoutSession.url,
-        amount: amount,
-        currency: currency,
-      },
-    });
   } catch (error) {
     next(new StripeError(error.message));
   }
