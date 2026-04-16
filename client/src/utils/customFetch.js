@@ -7,6 +7,7 @@ const getServiceBaseURL = (path) => {
   if (path.includes("/api/consultations")) return "http://localhost:4000";   // telemedicine-service
   if (path.includes("/api/doctors") || path.includes("/api/availability") || path.includes("/api/prescriptions")) return "http://localhost:3003";
   if (path.includes("/api/patients") || path.includes("/api/upload") || path.includes("/api/reports")) return "http://localhost:3000";
+  if (path.includes("/api/payments")) return "http://localhost:3005";
   return "http://localhost:5000"; // Fallback
 };
 
