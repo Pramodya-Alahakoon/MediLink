@@ -139,6 +139,25 @@ const Availability = () => {
     }
   };
 
+  const handleUnblockDayRange = async (id) => {
+    const confirmed = window.confirm('Unblock this date range? Patients will be able to book appointments on these days again.');
+    if (!confirmed) return;
+
+    try {
+      const { data } = await customFetch.delete(`/api/availability/blocked-days/${id}`);
+      if (data.success) {
+        toast.success('Days unblocked successfully');
+        fetchWeekData();
+        fetchBlockedDays();
+      } else {
+        toast.error('Failed to unblock days');
+      }
+    } catch (error) {
+      console.error('Error unblocking days:', error);
+      toast.error('Error unblocking days');
+    }
+  };
+
   const handleSlotClick = (slot) => {
     setSelectedSlot(slot);
   };
@@ -454,7 +473,20 @@ const Availability = () => {
                   }`} />
                 </button>
               </div>
-              <p className="text-[13px] text-slate-500 dark:text-slate-400 mb-2">15 min between sessions</p>
+              <div className="flex items-center gap-2">
+                <input 
+                  type="number"
+                  min={0}
+                  max={60}
+                  value={tempSettings.bufferTime}
+                  onChange={(e) => setTempSettings({
+                    ...tempSettings,
+                    bufferTime: Number.isNaN(parseInt(e.target.value)) ? 0 : parseInt(e.target.value),
+                  })}
+                  className="w-24 p-3 bg-slate-50/50 dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-semibold text-[#0D1C2E] dark:text-slate-100 text-[14px] focus:ring-2 focus:ring-[#055153]/20 dark:focus:ring-teal-500/40 focus:border-[#055153] dark:focus:border-teal-500 transition-all outline-none"
+                />
+                <span className="text-[13px] text-slate-500 dark:text-slate-400">minutes between sessions</span>
+              </div>
             </div>
 
             <div className="h-px bg-slate-100" />
@@ -510,43 +542,53 @@ const Availability = () => {
                 <Ban size={15} className="opacity-70" />
                 Block Days
               </button>
+
+              {/* Existing blocked ranges */}
+              {blockedDays && blockedDays.length > 0 && (
+                <div className="mt-4 space-y-2 max-h-40 overflow-y-auto custom-scrollbar">
+                  {blockedDays.map((block) => {
+                    const startLabel = block.startDate ? format(new Date(block.startDate), 'MMM d, yyyy') : '';
+                    const endLabel = block.endDate ? format(new Date(block.endDate), 'MMM d, yyyy') : '';
+                    return (
+                      <div
+                        key={block._id}
+                        className="flex items-center justify-between px-3 py-2 rounded-lg bg-slate-50/80 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700"
+                      >
+                        <div className="flex flex-col text-[11px]">
+                          <span className="font-semibold text-slate-700 dark:text-slate-100">
+                            {startLabel}{endLabel && startLabel !== endLabel ? ` – ${endLabel}` : ''}
+                          </span>
+                          {block.type && (
+                            <span className="uppercase tracking-widest text-[10px] text-slate-500 dark:text-slate-400">
+                              {block.type}
+                            </span>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleUnblockDayRange(block._id)}
+                          className="px-2 py-1 rounded-full text-[10px] font-semibold text-emerald-700 dark:text-emerald-200 bg-emerald-100 dark:bg-emerald-900/40 hover:bg-emerald-200 dark:hover:bg-emerald-900/60 transition-colors"
+                        >
+                          Unblock
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          </div>
-        </div>
 
-        {/* Change Request / Save Actions */}
-        <div className="bg-[#F0F4F8] dark:bg-slate-900 rounded-[20px] p-5 border border-slate-200/60 dark:border-slate-700 shadow-sm relative overflow-hidden">
-          <p className="text-[13px] text-slate-600 dark:text-slate-300 mb-4 leading-relaxed relative z-10 px-1">
-            You have <strong className="text-[#0D1C2E] dark:text-white">2 pending change requests</strong> for the upcoming week from the administration desk.
-          </p>
-          <button 
-            onClick={handleUpdateSettings}
-            className="w-full py-4 bg-[#055153] hover:bg-[#064243] dark:bg-teal-600 dark:hover:bg-teal-500 text-white rounded-xl font-bold text-[15px] transition-all shadow-[0_4px_14px_rgba(5,81,83,0.3)] hover:shadow-[0_6px_20px_rgba(5,81,83,0.4)] hover:-translate-y-0.5 relative z-10"
-          >
-            Save Changes
-          </button>
-          
-          {/* Decorative blurred circle */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100 dark:bg-blue-900 rounded-full blur-[40px] opacity-60 -mr-10 -mt-10" />
-        </div>
+            <div className="h-px bg-slate-100 dark:bg-slate-800" />
 
-        {/* Pro Tip Card */}
-        <div className="bg-[#05151F] rounded-[20px] p-6 text-white relative overflow-hidden shrink-0 shadow-lg mt-auto">
-          {/* Bulb Icon Decoration */}
-          <div className="absolute -bottom-6 -right-6 opacity-10">
-            <svg width="120" height="120" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C7.58 2 4 5.58 4 10C4 12.35 5.03 14.47 6.64 15.93C7.22 16.45 7.61 17.18 7.61 17.97V19C7.61 19.55 8.06 20 8.61 20H15.39C15.94 20 16.39 19.55 16.39 19V17.97C16.39 17.18 16.78 16.45 17.36 15.93C18.97 14.47 20 12.35 20 10C20 5.58 16.42 2 12 2ZM15 22H9C8.45 22 8 22.45 8 23C8 23.55 8.45 24 9 24H15C15.55 24 16 23.55 16 23C16 22.45 15.55 22 15 22Z" />
-            </svg>
+            {/* Save Settings */}
+            <button 
+              onClick={handleUpdateSettings}
+              className="w-full mt-1 py-3 bg-[#055153] hover:bg-[#064243] dark:bg-teal-600 dark:hover:bg-teal-500 text-white rounded-xl font-bold text-[14px] transition-all shadow-[0_3px_10px_rgba(5,81,83,0.35)] hover:shadow-[0_5px_16px_rgba(5,81,83,0.45)] hover:-translate-y-0.5"
+            >
+              Save Settings
+            </button>
+
           </div>
-          
-          <h3 className="font-bold text-[16px] mb-3 relative z-10">Pro Tip</h3>
-          <p className="text-[13px] text-slate-300/90 leading-relaxed mb-5 relative z-10">
-            Set your recurring availability once to automatically populate future weeks. Syncing with Google Calendar is recommended.
-          </p>
-          <button className="text-emerald-400 text-[13px] font-bold hover:text-emerald-300 transition-colors flex items-center gap-1 group relative z-10">
-            Learn more 
-            <span className="transform transition-transform group-hover:translate-x-1">→</span>
-          </button>
         </div>
 
       </div>
