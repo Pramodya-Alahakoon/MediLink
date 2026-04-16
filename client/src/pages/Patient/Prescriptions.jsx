@@ -94,14 +94,14 @@ const PatientPrescriptions = () => {
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-6">
+    <div className="w-full max-w-6xl mx-auto p-4 md:p-6 bg-[#F8FAFB] dark:bg-slate-950 min-h-screen transition-colors duration-300">
       {/* Header */}
-      <h1 className="text-4xl font-bold text-[#1e293b] mb-8">
+      <h1 className="text-4xl font-bold text-[#1e293b] dark:text-white mb-8">
         My Prescriptions
       </h1>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6 border-b border-gray-200">
+      <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-slate-700">
         {[
           { id: "all", label: "All" },
           { id: "active", label: "Active" },
@@ -128,13 +128,13 @@ const PatientPrescriptions = () => {
           placeholder="Search by medicine name, doctor, or notes..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+          className="w-full px-4 py-2 border border-gray-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-[#1e293b] dark:text-slate-200 focus:ring-2 focus:ring-[#055153] outline-none dark:placeholder:text-slate-500"
         />
       </div>
 
       {/* Prescriptions List */}
       {filteredPrescriptions.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
+        <div className="text-center py-12 bg-gray-50 dark:bg-slate-800 dark:bg-slate-900 rounded-lg">
           <Pill size={48} className="mx-auto text-gray-300 mb-4" />
           <h3 className="text-xl font-semibold text-gray-600 mb-2">
             No prescriptions found
@@ -150,7 +150,7 @@ const PatientPrescriptions = () => {
           {filteredPrescriptions.map((prescription) => (
             <div
               key={prescription._id}
-              className="bg-white rounded-lg shadow-md hover:shadow-lg transition p-6"
+              className="bg-white dark:bg-slate-900 rounded-lg shadow-md hover:shadow-lg transition p-6"
             >
               {/* Header */}
               <div className="flex justify-between items-start mb-4">
@@ -188,7 +188,7 @@ const PatientPrescriptions = () => {
               </div>
 
               {/* Medicines List */}
-              <div className="bg-gray-50 rounded-lg p-4 mb-4">
+              <div className="bg-gray-50 dark:bg-slate-800 dark:bg-slate-900 rounded-lg p-4 mb-4">
                 <h4 className="font-semibold text-[#1e293b] mb-3 flex items-center gap-2">
                   <Pill size={18} className="text-blue-500" />
                   Medicines
@@ -197,7 +197,7 @@ const PatientPrescriptions = () => {
                   {prescription.medicines?.map((medicine, idx) => (
                     <div
                       key={idx}
-                      className="bg-white p-3 rounded border border-gray-200"
+                      className="bg-white dark:bg-slate-900 p-3 rounded border border-gray-200 dark:border-slate-700"
                     >
                       <div className="flex justify-between items-start mb-2">
                         <div>
@@ -253,7 +253,7 @@ const PatientPrescriptions = () => {
       {/* Detail Modal */}
       {selectedPrescription && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-lg shadow-xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto">
             <h2 className="text-3xl font-bold text-[#1e293b] mb-6">
               Prescription Details
             </h2>
@@ -306,7 +306,7 @@ const PatientPrescriptions = () => {
                 {selectedPrescription.medicines?.map((medicine, idx) => (
                   <div
                     key={idx}
-                    className="border border-gray-200 rounded-lg p-4"
+                    className="border border-gray-200 dark:border-slate-700 rounded-lg p-4"
                   >
                     <h4 className="font-bold text-lg text-[#1e293b] mb-2">
                       {medicine.name}
