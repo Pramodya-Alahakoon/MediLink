@@ -285,15 +285,14 @@ const PatientAppointments = () => {
                 </div>
               )}
 
-              {activeTab === "upcoming" &&
-                appointment.status !== "Cancelled" && (
-                  <button
-                    onClick={() => handleCancelAppointment(appointment._id)}
-                    className="text-red-500 hover:text-red-700 font-semibold text-xs transition mt-1"
-                  >
-                    Cancel Appointment
-                  </button>
-                )}
+              {activeTab === "upcoming" && appointment.status === "Pending" && (
+                <button
+                  onClick={() => handleCancelAppointment(appointment._id)}
+                  className="text-red-500 hover:text-red-700 font-semibold text-xs transition mt-1"
+                >
+                  Cancel Appointment
+                </button>
+              )}
             </div>
           ))}
         </div>

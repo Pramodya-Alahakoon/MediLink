@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { jsPDF } from "jspdf";
 import {
   Download,
   Search,
@@ -781,60 +782,151 @@ const Patients = () => {
     }
   };
 
-  // -- Export realistic CSV --
+  // -- Export proper PDF report --
   const handleExport = () => {
-    const now = new Date().toLocaleString("en-US");
+    const doc = new jsPDF({
+      orientation: "landscape",
+      unit: "mm",
+      format: "a4",
+    });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 14;
+    let y = margin;
+
     const doctorName = doctorProfile?.name || "Doctor";
     const spec = doctorProfile?.specialization || "";
-
-    const meta = [
-      [`MediLink Clinical Patient Report`],
-      [`Generated: ${now}`],
-      [`Doctor: Dr. ${doctorName}${spec ? " — " + spec : ""}`],
-      [`Total Patients: ${doctorPatients.length}`],
-      [],
-      [
-        "Patient ID",
-        "Full Name",
-        "Age",
-        "Gender",
-        "Blood Group",
-        "Phone",
-        "Address",
-        "Medical History",
-        "Total Consultations",
-        "Last Consultation",
-      ],
-    ];
-
-    const rows = doctorPatients.map((p) => {
-      const { count, lastDate } = getStats(p._id);
-      return [
-        p._id,
-        p.name,
-        p.age,
-        p.gender,
-        p.bloodGroup || "",
-        p.phone,
-        p.address,
-        p.medicalHistory || "",
-        count,
-        lastDate ? fmtDate(lastDate) : "N/A",
-      ];
+    const now = new Date().toLocaleString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
 
-    const csv = [...meta, ...rows]
-      .map((r) =>
-        r.map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`).join(","),
-      )
-      .join("\n");
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(
-      new Blob([csv], { type: "text/csv;charset=utf-8;" }),
+    // --- Header banner ---
+    doc.setFillColor(5, 81, 83); // #055153
+    doc.rect(0, 0, pageW, 28, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text("MediLink", margin, 12);
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.text("Clinical Patient Report", margin, 18);
+    doc.text(`Generated: ${now}`, pageW - margin, 12, { align: "right" });
+    doc.text(
+      `Dr. ${doctorName}${spec ? " — " + spec : ""}`,
+      pageW - margin,
+      18,
+      { align: "right" },
     );
-    a.download = `MediLink_Patients_${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(a.href);
+    doc.text(`Total Patients: ${doctorPatients.length}`, pageW - margin, 24, {
+      align: "right",
+    });
+    y = 34;
+
+    // --- Table setup ---
+    const cols = [
+      { header: "#", width: 8 },
+      { header: "Patient ID", width: 30 },
+      { header: "Full Name", width: 42 },
+      { header: "Age", width: 14 },
+      { header: "Gender", width: 20 },
+      { header: "Blood Group", width: 22 },
+      { header: "Phone", width: 30 },
+      { header: "Medical History", width: 44 },
+      { header: "Consultations", width: 24 },
+      { header: "Last Visit", width: 30 },
+    ];
+    const totalW = cols.reduce((s, c) => s + c.width, 0);
+    const startX = (pageW - totalW) / 2; // center table
+    const rowH = 7;
+    const headerH = 8;
+
+    const drawHeader = () => {
+      doc.setFillColor(5, 81, 83);
+      doc.rect(startX, y, totalW, headerH, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7.5);
+      let cx = startX;
+      cols.forEach((col) => {
+        doc.text(col.header, cx + 2, y + 5.5);
+        cx += col.width;
+      });
+      y += headerH;
+    };
+
+    const checkPage = () => {
+      if (y + rowH > pageH - 10) {
+        // Footer
+        doc.setFontSize(7);
+        doc.setTextColor(150);
+        doc.text(`Page ${doc.getNumberOfPages()}`, pageW / 2, pageH - 5, {
+          align: "center",
+        });
+        doc.addPage();
+        y = margin;
+        drawHeader();
+      }
+    };
+
+    drawHeader();
+
+    // --- Table rows ---
+    doctorPatients.forEach((p, i) => {
+      checkPage();
+      const { count, lastDate } = getStats(p._id);
+      const isAlt = i % 2 === 0;
+      if (isAlt) {
+        doc.setFillColor(245, 248, 250);
+        doc.rect(startX, y, totalW, rowH, "F");
+      }
+      doc.setTextColor(30, 30, 30);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7);
+
+      const rowData = [
+        String(i + 1),
+        shortId(p._id),
+        p.name || "—",
+        p.age != null ? String(p.age) : "—",
+        p.gender || "—",
+        p.bloodGroup || "—",
+        p.phone || "—",
+        (p.medicalHistory || "—").slice(0, 30),
+        String(count),
+        lastDate ? fmtDate(lastDate) : "N/A",
+      ];
+
+      let cx = startX;
+      rowData.forEach((val, ci) => {
+        doc.text(val, cx + 2, y + 5, { maxWidth: cols[ci].width - 3 });
+        cx += cols[ci].width;
+      });
+
+      // Light grid line
+      doc.setDrawColor(220);
+      doc.line(startX, y + rowH, startX + totalW, y + rowH);
+      y += rowH;
+    });
+
+    // --- Footer on last page ---
+    doc.setFontSize(7);
+    doc.setTextColor(150);
+    doc.text(`Page ${doc.getNumberOfPages()}`, pageW / 2, pageH - 5, {
+      align: "center",
+    });
+    doc.text(
+      "This is a system-generated report from MediLink.",
+      startX,
+      pageH - 5,
+    );
+
+    // --- Save PDF ---
+    doc.save(`MediLink_Patients_${new Date().toISOString().slice(0, 10)}.pdf`);
+    toast.success("PDF report downloaded!");
   };
 
   // -- Render --

@@ -104,8 +104,8 @@ const PaymentSuccess = () => {
             Payment Successful!
           </h1>
           <p className="text-slate-500 dark:text-slate-400 text-center mb-6">
-            Your appointment is confirmed. A receipt has been sent to your
-            email.
+            Your appointment is booked and pending doctor confirmation. A
+            receipt has been sent to your email.
           </p>
 
           {loading ? (
@@ -222,22 +222,11 @@ const PaymentSuccess = () => {
               </div>
 
               {/* Appointment status badge */}
-              <div className="bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-800 rounded-xl p-3 text-center">
-                <p className="text-green-700 dark:text-green-400 text-sm font-medium">
-                  ✓ Appointment status:{" "}
-                  <span className="font-bold">Confirmed</span>
-                </p>
-              </div>
-
-              {/* Test card hint for sandbox */}
               <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-800 rounded-xl p-3 text-center">
-                <p className="text-amber-700 dark:text-amber-400 text-xs">
-                  <span className="font-semibold">Sandbox mode:</span> Use test
-                  card{" "}
-                  <span className="font-mono font-bold">
-                    4242 4242 4242 4242
-                  </span>
-                  , any future date, any 3-digit CVC.
+                <p className="text-amber-700 dark:text-amber-400 text-sm font-medium">
+                  ⏳ Appointment status:{" "}
+                  <span className="font-bold">Pending</span> — Awaiting doctor
+                  confirmation
                 </p>
               </div>
             </motion.div>
