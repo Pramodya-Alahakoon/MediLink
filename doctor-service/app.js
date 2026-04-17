@@ -12,6 +12,7 @@ import timeSlotRouter from "./routes/timeSlotRoutes.js";
 import doctorNotesRouter from "./routes/doctorNotesRoutes.js";
 import consultationRouter from "./routes/consultationRoutes.js";
 import verificationRouter from "./routes/verificationRoutes.js";
+import reviewRouter from "./routes/reviewRoutes.js";
 
 const app = express();
 
@@ -20,7 +21,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
+// Routes — review routes BEFORE generic doctorRouter (avoid :id conflicts)
+app.use("/api/doctors", reviewRouter);
 app.use("/api/doctors", doctorRouter);
 app.use("/api/doctors", verificationRouter);
 app.use("/api/doctors", appointmentRouter);
