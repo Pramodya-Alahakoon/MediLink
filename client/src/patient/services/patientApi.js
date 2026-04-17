@@ -33,6 +33,29 @@ export const patientApi = {
     return data;
   },
 
+  async uploadProfilePhoto(patientId, formData) {
+    const { data } = await customFetch.post(
+      `${ENDPOINTS.patient}/${patientId}/photo`,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } },
+    );
+    return data;
+  },
+
+  async requestProfileDeletion(patientId) {
+    const { data } = await customFetch.post(
+      `${ENDPOINTS.patient}/${patientId}/request-delete`,
+    );
+    return data;
+  },
+
+  async removeProfilePhoto(patientId) {
+    const { data } = await customFetch.delete(
+      `${ENDPOINTS.patient}/${patientId}/photo`,
+    );
+    return data;
+  },
+
   // ========== REPORTS & UPLOADS ==========
   async uploadReport(formData) {
     const { data } = await customFetch.post(
