@@ -22,6 +22,7 @@ import DoctorReports from "./pages/Doctor/Reports";
 import AdminDeletionReview from "./pages/Doctor/AdminDeletionReview";
 import DoctorPatients from "./pages/Doctor/Patients";
 import Notes from "./pages/Doctor/Notes";
+import ProfessionalVerification from "./pages/Doctor/ProfessionalVerification";
 import AdminLayout from "./layouts/AdminLayout";
 import AdminDashboard from "./pages/Admin/Dashboard";
 import AdminUsers from "./pages/Admin/Users";
@@ -29,6 +30,7 @@ import AdminDoctors from "./pages/Admin/Doctors";
 import AdminAppointments from "./pages/Admin/Appointments";
 import AdminPayments from "./pages/Admin/Payments";
 import AdminMessages from "./pages/Admin/Messages";
+import AdminVerifications from "./pages/Admin/Verifications";
 import PatientLayout from "./layouts/PatientLayout";
 import PatientDashboard from "./pages/Patient/Dashboard";
 import PatientProfile from "./pages/Patient/Profile";
@@ -129,6 +131,10 @@ function App() {
                     />
                     <Route path="/doctor/notes" element={<Notes />} />
                     <Route
+                      path="/doctor/verification"
+                      element={<ProfessionalVerification />}
+                    />
+                    <Route
                       path="/doctor/admin/deletions"
                       element={<AdminDeletionReview />}
                     />
@@ -206,6 +212,10 @@ function App() {
                     />
                     <Route path="/admin/payments" element={<AdminPayments />} />
                     <Route path="/admin/messages" element={<AdminMessages />} />
+                    <Route
+                      path="/admin/verifications"
+                      element={<AdminVerifications />}
+                    />
                   </Route>
                 </Route>
               </Routes>

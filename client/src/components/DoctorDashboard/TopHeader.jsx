@@ -13,9 +13,13 @@ const TopHeader = () => {
   const doctorName =
     doctorProfile?.name || user?.name || user?.fullName || "Doctor";
   const specialization = doctorProfile?.specialization || "General Practice";
-  const profileImage = doctorProfile?.profileImage?.startsWith("http")
-    ? doctorProfile.profileImage
-    : "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&h=150&fit=crop&crop=faces";
+  const profileImage = doctorProfile?.verification?.profilePhotoUrl?.startsWith(
+    "http",
+  )
+    ? doctorProfile.verification.profilePhotoUrl
+    : doctorProfile?.profileImage?.startsWith("http")
+      ? doctorProfile.profileImage
+      : "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&h=150&fit=crop&crop=faces";
 
   return (
     <header className="w-full h-20 bg-white dark:bg-slate-950 sticky top-0 z-40 flex items-center justify-between px-4 md:px-8 border-b border-slate-100 dark:border-slate-900 transition-colors duration-300">

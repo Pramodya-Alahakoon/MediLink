@@ -11,6 +11,7 @@ import blockedDaysRouter from "./routes/blockedDaysRoutes.js";
 import timeSlotRouter from "./routes/timeSlotRoutes.js";
 import doctorNotesRouter from "./routes/doctorNotesRoutes.js";
 import consultationRouter from "./routes/consultationRoutes.js";
+import verificationRouter from "./routes/verificationRoutes.js";
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use("/api/doctors", doctorRouter);
+app.use("/api/doctors", verificationRouter);
 app.use("/api/doctors", appointmentRouter);
 app.use("/api/doctors", doctorNotesRouter);
 app.use("/api/doctors", patientReportRouter);
