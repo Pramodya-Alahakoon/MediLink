@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: appointment-service
+  namespace: medilink
+  labels:
+    app: appointment-service
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5002
+      targetPort: 5002
+      protocol: TCP
+  selector:
+    app: appointment-service

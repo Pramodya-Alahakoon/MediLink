@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: appointment-service
+  namespace: medilink
+  labels:
+    app: appointment-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: appointment-service
+  template:
+    metadata:
+      labels:
+        app: appointment-service
+    spec:
+      containers:
+        - name: appointment-service
+          image: medilink-appointment-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5002
+          env:
+            - name: PORT
+              value: "5002"
+            - name: NODE_ENV
+              value: "production"
+            - name: JWT_SECRET
+              value: "secret123"
+            - name: MONGO_URI
+              value: "mongodb+srv://sankamaduwantha68_db_user:5wF11ohedlW4LeYS@cluster0.ahvletz.mongodb.net/?appName=Cluster0"
+            - name: AUTH_SERVICE_URL
+              value: "http://auth-service:5000"
+            - name: DOCTOR_SERVICE_URL
+              value: "http://doctor-service:3003"
+            - name: NOTIFICATION_SERVICE_URL
+              value: "http://notification-service:5003"

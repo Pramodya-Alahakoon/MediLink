@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: medilink
+  labels:
+    app: payment-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+    spec:
+      containers:
+        - name: payment-service
+          image: medilink-payment-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3005
+          env:
+            - name: PORT
+              value: "3005"
+            - name: NODE_ENV
+              value: "production"
+            - name: JWT_SECRET
+              value: "secret123"
+            - name: MONGO_URI
+              value: "mongodb+srv://sankamaduwantha68_db_user:5wF11ohedlW4LeYS@cluster0.ahvletz.mongodb.net/?appName=Cluster0"
+            - name: APPOINTMENT_SERVICE_URL
+              value: "http://appointment-service:5002"
