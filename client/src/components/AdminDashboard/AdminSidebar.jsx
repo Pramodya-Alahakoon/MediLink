@@ -8,6 +8,7 @@ import {
   Stethoscope,
   Calendar,
   CreditCard,
+  MessageSquare,
   Bell,
   LogOut,
   Loader2,
@@ -81,6 +82,7 @@ const AdminSidebar = () => {
     { icon: Stethoscope, label: "Doctors", path: "/admin/doctors" },
     { icon: Calendar, label: "Appointments", path: "/admin/appointments" },
     { icon: CreditCard, label: "Payments", path: "/admin/payments" },
+    { icon: MessageSquare, label: "Messages", path: "/admin/messages" },
   ];
 
   const NavButton = ({ item }) => {
