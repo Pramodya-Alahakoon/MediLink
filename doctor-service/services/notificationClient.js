@@ -17,3 +17,23 @@ export async function sendNotification(payload) {
     console.warn(`⚠️  Notification failed [${payload.type}]:`, err.message);
   }
 }
+
+/**
+ * Email-only notification for doctors. Never throws.
+ * @param {{ email: string, name: string, type: string, patientName?: string }} payload
+ */
+export async function sendDoctorNotification(payload) {
+  try {
+    await axios.post(`${NOTIFICATION_URL}/notifications/notify`, payload, {
+      timeout: 5000,
+    });
+    console.log(
+      `✅ Doctor notification sent [${payload.type}] to ${payload.email}`,
+    );
+  } catch (err) {
+    console.warn(
+      `⚠️  Doctor notification failed [${payload.type}]:`,
+      err.message,
+    );
+  }
+}

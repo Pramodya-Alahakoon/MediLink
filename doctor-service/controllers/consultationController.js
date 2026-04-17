@@ -1,8 +1,25 @@
 import { StatusCodes } from "http-status-codes";
 import { BadRequestError, NotFoundError } from "../errors/customErrors.js";
 import Consultation from "../models/Consultation.js";
-import { sendNotification } from "../services/notificationClient.js";
+import Doctor from "../models/Doctor.js";
+import {
+  sendNotification,
+  sendDoctorNotification,
+} from "../services/notificationClient.js";
 import { fetchAppointmentById } from "../services/appointmentClient.js";
+
+/** Strip "dr"/"dr." prefix and title-case for notification templates */
+const cleanDoctorName = (name) => {
+  if (!name || typeof name !== "string") return "";
+  let t = name.trim().replace(/^dr\.?\s*/i, "");
+  if (!t) t = name.trim();
+  return t
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+};
 
 /**
  * VIDEO CONSULTATION CONTROLLER
@@ -154,6 +171,8 @@ export const updateConsultationStatus = async (req, res, next) => {
     if (status === "completed") {
       const authToken = req.headers?.authorization?.split(" ")[1];
       const appt = await fetchAppointmentById(appointmentId, authToken);
+
+      // Notify patient (email + SMS)
       if (appt?.patientEmail && appt?.patientName && appt?.contactPhone) {
         sendNotification({
           email: appt.patientEmail,
@@ -161,6 +180,24 @@ export const updateConsultationStatus = async (req, res, next) => {
           name: appt.patientName,
           type: "CONSULTATION_COMPLETED",
         });
+      }
+
+      // Notify doctor (email + SMS)
+      try {
+        const doctor = await Doctor.findOne({
+          doctorId: session.doctorId,
+        }).lean();
+        if (doctor?.email && doctor?.name && doctor?.phone) {
+          sendDoctorNotification({
+            email: doctor.email,
+            phone: doctor.phone,
+            name: cleanDoctorName(doctor.name),
+            type: "CONSULTATION_COMPLETED_DOCTOR",
+            patientName: appt?.patientName,
+          });
+        }
+      } catch {
+        // Non-critical — doctor lookup failure should not affect response
       }
     }
 

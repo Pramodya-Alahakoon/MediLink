@@ -1,16 +1,41 @@
 import Appointment from "../models/Appointment.js";
 import { fetchAISuggestions } from "../services/aiSymptomClient.js";
 import { fetchDoctorById } from "../services/doctorService.js";
-import { sendNotification } from "../services/notificationClient.js";
+import {
+  sendNotification,
+  resolvePatientEmail,
+  sendDoctorNotification,
+} from "../services/notificationClient.js";
 import { StatusCodes } from "http-status-codes";
 import { NotFoundError, BadRequestError } from "../errors/customErrors.js";
 
+/** Capitalize each word */
+const titleCase = (s) =>
+  s
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+
+/**
+ * Clean doctor name for notifications (no "Dr." prefix).
+ * Handles DB names like "drpramodya" → "Pramodya"
+ */
+const cleanDoctorName = (name) => {
+  if (!name || typeof name !== "string") return "";
+  let t = name.trim();
+  // Strip leading "dr." or "dr" prefix (common in usernames)
+  t = t.replace(/^dr\.?\s*/i, "");
+  if (!t) return titleCase(name.trim());
+  return titleCase(t);
+};
+
 /** Display label for UI (matches patient portal "Dr. …" convention) */
 const formatDoctorDisplayName = (name) => {
-  if (!name || typeof name !== "string") return "";
-  const t = name.trim();
-  if (!t) return "";
-  return /^dr\.?\s/i.test(t) ? t : `Dr. ${t}`;
+  const clean = cleanDoctorName(name);
+  if (!clean) return "";
+  return `Dr. ${clean}`;
 };
 
 // Error handler wrapper for async functions
@@ -68,17 +93,47 @@ export const bookAppointment = asyncHandler(async (req, res) => {
     const appointment = await Appointment.create(req.body);
 
     // Fire-and-forget notification — does not block the response
-    if (
-      appointment.patientEmail &&
-      appointment.patientName &&
-      appointment.contactPhone
-    ) {
-      sendNotification({
-        email: appointment.patientEmail,
-        phone: appointment.contactPhone,
-        name: appointment.patientName,
-        type: "APPOINTMENT_BOOKED",
-      });
+    if (appointment.patientName && appointment.contactPhone) {
+      (async () => {
+        let email = appointment.patientEmail;
+        if (!email) {
+          email = await resolvePatientEmail(
+            appointment.patientId,
+            req.headers?.authorization,
+          );
+        }
+        if (email) {
+          sendNotification({
+            email,
+            phone: appointment.contactPhone,
+            name: appointment.patientName,
+            type: "APPOINTMENT_BOOKED",
+          });
+        }
+      })();
+    }
+
+    // Notify the doctor via email + SMS
+    if (appointment.doctorId) {
+      (async () => {
+        try {
+          const { doctor } = await fetchDoctorById(
+            String(appointment.doctorId),
+          );
+          if (doctor?.email && doctor?.name && doctor?.phone) {
+            sendDoctorNotification({
+              email: doctor.email,
+              phone: doctor.phone,
+              name: cleanDoctorName(doctor.name),
+              type: "APPOINTMENT_BOOKED_DOCTOR",
+              patientName: appointment.patientName,
+              appointmentDate: appointment.appointmentDate,
+            });
+          }
+        } catch {
+          // Non-critical — doctor lookup may fail for unknown IDs
+        }
+      })();
     }
 
     res.status(StatusCodes.CREATED).json({
