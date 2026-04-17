@@ -11,6 +11,7 @@ const router = Router();
 
 // Availability Routes
 // Base path: /api/availability
+// NOTE: /week/:doctorId is handled by timeSlotRoutes.js (mounted before this)
 
 router.post("/", asyncHandler(createAvailability));
 router.get("/:doctorId", asyncHandler(getAvailabilityByDoctor));

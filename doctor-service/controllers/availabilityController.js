@@ -1,7 +1,7 @@
-import Availability from '../models/Availability.js';
-import Doctor from '../models/Doctor.js';
-import { StatusCodes } from 'http-status-codes';
-import { NotFoundError, BadRequestError } from '../errors/customErrors.js';
+import Availability from "../models/Availability.js";
+import Doctor from "../models/Doctor.js";
+import { StatusCodes } from "http-status-codes";
+import { NotFoundError, BadRequestError } from "../errors/customErrors.js";
 
 // Helper: extremely basic time range sanity check
 const isValidTimeRange = (start, end) => {
@@ -21,11 +21,13 @@ export const createAvailability = async (req, res, next) => {
     const { doctorId, day, startTime, endTime, isAvailable } = req.body;
 
     if (!doctorId || !day || !startTime || !endTime) {
-      throw new BadRequestError('Required fields missing: doctorId, day, startTime, endTime');
+      throw new BadRequestError(
+        "Required fields missing: doctorId, day, startTime, endTime",
+      );
     }
 
     if (!isValidTimeRange(startTime, endTime)) {
-      throw new BadRequestError('Invalid time range provided');
+      throw new BadRequestError("Invalid time range provided");
     }
 
     // Validate that the doctor actually exists
@@ -38,7 +40,7 @@ export const createAvailability = async (req, res, next) => {
 
     if (!doctor) {
       throw new NotFoundError(
-        'Cannot create availability. Doctor profile does not exist.'
+        "Cannot create availability. Doctor profile does not exist.",
       );
     }
 
@@ -92,7 +94,7 @@ export const updateAvailability = async (req, res, next) => {
       throw new NotFoundError(`No availability slot found with id: ${id}`);
     }
 
-    // Prevent moving a slot to a completely different doctor 
+    // Prevent moving a slot to a completely different doctor
     // unless you want to allow that (typically we wouldn't)
     const updateData = { ...req.body };
     delete updateData.doctorId;
@@ -127,7 +129,7 @@ export const deleteAvailability = async (req, res, next) => {
 
     res.status(StatusCodes.OK).json({
       success: true,
-      message: 'Availability slot deleted successfully',
+      message: "Availability slot deleted successfully",
       data: {},
     });
   } catch (error) {

@@ -36,28 +36,35 @@ const AdminDashboard = () => {
   const [appointmentCount, setAppointmentCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchAll = async () => {
-      try {
-        const [userRes, payRes, apptRes] = await Promise.all([
-          customFetch.get("/api/auth/admin/stats").catch(() => null),
-          customFetch.get("/api/payment/admin/overview").catch(() => null),
-          customFetch.get("/api/appointments").catch(() => null),
-        ]);
-        if (userRes?.data?.data) setStats(userRes.data.data);
-        if (payRes?.data?.data) setPaymentStats(payRes.data.data);
-        if (apptRes?.data) {
-          const appts =
-            apptRes.data.data || apptRes.data.appointments || apptRes.data;
-          if (Array.isArray(appts)) setAppointmentCount(appts.length);
-        }
-      } catch (err) {
-        console.error("Dashboard fetch error:", err);
-      } finally {
-        setLoading(false);
+  const fetchAll = async () => {
+    try {
+      const [userRes, payRes, apptRes] = await Promise.all([
+        customFetch.get("/api/auth/admin/stats").catch(() => null),
+        customFetch.get("/api/payment/admin/overview").catch(() => null),
+        customFetch.get("/api/appointments").catch(() => null),
+      ]);
+      if (userRes?.data?.data) setStats(userRes.data.data);
+      if (payRes?.data?.data) setPaymentStats(payRes.data.data);
+      if (apptRes?.data) {
+        const appts =
+          apptRes.data.data || apptRes.data.appointments || apptRes.data;
+        if (Array.isArray(appts)) setAppointmentCount(appts.length);
       }
-    };
+    } catch (err) {
+      console.error("Dashboard fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchAll();
+  }, []);
+
+  // Auto-refresh every 15s
+  useEffect(() => {
+    const interval = setInterval(fetchAll, 15000);
+    return () => clearInterval(interval);
   }, []);
 
   if (loading) {
