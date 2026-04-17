@@ -142,8 +142,8 @@ services:
     image: rabbitmq:3-management
     container_name: medilink-rabbitmq
     ports:
-      - "5782:5672"
-      - "15682:15672"
+      - "5672:5672"
+      - "15672:15672"
     networks:
       - medilink-network
 
