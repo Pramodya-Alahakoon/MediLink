@@ -6,6 +6,7 @@ import {
   FiCalendar,
   FiCreditCard,
   FiChevronRight,
+  FiChevronLeft,
   FiShield,
   FiZap,
   FiMapPin,
@@ -37,6 +38,7 @@ function PlanAppointment() {
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [availabilityData, setAvailabilityData] = useState([]);
   const [weekRange, setWeekRange] = useState(null);
+  const [currentWeekStart, setCurrentWeekStart] = useState(null);
   const [selectedDateObj, setSelectedDateObj] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
@@ -80,18 +82,35 @@ function PlanAppointment() {
     fetchDoctors();
   }, []);
 
+  // Helper: get Monday of the week containing a given date
+  const getMondayOf = (date) => {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    d.setDate(diff);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  };
+
   // 2. Fetch Availability when Doctor is Selected
-  const fetchAvailability = async (doctor) => {
+  const fetchAvailability = async (doctor, weekStartDate = null) => {
     setIsLoadingAvailability(true);
     try {
       // Use doctorId if it exists, fallback to _id
       const idToUse = doctor.doctorId || doctor._id;
-      const res = await customFetch.get(`/api/availability/week/${idToUse}`);
+      const params = weekStartDate
+        ? `?startDate=${weekStartDate.toISOString().split("T")[0]}`
+        : "";
+      const res = await customFetch.get(
+        `/api/availability/week/${idToUse}${params}`,
+      );
 
       if (res.data.success) {
         const days = res.data.data || [];
         setAvailabilityData(days);
         setWeekRange(res.data.weekRange);
+        // Track the current week's Monday
+        setCurrentWeekStart(getMondayOf(res.data.weekRange.start));
 
         // Auto-select the first available future working day
         const firstAvailable =
@@ -114,11 +133,23 @@ function PlanAppointment() {
     }
   };
 
+  const handleWeekChange = (direction) => {
+    if (!selectedDoctor || !currentWeekStart) return;
+    const newMonday = new Date(currentWeekStart);
+    newMonday.setDate(newMonday.getDate() + direction * 7);
+    // Don't allow navigating to weeks before the current week
+    const thisMonday = getMondayOf(new Date());
+    if (newMonday < thisMonday) return;
+    setSelectedSlot(null);
+    fetchAvailability(selectedDoctor, newMonday);
+  };
+
   const handleDoctorSelect = (doc) => {
     setSelectedDoctor(doc);
     setCurrentStep(2);
     // Reset slot selection
     setSelectedSlot(null);
+    setCurrentWeekStart(null);
     fetchAvailability(doc);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -591,12 +622,36 @@ function PlanAppointment() {
                     </p>
                   </div>
 
-                  {/* Date Range Pill */}
-                  <div className="bg-[#EEF5F9] dark:bg-slate-800 text-[#055153] dark:text-teal-400 px-4 py-2.5 rounded-full font-bold text-sm flex items-center justify-center gap-2 border border-[#E1EEF4] dark:border-slate-700 w-fit">
-                    <FiCalendar className="w-4 h-4" />
-                    {weekRange
-                      ? formatMonthRange(weekRange.start, weekRange.end)
-                      : "Loading..."}
+                  {/* Date Range Pill + Week Navigation */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleWeekChange(-1)}
+                      disabled={
+                        isLoadingAvailability ||
+                        (() => {
+                          const thisMonday = getMondayOf(new Date());
+                          return (
+                            currentWeekStart && currentWeekStart <= thisMonday
+                          );
+                        })()
+                      }
+                      className="w-9 h-9 flex items-center justify-center rounded-full border border-[#E1EEF4] dark:border-slate-700 bg-white dark:bg-slate-800 text-[#055153] dark:text-teal-400 hover:bg-[#EEF5F9] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      <FiChevronLeft className="w-4 h-4" />
+                    </button>
+                    <div className="bg-[#EEF5F9] dark:bg-slate-800 text-[#055153] dark:text-teal-400 px-4 py-2.5 rounded-full font-bold text-sm flex items-center justify-center gap-2 border border-[#E1EEF4] dark:border-slate-700">
+                      <FiCalendar className="w-4 h-4" />
+                      {weekRange
+                        ? formatMonthRange(weekRange.start, weekRange.end)
+                        : "Loading..."}
+                    </div>
+                    <button
+                      onClick={() => handleWeekChange(1)}
+                      disabled={isLoadingAvailability}
+                      className="w-9 h-9 flex items-center justify-center rounded-full border border-[#E1EEF4] dark:border-slate-700 bg-white dark:bg-slate-800 text-[#055153] dark:text-teal-400 hover:bg-[#EEF5F9] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      <FiChevronRight className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
 
