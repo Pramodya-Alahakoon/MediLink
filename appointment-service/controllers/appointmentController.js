@@ -247,7 +247,7 @@ export const updateAppointment = asyncHandler(async (req, res) => {
   }
 });
 
-// 5. Delete/Cancel Appointment
+// 5. Cancel Appointment (set status to Cancelled + notify doctor)
 export const deleteAppointment = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
@@ -255,13 +255,73 @@ export const deleteAppointment = asyncHandler(async (req, res) => {
     throw new BadRequestError("Appointment ID is required");
   }
 
-  const appointment = await Appointment.findByIdAndDelete(id);
+  const appointment = await Appointment.findById(id);
 
   if (!appointment) {
     throw new NotFoundError("Appointment not found");
   }
 
-  res.status(StatusCodes.OK).json({ msg: "Appointment cancelled and deleted" });
+  // Only allow cancellation of Pending appointments
+  if (appointment.status !== "Pending") {
+    throw new BadRequestError(
+      "Only Pending appointments can be cancelled by the patient",
+    );
+  }
+
+  appointment.status = "Cancelled";
+  appointment.cancellationReason = req.body?.reason || "Cancelled by patient";
+  await appointment.save();
+
+  // Notify the doctor about the cancellation (fire-and-forget)
+  if (appointment.doctorId) {
+    (async () => {
+      try {
+        const { doctor } = await fetchDoctorById(String(appointment.doctorId));
+        if (doctor?.email && doctor?.name && doctor?.phone) {
+          sendDoctorNotification({
+            email: doctor.email,
+            phone: doctor.phone,
+            name: cleanDoctorName(doctor.name),
+            type: "APPOINTMENT_CANCELLED",
+            patientName: appointment.patientName,
+            appointmentDate: appointment.appointmentDate,
+            recipientId: String(appointment.doctorId),
+            recipientRole: "doctor",
+          });
+        }
+      } catch {
+        // Non-critical
+      }
+    })();
+  }
+
+  // Notify the patient (fire-and-forget)
+  if (appointment.patientName && appointment.contactPhone) {
+    (async () => {
+      let email = appointment.patientEmail;
+      if (!email) {
+        email = await resolvePatientEmail(
+          appointment.patientId,
+          req.headers?.authorization,
+        );
+      }
+      if (email) {
+        sendNotification({
+          email,
+          phone: appointment.contactPhone,
+          name: appointment.patientName,
+          type: "APPOINTMENT_CANCELLED",
+          recipientId: appointment.patientId,
+          recipientRole: "patient",
+        });
+      }
+    })();
+  }
+
+  res.status(StatusCodes.OK).json({
+    msg: "Appointment cancelled successfully",
+    appointment,
+  });
 });
 
 // 5b. Patient updates their own PENDING appointment (edit details only)

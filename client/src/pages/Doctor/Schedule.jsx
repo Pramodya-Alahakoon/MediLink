@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
   FolderOpen,
+  CheckCircle,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { toast } from "react-hot-toast";
@@ -52,6 +53,16 @@ const Schedule = () => {
       fetchAppointments();
       fetchAllCounts();
     }
+  }, [doctorId, activeTab, page]);
+
+  // Auto-refresh every 15s so cancellations/updates appear in real time
+  useEffect(() => {
+    if (!doctorId) return;
+    const interval = setInterval(() => {
+      fetchAppointments();
+      fetchAllCounts();
+    }, 15000);
+    return () => clearInterval(interval);
   }, [doctorId, activeTab, page]);
 
   const fetchAllCounts = async () => {
@@ -420,12 +431,22 @@ const Schedule = () => {
                 )}
 
                 {apt.status === "Confirmed" && (
-                  <button
-                    onClick={() => handleStartCall(apt)}
-                    className="px-6 py-2.5 bg-[#055153] hover:bg-[#044042] dark:bg-teal-600 dark:hover:bg-teal-500 text-white font-bold text-[14px] rounded-xl transition-colors shadow-sm"
-                  >
-                    Start Call
-                  </button>
+                  <>
+                    <button
+                      onClick={() => handleStartCall(apt)}
+                      className="px-6 py-2.5 bg-[#055153] hover:bg-[#044042] dark:bg-teal-600 dark:hover:bg-teal-500 text-white font-bold text-[14px] rounded-xl transition-colors shadow-sm"
+                    >
+                      Start Call
+                    </button>
+                    <button
+                      onClick={() => handleAction("complete", apt._id)}
+                      className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-white font-bold text-[13px] rounded-xl transition-colors shadow-sm flex items-center gap-2"
+                      title="Mark appointment as completed"
+                    >
+                      <CheckCircle size={16} />
+                      Complete
+                    </button>
+                  </>
                 )}
 
                 {apt.status === "Cancelled" && (

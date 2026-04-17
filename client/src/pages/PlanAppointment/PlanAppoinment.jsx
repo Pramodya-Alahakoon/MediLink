@@ -102,7 +102,7 @@ function PlanAppointment() {
       // Use doctorId if it exists, fallback to _id
       const idToUse = doctor.doctorId || doctor._id;
       const params = weekStartDate
-        ? `?startDate=${weekStartDate.toISOString().split("T")[0]}`
+        ? `?startDate=${weekStartDate.getFullYear()}-${String(weekStartDate.getMonth() + 1).padStart(2, "0")}-${String(weekStartDate.getDate()).padStart(2, "0")}`
         : "";
       const res = await customFetch.get(
         `/api/availability/week/${idToUse}${params}`,

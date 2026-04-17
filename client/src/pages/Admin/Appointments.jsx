@@ -34,6 +34,12 @@ const AdminAppointments = () => {
     fetchAppointments();
   }, []);
 
+  // Auto-refresh every 15s so status changes appear in real time
+  useEffect(() => {
+    const interval = setInterval(fetchAppointments, 15000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Client-side filter
   let filtered = appointments;
   if (statusFilter)
