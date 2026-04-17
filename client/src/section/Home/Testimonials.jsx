@@ -36,12 +36,12 @@ const testimonials = [
 
 function Testimonials() {
   return (
-    <section className="py-24 bg-[#F8FAFB] dark:bg-slate-900 relative overflow-hidden transition-colors duration-300">
+    <section className="py-16 sm:py-20 lg:py-24 bg-[#F8FAFB] dark:bg-slate-900 relative overflow-hidden transition-colors duration-300">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/8 rounded-full blur-[120px]" />
       </div>
 
-      <div className="container mx-auto max-w-7xl px-5 sm:px-8 lg:px-16 xl:px-20 2xl:px-24 relative z-10">
+      <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 relative z-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -120,23 +120,25 @@ function Testimonials() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.4 }}
-          className="mt-14 flex flex-col sm:flex-row items-center justify-center gap-8 py-7 px-8 bg-white dark:bg-slate-800 rounded-3xl border border-gray-100 dark:border-slate-700 shadow-sm"
+          className="mt-12 py-6 px-6 sm:px-8 bg-white dark:bg-slate-800 rounded-3xl border border-gray-100 dark:border-slate-700 shadow-sm"
         >
-          {[
-            { val: "50,000+", lbl: "Patients served" },
-            { val: "500+", lbl: "Verified doctors" },
-            { val: "4.9/5", lbl: "Average rating" },
-            { val: "99.9%", lbl: "Platform uptime" },
-          ].map((stat, i) => (
-            <div key={i} className="text-center">
-              <p className="text-2xl font-extrabold font-manrope text-tertiary dark:text-white">
-                {stat.val}
-              </p>
-              <p className="text-xs text-neutral dark:text-slate-400 font-inter mt-0.5">
-                {stat.lbl}
-              </p>
-            </div>
-          ))}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+            {[
+              { val: "50,000+", lbl: "Patients served" },
+              { val: "500+", lbl: "Verified doctors" },
+              { val: "4.9/5", lbl: "Average rating" },
+              { val: "99.9%", lbl: "Platform uptime" },
+            ].map((stat, i) => (
+              <div key={i} className="text-center">
+                <p className="text-xl sm:text-2xl font-extrabold font-manrope text-tertiary dark:text-white">
+                  {stat.val}
+                </p>
+                <p className="text-xs text-neutral dark:text-slate-400 font-inter mt-0.5">
+                  {stat.lbl}
+                </p>
+              </div>
+            ))}
+          </div>
         </motion.div>
       </div>
     </section>

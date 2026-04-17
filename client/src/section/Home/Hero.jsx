@@ -61,10 +61,10 @@ function Hero() {
         />
       </div>
 
-      <div className="container mx-auto max-w-7xl px-5 sm:px-8 lg:px-16 xl:px-20 2xl:px-24 relative z-10 pt-28 pb-16 lg:pt-36 lg:pb-20">
-        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16 xl:gap-20">
+      <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 relative z-10 pt-24 pb-10 lg:pt-28 lg:pb-16">
+        <div className="flex flex-col lg:flex-row items-center justify-center gap-10 lg:gap-16 xl:gap-20">
           {/* ── LEFT COPY ── */}
-          <div className="w-full lg:w-[52%] flex flex-col items-start text-left space-y-7">
+          <div className="w-full lg:w-[52%] flex flex-col items-center text-center lg:items-start lg:text-left space-y-6 lg:space-y-7">
             {/* Tag */}
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -102,7 +102,7 @@ function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.3 }}
-              className="text-neutral dark:text-slate-400 text-base sm:text-lg leading-relaxed max-w-md font-inter transition-colors duration-300"
+              className="text-neutral dark:text-slate-400 text-base sm:text-lg leading-relaxed max-w-md mx-auto lg:mx-0 font-inter transition-colors duration-300"
             >
               Connect with top-rated specialists, book appointments in seconds,
               and manage your complete health journey — all in one intelligent
@@ -114,7 +114,7 @@ function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.45 }}
-              className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
+              className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto items-center lg:items-start"
             >
               <button
                 onClick={handleBookClick}
@@ -137,7 +137,7 @@ function Hero() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.65 }}
-              className="flex items-center gap-4 pt-2"
+              className="flex items-center gap-4 pt-2 justify-center lg:justify-start"
             >
               <div className="flex -space-x-2.5">
                 {[
@@ -187,7 +187,7 @@ function Hero() {
               {/* Glowing ring */}
               <div className="absolute inset-0 rounded-[2.5rem] bg-primary/20 blur-3xl scale-95" />
 
-              <div className="relative rounded-[2.5rem] overflow-hidden border border-white/60 dark:border-white/10 shadow-2xl h-[420px] sm:h-[500px] lg:h-[560px] bg-gradient-to-br from-primary/5 to-tertiary/5 dark:from-primary/10 dark:to-slate-800/50">
+              <div className="relative rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden border border-white/60 dark:border-white/10 shadow-2xl h-[300px] sm:h-[420px] lg:h-[560px] bg-gradient-to-br from-primary/5 to-tertiary/5 dark:from-primary/10 dark:to-slate-800/50">
                 <img
                   src="/Images/hero-doctors.png"
                   alt="MediLink Doctors"
@@ -202,7 +202,7 @@ function Hero() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 1.0, duration: 0.5 }}
-                className="absolute -left-4 sm:-left-8 top-[18%] glass dark:bg-slate-800/80 rounded-2xl px-4 py-3.5 shadow-xl flex items-center gap-3 z-20 min-w-[150px] dark:border dark:border-slate-700/50"
+                className="absolute -left-3 sm:-left-8 top-[18%] glass dark:bg-slate-800/80 rounded-2xl px-3 py-2.5 sm:px-4 sm:py-3.5 shadow-xl hidden sm:flex items-center gap-3 z-20 min-w-[130px] sm:min-w-[150px] dark:border dark:border-slate-700/50"
               >
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <FiShield className="w-5 h-5 text-primary" />
@@ -221,7 +221,7 @@ function Hero() {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 1.2, duration: 0.5 }}
-                className="absolute -right-4 sm:-right-8 bottom-[20%] glass dark:bg-slate-800/80 rounded-2xl px-4 py-3.5 shadow-xl flex items-center gap-3 z-20 min-w-[150px] dark:border dark:border-slate-700/50"
+                className="absolute -right-3 sm:-right-8 bottom-[20%] glass dark:bg-slate-800/80 rounded-2xl px-3 py-2.5 sm:px-4 sm:py-3.5 shadow-xl hidden sm:flex items-center gap-3 z-20 min-w-[130px] sm:min-w-[150px] dark:border dark:border-slate-700/50"
               >
                 <div className="w-10 h-10 rounded-xl bg-green-50 dark:bg-green-500/10 flex items-center justify-center flex-shrink-0">
                   <svg

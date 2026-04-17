@@ -73,19 +73,19 @@ const item = {
 
 function Services() {
   return (
-    <section className="py-24 bg-white dark:bg-slate-900 relative overflow-hidden transition-colors duration-300">
+    <section className="py-16 sm:py-20 lg:py-24 bg-white dark:bg-slate-900 relative overflow-hidden transition-colors duration-300">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 right-0 w-[600px] h-[400px] bg-primary/5 rounded-full blur-[120px]" />
       </div>
 
-      <div className="container mx-auto max-w-7xl px-5 sm:px-8 lg:px-16 xl:px-20 2xl:px-24 relative z-10">
+      <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 relative z-10">
         {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="max-w-2xl mb-16"
+          className="max-w-2xl mb-10 lg:mb-16"
         >
           <span className="inline-block text-xs font-bold font-inter tracking-widest text-primary uppercase mb-3">
             What We Offer

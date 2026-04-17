@@ -35,12 +35,12 @@ const stats = [
 function Stats() {
   return (
     <section className="py-10 bg-white dark:bg-slate-900 border-y border-gray-100 dark:border-slate-800 transition-colors duration-300">
-      <div className="container mx-auto max-w-7xl px-5 sm:px-8 lg:px-16 xl:px-20 2xl:px-24">
+      <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-12">
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8"
         >
           {stats.map((stat, index) => {
             const Icon = stat.icon;

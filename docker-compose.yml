@@ -42,7 +42,6 @@ services:
     environment:
       - PORT=5000
       - JWT_SECRET=${JWT_SECRET:-secret123}
-      - GROQ_API_KEY=${GROQ_API_KEY:-}
     env_file:
       - ./auth-service/.env
     volumes:
