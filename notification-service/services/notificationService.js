@@ -9,6 +9,7 @@ const ALLOWED_TYPES = [
   "CONSULTATION_COMPLETED",
   "APPOINTMENT_BOOKED_DOCTOR",
   "CONSULTATION_COMPLETED_DOCTOR",
+  "PROFILE_UPDATED",
 ];
 
 /**
@@ -37,9 +38,15 @@ function buildNotificationMessage(type, name, extra = {}) {
     return { subject, text, html: wrapHtml(subject, text) };
   }
   // CONSULTATION_COMPLETED_DOCTOR
-  const patientInfo = extra.patientName ? ` with ${extra.patientName}` : "";
-  const subject = "Consultation Session Completed – MediLink";
-  const text = `Dear Dr. ${name}, your consultation session${patientInfo} has been marked as completed in MediLink. The session record is now available in your dashboard.`;
+  if (type === "CONSULTATION_COMPLETED_DOCTOR") {
+    const patientInfo = extra.patientName ? ` with ${extra.patientName}` : "";
+    const subject = "Consultation Session Completed – MediLink";
+    const text = `Dear Dr. ${name}, your consultation session${patientInfo} has been marked as completed in MediLink. The session record is now available in your dashboard.`;
+    return { subject, text, html: wrapHtml(subject, text) };
+  }
+  // PROFILE_UPDATED
+  const subject = "Profile Updated – MediLink";
+  const text = `Hello ${name}, your profile has been successfully updated in MediLink.`;
   return { subject, text, html: wrapHtml(subject, text) };
 }
 
@@ -123,6 +130,8 @@ export async function processNotification({
   type,
   patientName,
   appointmentDate,
+  recipientId,
+  recipientRole,
 }) {
   const validationError = validateNotificationPayload({
     email,
@@ -169,6 +178,9 @@ export async function processNotification({
         : "FAILED";
 
   await saveNotificationLog({
+    recipientId: recipientId || null,
+    recipientRole:
+      recipientRole || (type.includes("DOCTOR") ? "doctor" : "patient"),
     name: String(name).trim(),
     email: email.trim().toLowerCase(),
     phone: normalizedPhone,

@@ -281,10 +281,13 @@ export const patientApi = {
   },
 
   // ========== NOTIFICATIONS ==========
-  async getNotificationHistory(email) {
+  async getNotificationHistory(email, recipientId) {
+    const params = {};
+    if (recipientId) params.recipientId = recipientId;
+    else if (email) params.email = email;
     const { data } = await customFetch.get(
       `${ENDPOINTS.notification}/history`,
-      { params: { email } },
+      { params },
     );
     return data;
   },
@@ -293,6 +296,29 @@ export const patientApi = {
     const { data } = await customFetch.post(
       `${ENDPOINTS.notification}/notify`,
       payload,
+    );
+    return data;
+  },
+
+  async markNotificationRead(id) {
+    const { data } = await customFetch.patch(
+      `${ENDPOINTS.notification}/${id}/read`,
+    );
+    return data;
+  },
+
+  async markAllNotificationsRead(recipientId, email) {
+    const { data } = await customFetch.patch(
+      `${ENDPOINTS.notification}/read-all`,
+      { recipientId, email },
+    );
+    return data;
+  },
+
+  async clearNotifications(recipientId, email) {
+    const { data } = await customFetch.delete(
+      `${ENDPOINTS.notification}/clear`,
+      { data: { recipientId, email } },
     );
     return data;
   },

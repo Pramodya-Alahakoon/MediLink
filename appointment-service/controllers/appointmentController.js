@@ -108,6 +108,8 @@ export const bookAppointment = asyncHandler(async (req, res) => {
             phone: appointment.contactPhone,
             name: appointment.patientName,
             type: "APPOINTMENT_BOOKED",
+            recipientId: appointment.patientId,
+            recipientRole: "patient",
           });
         }
       })();
@@ -128,6 +130,8 @@ export const bookAppointment = asyncHandler(async (req, res) => {
               type: "APPOINTMENT_BOOKED_DOCTOR",
               patientName: appointment.patientName,
               appointmentDate: appointment.appointmentDate,
+              recipientId: String(appointment.doctorId),
+              recipientRole: "doctor",
             });
           }
         } catch {
