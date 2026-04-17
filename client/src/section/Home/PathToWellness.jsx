@@ -34,18 +34,18 @@ const steps = [
 
 function PathToWellness() {
   return (
-    <section className="py-24 bg-white dark:bg-slate-900 relative overflow-hidden transition-colors duration-300">
+    <section className="py-16 sm:py-20 lg:py-24 bg-white dark:bg-slate-900 relative overflow-hidden transition-colors duration-300">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute bottom-0 left-1/2 w-[800px] h-[300px] bg-primary/5 rounded-full blur-[100px] -translate-x-1/2" />
       </div>
 
-      <div className="container mx-auto max-w-7xl px-5 sm:px-8 lg:px-16 xl:px-20 2xl:px-24 relative z-10">
+      <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 relative z-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center max-w-2xl mx-auto mb-20"
+          className="text-center max-w-2xl mx-auto mb-12 lg:mb-20"
         >
           <span className="inline-block text-xs font-bold font-inter tracking-widest text-primary uppercase mb-3">
             How It Works

@@ -9,7 +9,7 @@ const benefits = [
 
 function SymptomAnalysis() {
   return (
-    <section className="py-24 bg-white dark:bg-slate-900 relative overflow-hidden transition-colors duration-300">
+    <section className="py-16 sm:py-20 lg:py-24 bg-white dark:bg-slate-900 relative overflow-hidden transition-colors duration-300">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-br from-tertiary via-[#0d3b5c] to-primary" />
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px]" />
@@ -24,7 +24,7 @@ function SymptomAnalysis() {
         />
       </div>
 
-      <div className="container mx-auto max-w-7xl px-5 sm:px-8 lg:px-16 xl:px-20 2xl:px-24 relative z-10">
+      <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 relative z-10">
         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
           {/* Left copy */}
           <div className="w-full lg:w-1/2 text-white">

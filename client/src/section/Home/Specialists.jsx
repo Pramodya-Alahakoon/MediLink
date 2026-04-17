@@ -53,12 +53,12 @@ function Specialists() {
   const navigate = useNavigate();
 
   return (
-    <section className="py-24 bg-[#F8FAFB] dark:bg-slate-900 relative overflow-hidden transition-colors duration-300">
+    <section className="py-16 sm:py-20 lg:py-24 bg-[#F8FAFB] dark:bg-slate-900 relative overflow-hidden transition-colors duration-300">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[900px] h-[400px] bg-primary/8 rounded-full blur-[120px]" />
       </div>
 
-      <div className="container mx-auto max-w-7xl px-5 sm:px-8 lg:px-16 xl:px-20 2xl:px-24 relative z-10">
+      <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 relative z-10">
         {/* Section header */}
         <div className="flex flex-col sm:flex-row justify-between items-end gap-4 mb-12">
           <motion.div
@@ -101,7 +101,7 @@ function Specialists() {
             >
               {/* Image area */}
               <div
-                className={`relative h-56 bg-gradient-to-b ${doc.color} flex items-end justify-center overflow-hidden pt-4`}
+                className={`relative h-48 sm:h-56 bg-gradient-to-b ${doc.color} flex items-end justify-center overflow-hidden pt-4`}
               >
                 <img
                   src={doc.image}
