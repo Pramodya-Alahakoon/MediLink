@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: doctor-service
+  namespace: medilink
+  labels:
+    app: doctor-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: doctor-service
+  template:
+    metadata:
+      labels:
+        app: doctor-service
+    spec:
+      containers:
+        - name: doctor-service
+          image: medilink-doctor-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3003
+          env:
+            - name: PORT
+              value: "3003"
+            - name: NODE_ENV
+              value: "production"
+            - name: JWT_SECRET
+              value: "secret123"
+            - name: MONGO_URI
+              value: "mongodb+srv://chiransamiru2002_db_user:Medilink2026@cluster0.ytfzhlz.mongodb.net/doctor-service?retryWrites=true&w=majority&appName=Cluster0"
+            - name: APPOINTMENT_SERVICE_URL
+              value: "http://appointment-service:5002"
+            - name: PATIENT_SERVICE_URL
+              value: "http://patient-service:3001"
+            - name: NOTIFICATION_SERVICE_URL
+              value: "http://notification-service:5003"

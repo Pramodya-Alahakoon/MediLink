@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: patient-service
+  namespace: medilink
+  labels:
+    app: patient-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: patient-service
+  template:
+    metadata:
+      labels:
+        app: patient-service
+    spec:
+      containers:
+        - name: patient-service
+          image: medilink-patient-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3001
+          env:
+            - name: PORT
+              value: "3001"
+            - name: NODE_ENV
+              value: "production"
+            - name: JWT_SECRET
+              value: "secret123"
+            - name: MONGO_URI
+              value: "mongodb://havindunimadith7_db_user:v9Ti7NbCvFQIuMqa@ac-tg8gvp5-shard-00-00.ytfzhlz.mongodb.net:27017,ac-tg8gvp5-shard-00-01.ytfzhlz.mongodb.net:27017,ac-tg8gvp5-shard-00-02.ytfzhlz.mongodb.net:27017/?ssl=true&replicaSet=atlas-z4mp8x-shard-0&authSource=admin&appName=Cluster0"
+            - name: CLIENT_URL
+              value: "http://client:5173"
+            - name: SKIP_CLOUDINARY
+              value: "true"

@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: medilink
+  labels:
+    app: api-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+        - name: api-gateway
+          image: medilink-api-gateway:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5000
+          env:
+            - name: PORT
+              value: "5000"
+            - name: NODE_ENV
+              value: "production"
+            - name: JWT_SECRET
+              value: "secret123"
+            - name: PATIENT_SERVICE
+              value: "http://patient-service:3001"
+            - name: APPOINTMENT_SERVICE
+              value: "http://appointment-service:5002"
+            - name: DOCTOR_SERVICE
+              value: "http://doctor-service:3003"
+            - name: PAYMENT_SERVICE
+              value: "http://payment-service:3005"
+            - name: AUTH_SERVICE
+              value: "http://auth-service:5000"
+            - name: AI_SERVICE
+              value: "http://ai-symptom-service:3001"
+            - name: NOTIFICATION_SERVICE
+              value: "http://notification-service:5003"
+            - name: TELEMEDICINE_SERVICE
+              value: "http://telemedicine-service:3004"
