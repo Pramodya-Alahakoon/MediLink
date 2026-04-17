@@ -341,10 +341,54 @@ export const refundPayment = async (req, res, next) => {
   }
 };
 
+// Admin: Platform-wide payment overview
+export const getAdminPaymentOverview = async (req, res, next) => {
+  try {
+    const [
+      totalPayments,
+      completedPayments,
+      pendingPayments,
+      failedPayments,
+      refundedPayments,
+      revenueAgg,
+      recentPayments,
+    ] = await Promise.all([
+      Payment.countDocuments(),
+      Payment.countDocuments({ status: "completed" }),
+      Payment.countDocuments({ status: "pending" }),
+      Payment.countDocuments({ status: "failed" }),
+      Payment.countDocuments({ status: "refunded" }),
+      Payment.aggregate([
+        { $match: { status: "completed" } },
+        { $group: { _id: null, total: { $sum: "$amount" } } },
+      ]),
+      Payment.find().sort({ createdAt: -1 }).limit(20).lean(),
+    ]);
+
+    const totalRevenue = revenueAgg[0]?.total || 0;
+
+    res.status(200).json({
+      success: true,
+      data: {
+        totalPayments,
+        completedPayments,
+        pendingPayments,
+        failedPayments,
+        refundedPayments,
+        totalRevenue,
+        recentPayments,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export default {
   createCheckoutSession,
   verifyCheckoutSession,
   getPayment,
   getUserPayments,
   refundPayment,
+  getAdminPaymentOverview,
 };

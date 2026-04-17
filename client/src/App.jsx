@@ -22,6 +22,12 @@ import DoctorReports from "./pages/Doctor/Reports";
 import AdminDeletionReview from "./pages/Doctor/AdminDeletionReview";
 import DoctorPatients from "./pages/Doctor/Patients";
 import Notes from "./pages/Doctor/Notes";
+import AdminLayout from "./layouts/AdminLayout";
+import AdminDashboard from "./pages/Admin/Dashboard";
+import AdminUsers from "./pages/Admin/Users";
+import AdminDoctors from "./pages/Admin/Doctors";
+import AdminAppointments from "./pages/Admin/Appointments";
+import AdminPayments from "./pages/Admin/Payments";
 import PatientLayout from "./layouts/PatientLayout";
 import PatientDashboard from "./pages/Patient/Dashboard";
 import PatientProfile from "./pages/Patient/Profile";
@@ -181,6 +187,23 @@ function App() {
                       element={<PaymentSuccess />}
                     />
                     <Route path="/payment/cancel" element={<PaymentCancel />} />
+                  </Route>
+                </Route>
+
+                {/* Admin Dashboard Routes - Admin Only */}
+                <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+                  <Route element={<AdminLayout />}>
+                    <Route
+                      path="/admin/dashboard"
+                      element={<AdminDashboard />}
+                    />
+                    <Route path="/admin/users" element={<AdminUsers />} />
+                    <Route path="/admin/doctors" element={<AdminDoctors />} />
+                    <Route
+                      path="/admin/appointments"
+                      element={<AdminAppointments />}
+                    />
+                    <Route path="/admin/payments" element={<AdminPayments />} />
                   </Route>
                 </Route>
               </Routes>
