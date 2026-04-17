@@ -92,9 +92,17 @@ function PlanAppointment() {
         setAvailabilityData(days);
         setWeekRange(res.data.weekRange);
 
-        // Auto-select the first working day that isn't completely blocked
+        // Auto-select the first available future working day
         const firstAvailable =
-          days.find((d) => !d.isBlocked && d.isWorkingDay) || days[0];
+          days.find(
+            (d) =>
+              !d.isBlocked &&
+              d.isWorkingDay &&
+              !d.isPast &&
+              d.slots?.length > 0,
+          ) ||
+          days.find((d) => !d.isBlocked && d.isWorkingDay && !d.isPast) ||
+          days[0];
         setSelectedDateObj(firstAvailable);
       }
     } catch (err) {
@@ -589,7 +597,9 @@ function PlanAppointment() {
                           const isSelected =
                             selectedDateObj?.date === dayData.date;
                           const isDisabled =
-                            dayData.isBlocked || !dayData.isWorkingDay;
+                            dayData.isBlocked ||
+                            !dayData.isWorkingDay ||
+                            dayData.isPast;
                           const dayShort = dayData.day
                             .substring(0, 3)
                             .toUpperCase();
