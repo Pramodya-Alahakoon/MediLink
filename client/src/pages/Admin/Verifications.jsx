@@ -68,6 +68,21 @@ const AdminVerifications = () => {
     setDoctors(filtered);
   }, [allDoctors, tabFilter, search]);
 
+  const LOCAL_DOCTOR_FILE_HOST = "http://localhost:3003";
+
+  const resolveCertificateUrl = (rawUrl) => {
+    if (!rawUrl || typeof rawUrl !== "string") return "";
+    const trimmed = rawUrl.trim();
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    if (trimmed.startsWith("/uploads/")) {
+      return `${LOCAL_DOCTOR_FILE_HOST}${trimmed}`;
+    }
+    if (trimmed.startsWith("uploads/")) {
+      return `${LOCAL_DOCTOR_FILE_HOST}/${trimmed}`;
+    }
+    return trimmed;
+  };
+
   const pendingCount = allDoctors.filter(
     (d) => d.verification?.status === "pending",
   ).length;
@@ -77,6 +92,35 @@ const AdminVerifications = () => {
   const rejectedCount = allDoctors.filter(
     (d) => d.verification?.status === "rejected",
   ).length;
+
+  const handleDownloadCertificate = async (url, doctorName) => {
+    // FIX: Cloudinary free tier blocks raw PDF delivery by default (HTTP 401).
+    // By changing the extension to .jpg, Cloudinary automatically converts the PDF
+    // to an image and serves it, bypassing the 401 security block.
+    let resolvedUrl = resolveCertificateUrl(url);
+    let isCloudinaryPdf = false;
+
+    if (
+      resolvedUrl.includes("cloudinary.com") &&
+      resolvedUrl.toLowerCase().endsWith(".pdf")
+    ) {
+      resolvedUrl = resolvedUrl.slice(0, -4) + ".jpg"; // Swap extension
+      isCloudinaryPdf = true;
+    }
+
+    const tempToast = toast.loading("Opening certificate in a new tab...");
+    try {
+      // Instead of forcing a background download that hides in the Downloads folder,
+      // simply open the certificate securely in the browser so the admin can view it instantly.
+      window.open(resolvedUrl, "_blank", "noopener,noreferrer");
+      toast.dismiss(tempToast);
+      toast.success("Certificate opened!");
+    } catch (error) {
+      toast.dismiss(tempToast);
+      console.error("Failed to open certificate:", error);
+      toast.error("Failed to open the certificate.");
+    }
+  };
 
   const handleApprove = async (doctor) => {
     if (
@@ -274,33 +318,47 @@ const AdminVerifications = () => {
                   {selectedDoctor.verification.slmcCertificateUrl.includes(
                     ".pdf",
                   ) ? (
-                    <a
-                      href={selectedDoctor.verification.slmcCertificateUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 p-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+                    <div
+                      onClick={() =>
+                        handleDownloadCertificate(
+                          selectedDoctor.verification.slmcCertificateUrl,
+                          selectedDoctor.name,
+                        )
+                      }
+                      className="flex items-center gap-2 p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition"
                     >
                       <FileText size={20} className="text-red-500" />
                       <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
-                        View PDF Certificate
+                        Open PDF Certificate
                       </span>
                       <ExternalLink
                         size={14}
                         className="text-slate-400 ml-auto"
                       />
-                    </a>
+                    </div>
                   ) : (
-                    <a
-                      href={selectedDoctor.verification.slmcCertificateUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <div
+                      onClick={() =>
+                        handleDownloadCertificate(
+                          selectedDoctor.verification.slmcCertificateUrl,
+                          selectedDoctor.name,
+                        )
+                      }
+                      className="cursor-pointer group relative"
                     >
                       <img
-                        src={selectedDoctor.verification.slmcCertificateUrl}
+                        src={resolveCertificateUrl(
+                          selectedDoctor.verification.slmcCertificateUrl,
+                        ).replace(/\.pdf$/i, ".jpg")}
                         alt="SLMC Certificate"
-                        className="w-full max-h-80 object-contain bg-slate-50 dark:bg-slate-800"
+                        className="w-full max-h-80 object-contain bg-slate-50 dark:bg-slate-800 transition-opacity group-hover:opacity-90"
                       />
-                    </a>
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+                        <span className="bg-white text-slate-800 text-sm font-semibold px-4 py-2 rounded-lg shadow-lg">
+                          Open Full Certificate
+                        </span>
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>

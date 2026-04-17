@@ -65,7 +65,10 @@ function PlanAppointment() {
     const fetchDoctors = async () => {
       try {
         const { data } = await customFetch.get("/api/doctor");
-        const docs = data.data || [];
+        // Filter out doctors who are not 'approved'
+        const docs = (data.data || []).filter(
+          (d) => d.verification?.status === "approved",
+        );
         setDoctors(docs);
 
         const uniqueSpecialties = [

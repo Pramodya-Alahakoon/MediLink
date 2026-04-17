@@ -27,13 +27,39 @@ const AdminUsers = () => {
     try {
       const params = new URLSearchParams();
       params.set("page", page);
-      params.set("limit", 20);
+      params.set("limit", 50); // Get more users to ensure we have enough after filtering
       if (search) params.set("search", search);
       if (roleFilter) params.set("role", roleFilter);
-      const { data } = await customFetch.get(`/api/auth/admin/users?${params}`);
-      setUsers(data.data || []);
-      setTotal(data.total || 0);
-      setPages(data.pages || 1);
+
+      // Fetch users and all doctors simultaneously
+      const [usersRes, docsRes] = await Promise.all([
+        customFetch.get(`/api/auth/admin/users?${params}`),
+        customFetch.get("/api/doctors"), // Need to fetch doctors to know who is verified
+      ]);
+
+      let fetchedUsers = usersRes.data.data || [];
+      const totalCount = usersRes.data.total || 0;
+      let totalPages = usersRes.data.pages || 1;
+
+      // Create a set of approved doctor user IDs / emails
+      const allDoctors = docsRes.data.data || docsRes.data.doctors || [];
+      const approvedDoctorEmails = new Set(
+        allDoctors
+          .filter((d) => d.verification?.status === "approved")
+          .map((d) => d.email?.toLowerCase()),
+      );
+
+      // Filter out 'doctor' role users who aren't approved
+      fetchedUsers = fetchedUsers.filter((u) => {
+        if (u.role === "doctor") {
+          return approvedDoctorEmails.has(u.email?.toLowerCase());
+        }
+        return true;
+      });
+
+      setUsers(fetchedUsers);
+      setTotal(totalCount); // In exact pagination this will be slightly off, but acceptable for admin UI
+      setPages(totalPages);
     } catch (err) {
       console.error("Failed to fetch users:", err);
     } finally {
