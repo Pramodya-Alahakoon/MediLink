@@ -5,6 +5,7 @@ import {
   ClipboardList,
   Wallet,
   Download,
+  Star,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useDoctorContext } from "../../context/DoctorContext";
@@ -35,6 +36,11 @@ const Dashboard = () => {
   });
   const [appointments, setAppointments] = useState([]);
   const [loadingStats, setLoadingStats] = useState(true);
+  const [ratingData, setRatingData] = useState({
+    average: 0,
+    total: 0,
+    stars: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+  });
 
   useEffect(() => {
     if (!doctorId) return;
@@ -42,9 +48,10 @@ const Dashboard = () => {
     const fetchDashboardData = async () => {
       setLoadingStats(true);
       try {
-        const [apptRes, paymentRes] = await Promise.allSettled([
+        const [apptRes, paymentRes, ratingRes] = await Promise.allSettled([
           customFetch.get(`/api/doctors/${doctorId}/appointments?limit=500`),
           customFetch.get(`/api/payment/doctor/summary?doctorId=${doctorId}`),
+          customFetch.get(`/api/doctors/${doctorId}/rating-summary`),
         ]);
 
         const allAppointments =
@@ -73,6 +80,10 @@ const Dashboard = () => {
           pendingCount: pendingAppts.length,
           monthlyEarnings: monthlyTotal.toLocaleString(),
         });
+
+        if (ratingRes.status === "fulfilled" && ratingRes.value.data?.data) {
+          setRatingData(ratingRes.value.data.data);
+        }
 
         setAppointments(allAppointments);
       } catch (err) {
@@ -119,7 +130,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 md:gap-6">
           <StatCard
             title="Total Appointments"
             value={loadingStats ? "…" : String(stats.total)}
@@ -152,6 +163,21 @@ const Dashboard = () => {
             value={loadingStats ? "…" : stats.monthlyEarnings}
             icon={Wallet}
             isHighlighted={true}
+          />
+          <StatCard
+            title="Average Rating"
+            value={
+              loadingStats
+                ? "…"
+                : ratingData.average > 0
+                  ? `${ratingData.average} ★`
+                  : "No ratings"
+            }
+            badgeText={
+              ratingData.total > 0 ? `${ratingData.total} reviews` : undefined
+            }
+            badgeColor="green"
+            icon={Star}
           />
         </div>
 

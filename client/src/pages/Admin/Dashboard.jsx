@@ -7,6 +7,7 @@ import {
   TrendingUp,
   UserPlus,
   Loader2,
+  Star,
 } from "lucide-react";
 import customFetch from "../../utils/customFetch";
 
@@ -34,15 +35,17 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
   const [paymentStats, setPaymentStats] = useState(null);
   const [appointmentCount, setAppointmentCount] = useState(0);
+  const [avgDoctorRating, setAvgDoctorRating] = useState({ avg: 0, total: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAll = async () => {
       try {
-        const [userRes, payRes, apptRes] = await Promise.all([
+        const [userRes, payRes, apptRes, doctorRes] = await Promise.all([
           customFetch.get("/api/auth/admin/stats").catch(() => null),
           customFetch.get("/api/payments/admin/overview").catch(() => null),
           customFetch.get("/api/appointments").catch(() => null),
+          customFetch.get("/api/doctors").catch(() => null),
         ]);
         if (userRes?.data?.data) setStats(userRes.data.data);
         if (payRes?.data?.data) setPaymentStats(payRes.data.data);
@@ -50,6 +53,26 @@ const AdminDashboard = () => {
           const appts =
             apptRes.data.data || apptRes.data.appointments || apptRes.data;
           if (Array.isArray(appts)) setAppointmentCount(appts.length);
+        }
+        // Compute platform-wide average doctor rating
+        if (doctorRes?.data?.data) {
+          const docs = doctorRes.data.data;
+          const ratedDocs = docs.filter((d) => d.rating?.count > 0);
+          if (ratedDocs.length > 0) {
+            const totalReviews = ratedDocs.reduce(
+              (s, d) => s + d.rating.count,
+              0,
+            );
+            const weightedAvg =
+              ratedDocs.reduce(
+                (s, d) => s + d.rating.average * d.rating.count,
+                0,
+              ) / totalReviews;
+            setAvgDoctorRating({
+              avg: Math.round(weightedAvg * 10) / 10,
+              total: totalReviews,
+            });
+          }
         }
       } catch (err) {
         console.error("Dashboard fetch error:", err);
@@ -111,6 +134,16 @@ const AdminDashboard = () => {
       label: "Refunded",
       value: paymentStats?.refundedPayments ?? "—",
       color: "bg-red-500",
+    },
+    {
+      icon: Star,
+      label: "Avg Doctor Rating",
+      value: avgDoctorRating.avg > 0 ? `${avgDoctorRating.avg} ★` : "—",
+      color: "bg-amber-500",
+      sub:
+        avgDoctorRating.total > 0
+          ? `${avgDoctorRating.total} total reviews`
+          : "No reviews yet",
     },
   ];
 

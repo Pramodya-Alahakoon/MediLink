@@ -26,11 +26,6 @@ function PlanAppointment() {
   // Global View State
   const [currentStep, setCurrentStep] = useState(1);
 
-  // Payment Constants (LKR)
-  const doctorFee = 2500;
-  const serviceTax = 125;
-  const totalAmount = 2625;
-
   // ── STEP 1: Doctor State ──
   const [doctors, setDoctors] = useState([]);
   const [specialties, setSpecialties] = useState([]);
@@ -45,6 +40,12 @@ function PlanAppointment() {
   const [selectedDateObj, setSelectedDateObj] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
+
+  // Payment Constants (LKR) — fixed consultation fee
+  const doctorFee = 2500;
+  const serviceTaxRate = 0.05; // 5% service tax
+  const serviceTax = Math.round(doctorFee * serviceTaxRate);
+  const totalAmount = doctorFee + serviceTax;
 
   // ── STEP 3: Patient Details State ──
   const [patientName, setPatientName] = useState("");
@@ -431,9 +432,10 @@ function PlanAppointment() {
                           <div className="relative">
                             <img
                               src={
-                                doc.profileImage?.includes("http")
+                                doc.verification?.profilePhotoUrl ||
+                                (doc.profileImage?.includes("http")
                                   ? doc.profileImage
-                                  : "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=256&auto=format&fit=crop"
+                                  : "/default-doctor.png")
                               }
                               alt={doc.name}
                               className="w-20 h-20 rounded-[20px] object-cover shadow-sm group-hover:scale-105 transition-transform"
@@ -449,10 +451,10 @@ function PlanAppointment() {
                             <div className="flex items-center gap-1.5 mb-1">
                               <FiStar className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
                               <span className="font-bold text-[#055153] text-sm">
-                                {doc.rating?.average?.toFixed(1) || "4.9"}
+                                {doc.rating?.average?.toFixed(1) || "0.0"}
                               </span>
                               <span className="text-xs text-gray-400 dark:text-slate-500">
-                                ({doc.rating?.count || "0"} reviews)
+                                ({doc.rating?.count || 0} reviews)
                               </span>
                             </div>
 
@@ -472,24 +474,39 @@ function PlanAppointment() {
                         </div>
 
                         <div className="space-y-4 mb-7 flex-1 border-t border-gray-100 dark:border-slate-700 pt-5">
-                          <div className="flex items-center justify-between text-[13px]">
-                            <div className="flex items-center gap-2.5 text-[#4B5A69] dark:text-slate-400 font-medium">
-                              <FiCalendar className="w-4 h-4 text-[#055153]" />{" "}
-                              Next Slot
+                          {doc.location && (
+                            <div className="flex items-center justify-between text-[13px]">
+                              <div className="flex items-center gap-2.5 text-[#4B5A69] dark:text-slate-400 font-medium">
+                                <FiMapPin className="w-4 h-4 text-[#055153]" />{" "}
+                                Location
+                              </div>
+                              <div className="font-bold text-[#112429] dark:text-white truncate ml-2 max-w-[160px]">
+                                {doc.location}
+                              </div>
                             </div>
-                            <div className="font-bold text-[#112429] dark:text-white">
-                              Tomorrow, 09:30 AM
-                            </div>
-                          </div>
+                          )}
                           <div className="flex items-center justify-between text-[13px]">
                             <div className="flex items-center gap-2.5 text-[#4B5A69] dark:text-slate-400 font-medium">
                               <FiCreditCard className="w-4 h-4 text-[#055153]" />{" "}
                               Consultation
                             </div>
                             <div className="font-bold text-[#112429] dark:text-white">
-                              Rs. 2500.00
+                              {doc.consultationFee
+                                ? `Rs. ${doc.consultationFee.toLocaleString()}.00`
+                                : "Contact for fee"}
                             </div>
                           </div>
+                          {doc.hospital && (
+                            <div className="flex items-center justify-between text-[13px]">
+                              <div className="flex items-center gap-2.5 text-[#4B5A69] dark:text-slate-400 font-medium">
+                                <FiBriefcase className="w-4 h-4 text-[#055153]" />{" "}
+                                Hospital
+                              </div>
+                              <div className="font-bold text-[#112429] dark:text-white truncate ml-2 max-w-[160px]">
+                                {doc.hospital}
+                              </div>
+                            </div>
+                          )}
                         </div>
 
                         <button
@@ -776,9 +793,10 @@ function PlanAppointment() {
                     <div className="relative mb-5">
                       <img
                         src={
-                          selectedDoctor?.profileImage?.includes("http")
+                          selectedDoctor?.verification?.profilePhotoUrl ||
+                          (selectedDoctor?.profileImage?.includes("http")
                             ? selectedDoctor.profileImage
-                            : "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=256&auto=format&fit=crop"
+                            : "/default-doctor.png")
                         }
                         alt={selectedDoctor?.name}
                         className="w-24 h-24 rounded-3xl object-cover shadow-xl shadow-teal-900/10"
@@ -797,9 +815,9 @@ function PlanAppointment() {
                     </p>
                     <div className="inline-flex bg-white dark:bg-slate-700 shadow-sm border border-gray-100 dark:border-slate-600 px-3 py-1 rounded-full items-center gap-1.5 text-sm font-bold text-slate-700 dark:text-slate-200">
                       <FiStar className="text-amber-400 fill-amber-400 w-3.5 h-3.5" />
-                      {selectedDoctor?.rating?.average?.toFixed(1) || "4.9"}
+                      {selectedDoctor?.rating?.average?.toFixed(1) || "0.0"}
                       <span className="text-xs font-medium text-slate-400 ml-1">
-                        ({selectedDoctor?.rating?.count || "120"} reviews)
+                        ({selectedDoctor?.rating?.count || 0} reviews)
                       </span>
                     </div>
                   </div>
@@ -815,8 +833,7 @@ function PlanAppointment() {
                           Location
                         </p>
                         <p className="font-bold text-[#112429] dark:text-white text-[13px]">
-                          {selectedDoctor?.location ||
-                            "Central Medical Plaza, Suite 402"}
+                          {selectedDoctor?.location || "Not specified"}
                         </p>
                       </div>
                     </div>
@@ -830,7 +847,9 @@ function PlanAppointment() {
                           Fee
                         </p>
                         <p className="font-bold text-[#112429] dark:text-white text-[13px]">
-                          Rs. 2500.00 per session
+                          {selectedDoctor?.consultationFee
+                            ? `Rs. ${selectedDoctor.consultationFee.toLocaleString()}.00 per session`
+                            : "Contact for fee"}
                         </p>
                       </div>
                     </div>
@@ -1088,9 +1107,10 @@ function PlanAppointment() {
                     <div className="relative mb-5">
                       <img
                         src={
-                          selectedDoctor?.profileImage?.includes("http")
+                          selectedDoctor?.verification?.profilePhotoUrl ||
+                          (selectedDoctor?.profileImage?.includes("http")
                             ? selectedDoctor.profileImage
-                            : "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=256&auto=format&fit=crop"
+                            : "/default-doctor.png")
                         }
                         alt={selectedDoctor?.name}
                         className="w-24 h-24 rounded-3xl object-cover shadow-xl shadow-teal-900/10"
@@ -1211,9 +1231,10 @@ function PlanAppointment() {
                   <div className="flex items-center gap-4">
                     <img
                       src={
-                        selectedDoctor?.profileImage?.includes("http")
+                        selectedDoctor?.verification?.profilePhotoUrl ||
+                        (selectedDoctor?.profileImage?.includes("http")
                           ? selectedDoctor.profileImage
-                          : "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=256&auto=format&fit=crop"
+                          : "/default-doctor.png")
                       }
                       alt={selectedDoctor?.name}
                       className="w-14 h-14 rounded-2xl object-cover"
@@ -1491,7 +1512,7 @@ function PlanAppointment() {
                       ) : (
                         <>
                           <FiCreditCard className="w-5 h-5" /> Confirm Booking &
-                          Pay Rs. 2625
+                          Pay Rs. {totalAmount}
                         </>
                       )}
                     </button>
@@ -1509,9 +1530,10 @@ function PlanAppointment() {
                     <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-100 dark:border-slate-700">
                       <img
                         src={
-                          selectedDoctor?.profileImage?.includes("http")
+                          selectedDoctor?.verification?.profilePhotoUrl ||
+                          (selectedDoctor?.profileImage?.includes("http")
                             ? selectedDoctor.profileImage
-                            : "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=256&auto=format&fit=crop"
+                            : "/default-doctor.png")
                         }
                         alt={selectedDoctor?.name}
                         className="w-14 h-14 rounded-2xl object-cover shadow-md"

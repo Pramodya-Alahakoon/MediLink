@@ -197,7 +197,15 @@ const AdminDoctors = () => {
               <div className="flex justify-between">
                 <span className="text-slate-500">Fee</span>
                 <span className="text-[#112429] dark:text-slate-200 font-medium">
-                  Rs. {selectedDoctor.consultationFee || "—"}
+                  Rs. 2,500
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Rating</span>
+                <span className="text-[#112429] dark:text-slate-200 font-medium">
+                  {selectedDoctor.rating?.average > 0
+                    ? `${selectedDoctor.rating.average} ★ (${selectedDoctor.rating.count} reviews)`
+                    : "No ratings yet"}
                 </span>
               </div>
             </div>
@@ -233,7 +241,7 @@ const AdminDoctors = () => {
                   <th className="px-6 py-3 font-bold">Specialization</th>
                   <th className="px-6 py-3 font-bold">Email</th>
                   <th className="px-6 py-3 font-bold">Status</th>
-                  <th className="px-6 py-3 font-bold">Fee</th>
+                  <th className="px-6 py-3 font-bold">Rating</th>
                   <th className="px-6 py-3 font-bold text-right">Actions</th>
                 </tr>
               </thead>
@@ -270,8 +278,19 @@ const AdminDoctors = () => {
                       {d.email || "—"}
                     </td>
                     <td className="px-6 py-4">{statusBadge(d.status)}</td>
-                    <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
-                      Rs. {d.consultationFee || "—"}
+                    <td className="px-6 py-4 text-sm">
+                      {d.rating?.average > 0 ? (
+                        <span className="font-semibold text-amber-600 dark:text-amber-400">
+                          {d.rating.average} ★
+                          <span className="text-slate-400 dark:text-slate-500 font-normal ml-1">
+                            ({d.rating.count})
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 dark:text-slate-500">
+                          —
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-2">
