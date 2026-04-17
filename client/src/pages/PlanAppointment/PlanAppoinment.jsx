@@ -18,11 +18,12 @@ import { FaUserMd, FaShieldAlt, FaSun, FaMoon } from "react-icons/fa";
 import { MdVerified } from "react-icons/md";
 import customFetch from "../../utils/customFetch";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 function PlanAppointment() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   // Global View State
   const [currentStep, setCurrentStep] = useState(1);
@@ -84,6 +85,27 @@ function PlanAppointment() {
     };
     fetchDoctors();
   }, []);
+
+  // Auto-select doctor if navigated from /patient/doctors
+  useEffect(() => {
+    const navDoctor = location.state?.doctor;
+    if (navDoctor && !isLoadingDoctors && doctors.length >= 0) {
+      // Match by doctorId or _id
+      const match =
+        doctors.find(
+          (d) => d.doctorId === navDoctor.doctorId || d._id === navDoctor._id,
+        ) || navDoctor;
+      if (match) {
+        setSelectedDoctor(match);
+        setCurrentStep(2);
+        setSelectedSlot(null);
+        setCurrentWeekStart(null);
+        fetchAvailability(match);
+        // Clear state so refreshing doesn't re-trigger
+        window.history.replaceState({}, document.title);
+      }
+    }
+  }, [isLoadingDoctors, doctors, location.state]);
 
   // Helper: get Monday of the week containing a given date
   const getMondayOf = (date) => {

@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { FiCpu, FiUser, FiSend } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
 const benefits = [
   "Instant triage before you even leave home",
@@ -8,6 +9,7 @@ const benefits = [
 ];
 
 function SymptomAnalysis() {
+  const navigate = useNavigate();
   return (
     <section className="py-16 sm:py-20 lg:py-24 bg-white dark:bg-slate-900 relative overflow-hidden transition-colors duration-300">
       <div className="absolute inset-0 pointer-events-none">
@@ -32,7 +34,7 @@ function SymptomAnalysis() {
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
-              className="inline-block text-xs font-bold font-inter tracking-widest text-primary/80 uppercase mb-4 bg-white/10 px-3 py-1 rounded-full"
+              className="inline-block text-xs font-bold font-inter tracking-widest text-emerald-300 uppercase mb-4 bg-white/10 px-3 py-1 rounded-full"
             >
               AI Symptom Engine
             </motion.span>
@@ -40,11 +42,11 @@ function SymptomAnalysis() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-manrope mb-6 leading-tight"
+              className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-manrope mb-6 leading-tight text-white"
             >
               Smart care starts
               <br />
-              <span className="text-primary/90">before the appointment.</span>
+              <span className="text-emerald-400">before the appointment.</span>
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 16 }}
@@ -86,6 +88,7 @@ function SymptomAnalysis() {
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.4 }}
+              onClick={() => navigate("/signin")}
               className="inline-flex items-center gap-2.5 bg-primary text-white font-semibold font-inter px-6 py-3.5 rounded-2xl shadow-lg shadow-primary/30 hover:bg-primary/90 hover:-translate-y-0.5 transition-all duration-300 text-sm"
             >
               <FiCpu className="w-4 h-4" />

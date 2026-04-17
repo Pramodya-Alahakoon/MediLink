@@ -7,6 +7,7 @@ import Specialists from "@/section/Home/Specialists";
 import PathToWellness from "@/section/Home/PathToWellness";
 import WhyMediLink from "@/section/Home/WhyMediLink";
 import Testimonials from "@/section/Home/Testimonials";
+import FAQ from "@/section/Home/FAQ";
 import AiChatBot from "@/components/AiChatBot";
 import HomeSplashScreen from "@/components/UI/HomeSplashScreen";
 
@@ -34,6 +35,7 @@ const Home = () => {
         <Specialists />
         <PathToWellness />
         <WhyMediLink />
+        <FAQ />
         <Testimonials />
         <AiChatBot />
       </main>
