@@ -18,9 +18,11 @@ import { MdVerified } from "react-icons/md";
 import customFetch from "../../utils/customFetch";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 function PlanAppointment() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   // Global View State
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -189,6 +191,7 @@ function PlanAppointment() {
         symptoms,
         patientName,
         contactPhone,
+        patientEmail: user?.email || "",
         specialization: selectedDoctor.specialization || undefined,
       };
 
