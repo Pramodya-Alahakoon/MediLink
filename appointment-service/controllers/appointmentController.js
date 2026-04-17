@@ -264,6 +264,37 @@ export const deleteAppointment = asyncHandler(async (req, res) => {
   res.status(StatusCodes.OK).json({ msg: "Appointment cancelled and deleted" });
 });
 
+// 5b. Patient updates their own PENDING appointment (edit details only)
+export const updateMyAppointment = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const patientId = req.user.userId;
+
+  const appointment = await Appointment.findById(id);
+  if (!appointment) throw new NotFoundError("Appointment not found");
+
+  if (String(appointment.patientId) !== String(patientId)) {
+    throw new BadRequestError("You can only edit your own appointments");
+  }
+  if (appointment.status !== "Pending") {
+    throw new BadRequestError(
+      "Only Pending appointments can be edited by patients",
+    );
+  }
+
+  // Allow only safe patient-editable fields
+  const { patientName, contactPhone, symptoms } = req.body;
+  if (patientName !== undefined) appointment.patientName = patientName;
+  if (contactPhone !== undefined) appointment.contactPhone = contactPhone;
+  if (symptoms !== undefined) appointment.symptoms = symptoms;
+
+  await appointment.save({ validateBeforeSave: true });
+
+  res.status(StatusCodes.OK).json({
+    msg: "Appointment updated successfully",
+    appointment,
+  });
+});
+
 // 6. Get appointments for a specific doctor (called by doctor-service)
 export const getAppointmentsByDoctorId = asyncHandler(async (req, res) => {
   const { doctorId } = req.params;
