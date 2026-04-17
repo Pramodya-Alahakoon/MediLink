@@ -1,0 +1,764 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MediLink - Kubernetes Dashboard</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          "Segoe UI",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background: #0a0e17;
+        color: #e2e8f0;
+        min-height: 100vh;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        border-bottom: 1px solid #1e3a5f;
+        padding: 20px 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .header h1 {
+        font-size: 24px;
+        font-weight: 700;
+        color: #fff;
+      }
+
+      .header h1 span {
+        color: #22d3ee;
+      }
+
+      .header-info {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .status-badge {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(34, 197, 94, 0.1);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        color: #22c55e;
+      }
+
+      .status-badge .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #22c55e;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.4;
+        }
+      }
+
+      .refresh-btn {
+        background: rgba(34, 211, 238, 0.1);
+        border: 1px solid rgba(34, 211, 238, 0.3);
+        color: #22d3ee;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 13px;
+        transition: all 0.2s;
+      }
+
+      .refresh-btn:hover {
+        background: rgba(34, 211, 238, 0.2);
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 30px 40px;
+      }
+
+      /* Stats Cards */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 30px;
+      }
+
+      .stat-card {
+        background: linear-gradient(135deg, #111827 0%, #1a2332 100%);
+        border: 1px solid #1e3a5f;
+        border-radius: 12px;
+        padding: 20px;
+      }
+
+      .stat-card .label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #64748b;
+        margin-bottom: 8px;
+      }
+
+      .stat-card .value {
+        font-size: 32px;
+        font-weight: 700;
+        color: #fff;
+      }
+
+      .stat-card .sub {
+        font-size: 12px;
+        color: #22c55e;
+        margin-top: 4px;
+      }
+
+      .stat-card.warning .sub {
+        color: #f59e0b;
+      }
+
+      .stat-card.error .sub {
+        color: #ef4444;
+      }
+
+      /* Section */
+      .section {
+        margin-bottom: 30px;
+      }
+
+      .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+      }
+
+      .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #f1f5f9;
+      }
+
+      .section-subtitle {
+        font-size: 13px;
+        color: #64748b;
+      }
+
+      /* Table */
+      .table-container {
+        background: linear-gradient(135deg, #111827 0%, #1a2332 100%);
+        border: 1px solid #1e3a5f;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th {
+        background: rgba(30, 58, 95, 0.3);
+        text-align: left;
+        padding: 14px 20px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #94a3b8;
+        font-weight: 600;
+        border-bottom: 1px solid #1e3a5f;
+      }
+
+      td {
+        padding: 14px 20px;
+        font-size: 13px;
+        border-bottom: 1px solid rgba(30, 58, 95, 0.3);
+        vertical-align: middle;
+      }
+
+      tr:last-child td {
+        border-bottom: none;
+      }
+
+      tr:hover td {
+        background: rgba(34, 211, 238, 0.03);
+      }
+
+      .pod-name {
+        font-weight: 600;
+        color: #e2e8f0;
+      }
+
+      .container-id {
+        font-family: "Cascadia Code", "Fira Code", monospace;
+        color: #64748b;
+        font-size: 12px;
+      }
+
+      .image-link {
+        color: #22d3ee;
+        text-decoration: none;
+        font-family: "Cascadia Code", "Fira Code", monospace;
+        font-size: 12px;
+      }
+
+      .image-link:hover {
+        text-decoration: underline;
+      }
+
+      /* Status badges */
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .status.running {
+        background: rgba(34, 197, 94, 0.1);
+        color: #22c55e;
+        border: 1px solid rgba(34, 197, 94, 0.2);
+      }
+
+      .status.running::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #22c55e;
+      }
+
+      .status.error,
+      .status.crashloopbackoff {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+      }
+
+      .status.error::before,
+      .status.crashloopbackoff::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #ef4444;
+      }
+
+      .status.pending {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+      }
+
+      .status.pending::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #f59e0b;
+      }
+
+      /* Action buttons */
+      .actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .action-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: 1px solid #1e3a5f;
+        background: transparent;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+      }
+
+      .action-btn.logs {
+        color: #22d3ee;
+      }
+
+      .action-btn.logs:hover {
+        background: rgba(34, 211, 238, 0.1);
+      }
+
+      .action-btn.more {
+        color: #94a3b8;
+      }
+
+      .action-btn.more:hover {
+        background: rgba(148, 163, 184, 0.1);
+      }
+
+      .action-btn.delete {
+        color: #ef4444;
+      }
+
+      .action-btn.delete:hover {
+        background: rgba(239, 68, 68, 0.1);
+      }
+
+      /* Footer */
+      .footer {
+        text-align: center;
+        padding: 20px;
+        color: #475569;
+        font-size: 12px;
+        border-top: 1px solid #1e3a5f;
+        margin-top: 20px;
+      }
+
+      .footer span {
+        color: #22d3ee;
+      }
+
+      /* Tabs */
+      .tabs {
+        display: flex;
+        gap: 4px;
+        background: #111827;
+        border: 1px solid #1e3a5f;
+        border-radius: 10px;
+        padding: 4px;
+        margin-bottom: 24px;
+        width: fit-content;
+      }
+
+      .tab {
+        padding: 8px 20px;
+        border-radius: 8px;
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .tab.active {
+        background: rgba(34, 211, 238, 0.1);
+        color: #22d3ee;
+      }
+
+      .tab:hover:not(.active) {
+        color: #94a3b8;
+      }
+
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      /* Showing items */
+      .showing-items {
+        text-align: right;
+        padding: 12px 20px;
+        font-size: 12px;
+        color: #64748b;
+        border-top: 1px solid rgba(30, 58, 95, 0.3);
+      }
+
+      .svc-type {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+      }
+
+      .svc-type.ClusterIP {
+        background: rgba(99, 102, 241, 0.1);
+        color: #818cf8;
+      }
+
+      .svc-type.NodePort {
+        background: rgba(34, 211, 238, 0.1);
+        color: #22d3ee;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 60px;
+        color: #64748b;
+      }
+
+      .loading .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid #1e3a5f;
+        border-top-color: #22d3ee;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto 16px;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div>
+        <h1>Medi<span>Link</span> — Kubernetes Deployment</h1>
+      </div>
+      <div class="header-info">
+        <div class="status-badge">
+          <div class="dot"></div>
+          Kubernetes running
+        </div>
+        <button class="refresh-btn" onclick="loadAll()">↻ Refresh</button>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- Stats -->
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card">
+          <div class="label">Total Pods</div>
+          <div class="value" id="stat-pods">—</div>
+          <div class="sub" id="stat-pods-sub">Loading...</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Services</div>
+          <div class="value" id="stat-svc">—</div>
+          <div class="sub" id="stat-svc-sub">Loading...</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Deployments</div>
+          <div class="value" id="stat-dep">—</div>
+          <div class="sub" id="stat-dep-sub">Loading...</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Namespace</div>
+          <div class="value" style="font-size: 22px">medilink</div>
+          <div class="sub">docker-desktop</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('pods')">
+          Pods Status
+        </button>
+        <button class="tab" onclick="switchTab('services')">Services</button>
+        <button class="tab" onclick="switchTab('deployments')">
+          Deployments
+        </button>
+      </div>
+
+      <!-- Pods Tab -->
+      <div class="tab-content active" id="tab-pods">
+        <div class="section">
+          <div class="section-header">
+            <div>
+              <div class="section-title">Kubernetes Pods Status</div>
+              <div class="section-subtitle">
+                All Kubernetes pods running in the cluster
+              </div>
+            </div>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 30px">
+                    <input type="checkbox" style="accent-color: #22d3ee" />
+                  </th>
+                  <th></th>
+                  <th>Name</th>
+                  <th>Container ID</th>
+                  <th>Image</th>
+                  <th>Status</th>
+                  <th>Restarts</th>
+                  <th>Age</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="pods-body">
+                <tr>
+                  <td colspan="9">
+                    <div class="loading">
+                      <div class="spinner"></div>
+                      Loading pods...
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="showing-items" id="pods-count"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Services Tab -->
+      <div class="tab-content" id="tab-services">
+        <div class="section">
+          <div class="section-header">
+            <div>
+              <div class="section-title">Kubernetes Services</div>
+              <div class="section-subtitle">
+                Service networking configuration
+              </div>
+            </div>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Cluster IP</th>
+                  <th>Port(s)</th>
+                  <th>Age</th>
+                </tr>
+              </thead>
+              <tbody id="svc-body">
+                <tr>
+                  <td colspan="6">
+                    <div class="loading">
+                      <div class="spinner"></div>
+                      Loading services...
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="showing-items" id="svc-count"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Deployments Tab -->
+      <div class="tab-content" id="tab-deployments">
+        <div class="section">
+          <div class="section-header">
+            <div>
+              <div class="section-title">Kubernetes Deployments</div>
+              <div class="section-subtitle">Deployment rollout status</div>
+            </div>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Name</th>
+                  <th>Ready</th>
+                  <th>Up-to-date</th>
+                  <th>Available</th>
+                  <th>Age</th>
+                </tr>
+              </thead>
+              <tbody id="dep-body">
+                <tr>
+                  <td colspan="6">
+                    <div class="loading">
+                      <div class="spinner"></div>
+                      Loading deployments...
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="showing-items" id="dep-count"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span>MediLink</span> Kubernetes Dashboard &bull; Namespace:
+      <strong>medilink</strong> &bull; Cluster:
+      <strong>docker-desktop</strong>
+    </div>
+
+    <script>
+      function switchTab(tab) {
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((el) => el.classList.remove("active"));
+        document
+          .querySelectorAll(".tab")
+          .forEach((el) => el.classList.remove("active"));
+        document.getElementById(`tab-${tab}`).classList.add("active");
+        event.target.classList.add("active");
+      }
+
+      async function loadPods() {
+        try {
+          const res = await fetch("/api/pods");
+          const pods = await res.json();
+          const tbody = document.getElementById("pods-body");
+
+          let running = 0;
+          tbody.innerHTML = pods
+            .map((pod) => {
+              const statusClass = pod.status.toLowerCase().replace(/\s/g, "");
+              if (pod.status === "Running") running++;
+              return `<tr>
+              <td><input type="checkbox" style="accent-color:#22d3ee"/></td>
+              <td><span class="status ${statusClass}"></span></td>
+              <td class="pod-name">${pod.name}</td>
+              <td class="container-id">${pod.containerId}</td>
+              <td><a class="image-link" href="#">${pod.image}</a></td>
+              <td><span class="status ${statusClass}">${pod.status}</span></td>
+              <td>${pod.restarts}</td>
+              <td>${pod.age}</td>
+              <td>
+                <div class="actions">
+                  <button class="action-btn logs" title="View Logs" onclick="viewLogs('${pod.name}')">☰</button>
+                  <button class="action-btn more" title="Details">⋮</button>
+                  <button class="action-btn delete" title="Delete Pod" onclick="deletePod('${pod.name}')">🗑</button>
+                </div>
+              </td>
+            </tr>`;
+            })
+            .join("");
+
+          document.getElementById("pods-count").textContent =
+            `Showing ${pods.length} items`;
+          document.getElementById("stat-pods").textContent = pods.length;
+          document.getElementById("stat-pods-sub").textContent =
+            `${running} running`;
+
+          const statCard = document.querySelector("#stat-pods").parentElement;
+          statCard.className =
+            running === pods.length ? "stat-card" : "stat-card warning";
+        } catch (err) {
+          document.getElementById("pods-body").innerHTML =
+            `<tr><td colspan="9" style="color:#ef4444;padding:20px">Error: ${err.message}</td></tr>`;
+        }
+      }
+
+      async function loadServices() {
+        try {
+          const res = await fetch("/api/services");
+          const services = await res.json();
+          const tbody = document.getElementById("svc-body");
+
+          tbody.innerHTML = services
+            .map(
+              (svc) => `<tr>
+              <td><span class="status running"></span></td>
+              <td class="pod-name">${svc.name}</td>
+              <td><span class="svc-type ${svc.type}">${svc.type}</span></td>
+              <td class="container-id">${svc.clusterIP}</td>
+              <td class="image-link">${svc.ports.join(", ")}</td>
+              <td>${svc.age}</td>
+            </tr>`,
+            )
+            .join("");
+
+          document.getElementById("svc-count").textContent =
+            `Showing ${services.length} items`;
+          document.getElementById("stat-svc").textContent = services.length;
+          document.getElementById("stat-svc-sub").textContent =
+            `${services.length} active`;
+        } catch (err) {
+          document.getElementById("svc-body").innerHTML =
+            `<tr><td colspan="6" style="color:#ef4444;padding:20px">Error: ${err.message}</td></tr>`;
+        }
+      }
+
+      async function loadDeployments() {
+        try {
+          const res = await fetch("/api/deployments");
+          const deps = await res.json();
+          const tbody = document.getElementById("dep-body");
+
+          let allReady = 0;
+          tbody.innerHTML = deps
+            .map((dep) => {
+              const isReady = dep.ready.startsWith(dep.ready.split("/")[1]);
+              if (isReady) allReady++;
+              return `<tr>
+              <td><span class="status ${isReady ? "running" : "error"}"></span></td>
+              <td class="pod-name">${dep.name}</td>
+              <td>${dep.ready}</td>
+              <td>${dep.upToDate}</td>
+              <td>${dep.available}</td>
+              <td>${dep.age}</td>
+            </tr>`;
+            })
+            .join("");
+
+          document.getElementById("dep-count").textContent =
+            `Showing ${deps.length} items`;
+          document.getElementById("stat-dep").textContent = deps.length;
+          document.getElementById("stat-dep-sub").textContent =
+            `${allReady} ready`;
+        } catch (err) {
+          document.getElementById("dep-body").innerHTML =
+            `<tr><td colspan="6" style="color:#ef4444;padding:20px">Error: ${err.message}</td></tr>`;
+        }
+      }
+
+      async function deletePod(name) {
+        if (
+          !confirm(
+            `Delete pod "${name}"? It will be recreated by the deployment.`,
+          )
+        )
+          return;
+        try {
+          await fetch(`/api/pods/${name}`, { method: "DELETE" });
+          setTimeout(loadAll, 1500);
+        } catch (err) {
+          alert("Error deleting pod: " + err.message);
+        }
+      }
+
+      function viewLogs(name) {
+        alert(
+          `To view logs, run in terminal:\nkubectl logs ${name} -n medilink`,
+        );
+      }
+
+      function loadAll() {
+        loadPods();
+        loadServices();
+        loadDeployments();
+      }
+
+      // Initial load
+      loadAll();
+
+      // Auto-refresh every 10 seconds
+      setInterval(loadAll, 10000);
+    </script>
+  </body>
+</html>
