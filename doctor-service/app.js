@@ -13,6 +13,11 @@ import doctorNotesRouter from "./routes/doctorNotesRoutes.js";
 import consultationRouter from "./routes/consultationRoutes.js";
 import verificationRouter from "./routes/verificationRoutes.js";
 import reviewRouter from "./routes/reviewRoutes.js";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -20,6 +25,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from uploads directory BEFORE 404 handler
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Routes — review routes BEFORE generic doctorRouter (avoid :id conflicts)
 app.use("/api/doctors", reviewRouter);
