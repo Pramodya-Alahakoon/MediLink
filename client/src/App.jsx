@@ -28,6 +28,7 @@ import AdminUsers from "./pages/Admin/Users";
 import AdminDoctors from "./pages/Admin/Doctors";
 import AdminAppointments from "./pages/Admin/Appointments";
 import AdminPayments from "./pages/Admin/Payments";
+import AdminMessages from "./pages/Admin/Messages";
 import PatientLayout from "./layouts/PatientLayout";
 import PatientDashboard from "./pages/Patient/Dashboard";
 import PatientProfile from "./pages/Patient/Profile";
@@ -204,6 +205,7 @@ function App() {
                       element={<AdminAppointments />}
                     />
                     <Route path="/admin/payments" element={<AdminPayments />} />
+                    <Route path="/admin/messages" element={<AdminMessages />} />
                   </Route>
                 </Route>
               </Routes>

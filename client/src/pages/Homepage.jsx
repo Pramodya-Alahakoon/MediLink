@@ -6,6 +6,7 @@ import Specialists from "@/section/Home/Specialists";
 import PathToWellness from "@/section/Home/PathToWellness";
 import WhyMediLink from "@/section/Home/WhyMediLink";
 import Testimonials from "@/section/Home/Testimonials";
+import AiChatBot from "@/components/AiChatBot";
 
 const Home = () => {
   return (
@@ -18,6 +19,7 @@ const Home = () => {
       <PathToWellness />
       <WhyMediLink />
       <Testimonials />
+      <AiChatBot />
     </main>
   );
 };
