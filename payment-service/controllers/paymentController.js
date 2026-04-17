@@ -311,12 +311,22 @@ export const refundPayment = async (req, res, next) => {
       throw new RefundError("Payment already refunded");
     }
 
-    if (payment.status !== "completed") {
-      throw new RefundError("Only completed payments can be refunded");
+    if (payment.status === "completed") {
+      throw new RefundError("Confirmed/completed payments cannot be refunded");
     }
 
-    // Create refund with Stripe
-    const refund = await createRefund(payment.stripeChargeId, amount, reason);
+    if (payment.status !== "pending" && payment.status !== "cancelled") {
+      throw new RefundError(
+        "Only pending or cancelled payments can be refunded",
+      );
+    }
+
+    // For pending/cancelled payments that have a Stripe charge, issue a Stripe refund
+    let stripeRefundId = null;
+    if (payment.stripeChargeId) {
+      const refund = await createRefund(payment.stripeChargeId, amount, reason);
+      stripeRefundId = refund.id;
+    }
 
     // Update payment status
     payment.status = "refunded";
@@ -328,7 +338,7 @@ export const refundPayment = async (req, res, next) => {
       data: {
         paymentId: payment._id,
         refundAmount: amount || payment.amount,
-        stripeRefundId: refund.id,
+        stripeRefundId: stripeRefundId,
       },
     });
   } catch (error) {

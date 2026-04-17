@@ -191,7 +191,7 @@ const AdminPayments = () => {
                         : "—"}
                     </td>
                     <td className="px-6 py-3 text-right">
-                      {p.status === "completed" && (
+                      {(p.status === "pending" || p.status === "cancelled") && (
                         <button
                           onClick={() => handleRefund(p._id)}
                           disabled={refundLoading === p._id}
