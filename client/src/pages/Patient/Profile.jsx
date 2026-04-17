@@ -122,6 +122,20 @@ const PatientProfile = () => {
           ? "Profile updated successfully!"
           : "Profile created successfully!",
       );
+
+      // Fire notification (fire-and-forget)
+      if (user?.email && saved.phone && saved.name) {
+        patientApi
+          .sendNotification({
+            email: user.email,
+            phone: saved.phone,
+            name: saved.name,
+            type: "PROFILE_UPDATED",
+            recipientId: uid,
+            recipientRole: "patient",
+          })
+          .catch(() => {});
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to save profile");
     } finally {
