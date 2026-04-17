@@ -150,7 +150,8 @@ const AdminDoctors = () => {
           >
             <div className="flex items-center gap-4 mb-6">
               <div className="w-16 h-16 rounded-full bg-teal-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
-                {selectedDoctor.profileImage ? (
+                {selectedDoctor.profileImage &&
+                selectedDoctor.profileImage.startsWith("http") ? (
                   <img
                     src={selectedDoctor.profileImage}
                     alt=""
@@ -191,13 +192,55 @@ const AdminDoctors = () => {
               <div className="flex justify-between">
                 <span className="text-slate-500">Experience</span>
                 <span className="text-[#112429] dark:text-slate-200 font-medium">
-                  {selectedDoctor.experience || "—"} years
+                  {selectedDoctor.experience != null
+                    ? `${selectedDoctor.experience} years`
+                    : "—"}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Fee</span>
                 <span className="text-[#112429] dark:text-slate-200 font-medium">
-                  Rs. 2,500
+                  {selectedDoctor.consultationFee
+                    ? `Rs. ${selectedDoctor.consultationFee.toLocaleString()}`
+                    : "—"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Hospital</span>
+                <span className="text-[#112429] dark:text-slate-200 font-medium">
+                  {selectedDoctor.hospital || "—"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Qualifications</span>
+                <span className="text-[#112429] dark:text-slate-200 font-medium text-right max-w-[60%]">
+                  {selectedDoctor.qualifications || "—"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Location</span>
+                <span className="text-[#112429] dark:text-slate-200 font-medium">
+                  {selectedDoctor.location || "—"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Languages</span>
+                <span className="text-[#112429] dark:text-slate-200 font-medium">
+                  {selectedDoctor.languages?.length
+                    ? selectedDoctor.languages.join(", ")
+                    : "—"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Verified</span>
+                <span className="text-[#112429] dark:text-slate-200 font-medium">
+                  {selectedDoctor.isVerified ? "Yes" : "No"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Sessions</span>
+                <span className="text-[#112429] dark:text-slate-200 font-medium">
+                  {selectedDoctor.sessionCount ?? 0}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -208,6 +251,16 @@ const AdminDoctors = () => {
                     : "No ratings yet"}
                 </span>
               </div>
+              {selectedDoctor.bio && (
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                  <span className="text-slate-500 text-xs uppercase tracking-wider">
+                    Bio
+                  </span>
+                  <p className="text-[#112429] dark:text-slate-200 text-sm mt-1">
+                    {selectedDoctor.bio}
+                  </p>
+                </div>
+              )}
             </div>
             <button
               onClick={() => setSelectedDoctor(null)}
@@ -254,7 +307,8 @@ const AdminDoctors = () => {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-teal-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                          {d.profileImage ? (
+                          {d.profileImage &&
+                          d.profileImage.startsWith("http") ? (
                             <img
                               src={d.profileImage}
                               alt=""
