@@ -408,7 +408,7 @@ function PlanAppointment() {
                   ? Array.from({ length: 3 }).map((_, i) => (
                       <div
                         key={i}
-                        className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 animate-pulse h-[320px]"
+                        className="bg-white dark:bg-slate-800 rounded-[24px] p-6 shadow-sm border border-gray-100 dark:border-slate-700 animate-pulse h-[320px]"
                       ></div>
                     ))
                   : filteredDoctors.map((doc, index) => (
@@ -443,7 +443,7 @@ function PlanAppointment() {
                               <span className="font-bold text-[#055153] text-sm">
                                 {doc.rating?.average?.toFixed(1) || "4.9"}
                               </span>
-                              <span className="text-xs text-gray-400">
+                              <span className="text-xs text-gray-400 dark:text-slate-500">
                                 ({doc.rating?.count || "0"} reviews)
                               </span>
                             </div>
@@ -451,7 +451,7 @@ function PlanAppointment() {
                             <h3 className="font-extrabold text-[19px] text-[#112429] dark:text-white leading-tight truncate">
                               Dr. {doc.name}
                             </h3>
-                            <p className="text-[#64748B] text-[13px] font-medium leading-relaxed mb-3 truncate">
+                            <p className="text-[#64748B] dark:text-slate-400 text-[13px] font-medium leading-relaxed mb-3 truncate">
                               {doc.specialization}
                             </p>
 
@@ -463,22 +463,22 @@ function PlanAppointment() {
                           </div>
                         </div>
 
-                        <div className="space-y-4 mb-7 flex-1 border-t border-gray-100 pt-5">
+                        <div className="space-y-4 mb-7 flex-1 border-t border-gray-100 dark:border-slate-700 pt-5">
                           <div className="flex items-center justify-between text-[13px]">
-                            <div className="flex items-center gap-2.5 text-[#4B5A69] font-medium">
+                            <div className="flex items-center gap-2.5 text-[#4B5A69] dark:text-slate-400 font-medium">
                               <FiCalendar className="w-4 h-4 text-[#055153]" />{" "}
                               Next Slot
                             </div>
-                            <div className="font-bold text-[#112429]">
+                            <div className="font-bold text-[#112429] dark:text-white">
                               Tomorrow, 09:30 AM
                             </div>
                           </div>
                           <div className="flex items-center justify-between text-[13px]">
-                            <div className="flex items-center gap-2.5 text-[#4B5A69] font-medium">
+                            <div className="flex items-center gap-2.5 text-[#4B5A69] dark:text-slate-400 font-medium">
                               <FiCreditCard className="w-4 h-4 text-[#055153]" />{" "}
                               Consultation
                             </div>
-                            <div className="font-bold text-[#112429]">
+                            <div className="font-bold text-[#112429] dark:text-white">
                               Rs. 2500.00
                             </div>
                           </div>
@@ -501,14 +501,14 @@ function PlanAppointment() {
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Card 1 */}
-                  <div className="rounded-[28px] p-8 bg-[#F8FAFC] border border-[#EEF2F6]">
-                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm">
+                  <div className="rounded-[28px] p-8 bg-[#F8FAFC] dark:bg-slate-800 border border-[#EEF2F6] dark:border-slate-700">
+                    <div className="w-12 h-12 bg-white dark:bg-slate-700 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
                       <FaShieldAlt className="w-5 h-5 text-[#055153]" />
                     </div>
-                    <h3 className="text-lg font-bold text-[#112429] mb-3">
+                    <h3 className="text-lg font-bold text-[#112429] dark:text-white mb-3">
                       Verified Experts
                     </h3>
-                    <p className="text-[#64748B] text-[14px] leading-relaxed font-medium">
+                    <p className="text-[#64748B] dark:text-slate-400 text-[14px] leading-relaxed font-medium">
                       Every clinician is rigorously vetted by our editorial
                       board for credentials and experience.
                     </p>
@@ -527,14 +527,14 @@ function PlanAppointment() {
                     </p>
                   </div>
                   {/* Card 3 */}
-                  <div className="rounded-[28px] p-8 bg-[#F8FAFC] border border-[#EEF2F6]">
-                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm">
+                  <div className="rounded-[28px] p-8 bg-[#F8FAFC] dark:bg-slate-800 border border-[#EEF2F6] dark:border-slate-700">
+                    <div className="w-12 h-12 bg-white dark:bg-slate-700 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
                       <FiShield className="w-5 h-5 text-[#055153]" />
                     </div>
-                    <h3 className="text-lg font-bold text-[#112429] mb-3">
+                    <h3 className="text-lg font-bold text-[#112429] dark:text-white mb-3">
                       Data Privacy
                     </h3>
-                    <p className="text-[#64748B] text-[14px] leading-relaxed font-medium">
+                    <p className="text-[#64748B] dark:text-slate-400 text-[14px] leading-relaxed font-medium">
                       Your medical records and personal details are encrypted
                       using clinical-grade security protocols.
                     </p>
@@ -648,8 +648,8 @@ function PlanAppointment() {
                                         isSelected
                                           ? "bg-[#055153] text-white shadow-lg"
                                           : isBooked
-                                            ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60 line-through decoration-gray-400"
-                                            : "bg-[#EBF3FB] text-[#0761A6] hover:bg-[#D5E6F7]"
+                                            ? "bg-gray-200 dark:bg-slate-700/50 text-gray-400 dark:text-slate-600 cursor-not-allowed opacity-60 line-through decoration-gray-400"
+                                            : "bg-[#EBF3FB] dark:bg-slate-700 text-[#0761A6] dark:text-teal-400 hover:bg-[#D5E6F7] dark:hover:bg-slate-600"
                                       }`}
                                     >
                                       {slot.startTime}
@@ -680,8 +680,8 @@ function PlanAppointment() {
                                         isSelected
                                           ? "bg-[#055153] text-white shadow-lg"
                                           : isBooked
-                                            ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60 line-through decoration-gray-400"
-                                            : "bg-[#EBF3FB] text-[#0761A6] hover:bg-[#D5E6F7]"
+                                            ? "bg-gray-200 dark:bg-slate-700/50 text-gray-400 dark:text-slate-600 cursor-not-allowed opacity-60 line-through decoration-gray-400"
+                                            : "bg-[#EBF3FB] dark:bg-slate-700 text-[#0761A6] dark:text-teal-400 hover:bg-[#D5E6F7] dark:hover:bg-slate-600"
                                       }`}
                                     >
                                       {slot.startTime}
@@ -712,8 +712,8 @@ function PlanAppointment() {
                                         isSelected
                                           ? "bg-[#055153] text-white shadow-lg"
                                           : isBooked
-                                            ? "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60 line-through decoration-gray-400"
-                                            : "bg-[#EBF3FB] text-[#0761A6] hover:bg-[#D5E6F7]"
+                                            ? "bg-gray-200 dark:bg-slate-700/50 text-gray-400 dark:text-slate-600 cursor-not-allowed opacity-60 line-through decoration-gray-400"
+                                            : "bg-[#EBF3FB] dark:bg-slate-700 text-[#0761A6] dark:text-teal-400 hover:bg-[#D5E6F7] dark:hover:bg-slate-600"
                                       }`}
                                     >
                                       {slot.startTime}
@@ -746,7 +746,7 @@ function PlanAppointment() {
                     className={`px-8 py-3.5 rounded-xl font-bold transition-all duration-300 shadow-xl ${
                       selectedSlot
                         ? "bg-[#055153] hover:bg-[#033A3C] text-white shadow-[#055153]/30 cursor-pointer transform hover:-translate-y-0.5"
-                        : "bg-gray-300 text-white shadow-none cursor-not-allowed opacity-70"
+                        : "bg-gray-300 dark:bg-slate-700 text-white dark:text-slate-500 shadow-none cursor-not-allowed opacity-70"
                     }`}
                   >
                     Confirm Selection
@@ -1058,7 +1058,7 @@ function PlanAppointment() {
                     className={`px-8 py-3.5 rounded-xl font-bold transition-all duration-300 shadow-xl ${
                       patientName && contactPhone.length === 10 && symptoms
                         ? "bg-[#055153] hover:bg-[#033A3C] text-white shadow-[#055153]/30 cursor-pointer transform hover:-translate-y-0.5"
-                        : "bg-gray-300 text-white shadow-none cursor-not-allowed opacity-70"
+                        : "bg-gray-300 dark:bg-slate-700 text-white dark:text-slate-500 shadow-none cursor-not-allowed opacity-70"
                     }`}
                   >
                     Review & Confirm
@@ -1139,7 +1139,7 @@ function PlanAppointment() {
                       Booking Summary
                     </div>
                     <div className="flex justify-between items-center gap-4">
-                      <span className="text-[13px] text-[#4B5A69] dark:bg-slate-400 font-medium">
+                      <span className="text-[13px] text-[#4B5A69] dark:text-slate-400 font-medium">
                         Selected Time
                       </span>
                       <span className="text-[13px] font-bold text-[#112429] dark:text-white text-right">
@@ -1244,7 +1244,7 @@ function PlanAppointment() {
                       <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase mb-1">
                         Status
                       </p>
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-bold">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 text-xs font-bold">
                         ⏳ Pending Confirmation
                       </span>
                     </div>
@@ -1355,7 +1355,7 @@ function PlanAppointment() {
                     </p>
                     <div className="space-y-4 text-sm">
                       <div className="flex justify-between items-center">
-                        <span className="text-slate-500 font-medium">
+                        <span className="text-slate-500 dark:text-slate-400 font-medium">
                           Full Name
                         </span>
                         <span className="font-bold text-[#112429] dark:text-white">
@@ -1363,7 +1363,7 @@ function PlanAppointment() {
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-slate-500 font-medium">
+                        <span className="text-slate-500 dark:text-slate-400 font-medium">
                           Phone
                         </span>
                         <span className="font-bold text-[#112429] dark:text-white">
@@ -1371,7 +1371,7 @@ function PlanAppointment() {
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-slate-500 font-medium">
+                        <span className="text-slate-500 dark:text-slate-400 font-medium">
                           Consultation Type
                         </span>
                         <span
@@ -1388,7 +1388,7 @@ function PlanAppointment() {
                       </div>
                       <div className="h-[1px] bg-gray-100 dark:bg-slate-700" />
                       <div>
-                        <span className="text-slate-500 font-medium block mb-3 flex items-center gap-2">
+                        <span className="text-slate-500 dark:text-slate-400 font-medium block mb-3 flex items-center gap-2">
                           <FiZap className="text-amber-500 w-3.5 h-3.5" />
                           Symptoms & Clinical Notes (Editable)
                         </span>
@@ -1425,7 +1425,7 @@ function PlanAppointment() {
                             <h4 className="font-bold text-[#112429] dark:text-white text-lg">
                               Stripe Checkout
                             </h4>
-                            <p className="text-sm text-slate-500 font-medium">
+                            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
                               Safe & Secure Credit Card
                             </p>
                           </div>
