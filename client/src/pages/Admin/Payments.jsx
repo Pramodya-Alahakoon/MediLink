@@ -34,7 +34,7 @@ const AdminPayments = () => {
     setLoading(true);
     try {
       const { data: res } = await customFetch.get(
-        "/api/payments/admin/overview",
+        "/api/payment/admin/overview",
       );
       setData(res.data);
     } catch (err) {
@@ -52,7 +52,7 @@ const AdminPayments = () => {
     if (!window.confirm("Issue a refund for this payment?")) return;
     setRefundLoading(paymentId);
     try {
-      await customFetch.post(`/api/payments/${paymentId}/refund`);
+      await customFetch.post(`/api/payment/${paymentId}/refund`);
       fetchOverview();
     } catch (err) {
       alert("Refund failed: " + (err.response?.data?.message || err.message));

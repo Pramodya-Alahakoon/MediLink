@@ -302,7 +302,8 @@ export const refundPayment = async (req, res, next) => {
       throw new PaymentNotFoundError();
     }
 
-    if (payment.userId.toString() !== userId.toString()) {
+    const role = req.user?.role;
+    if (role !== "admin" && payment.userId.toString() !== userId.toString()) {
       throw new InvalidPaymentError("Unauthorized access to this payment");
     }
 
@@ -344,6 +345,13 @@ export const refundPayment = async (req, res, next) => {
 // Admin: Platform-wide payment overview
 export const getAdminPaymentOverview = async (req, res, next) => {
   try {
+    const role = req.user?.role;
+    if (role !== "admin") {
+      return res
+        .status(403)
+        .json({ status: "error", message: "Admin access required" });
+    }
+
     const [
       totalPayments,
       completedPayments,
