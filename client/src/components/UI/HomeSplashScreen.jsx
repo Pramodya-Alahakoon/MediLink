@@ -3,14 +3,20 @@ import { motion } from "framer-motion";
 
 const HomeSplashScreen = () => {
   return (
-    <div className="fixed inset-0 z-[9999] overflow-hidden bg-[#031417]">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(20,184,166,0.28),transparent_36%),radial-gradient(circle_at_bottom_right,rgba(8,145,178,0.24),transparent_32%),linear-gradient(135deg,#031417_0%,#06242A_52%,#020B0D_100%)]" />
-      <div className="absolute inset-0 opacity-[0.14] [background-image:linear-gradient(rgba(255,255,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:64px_64px]" />
+    <div className="fixed inset-0 z-[9999] overflow-hidden bg-white dark:bg-[#031417] transition-colors duration-300">
+      {/* Dark theme gradients */}
+      <div className="absolute inset-0 hidden dark:block bg-[radial-gradient(circle_at_top,rgba(20,184,166,0.28),transparent_36%),radial-gradient(circle_at_bottom_right,rgba(8,145,178,0.24),transparent_32%),linear-gradient(135deg,#031417_0%,#06242A_52%,#020B0D_100%)]" />
+      {/* Light theme gradients */}
+      <div className="absolute inset-0 dark:hidden bg-[radial-gradient(circle_at_top,rgba(20,184,166,0.12),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(8,145,178,0.08),transparent_36%),linear-gradient(135deg,#ffffff_0%,#f0fdfa_52%,#f8fafb_100%)]" />
+
+      {/* Grid overlay */}
+      <div className="absolute inset-0 opacity-[0.08] dark:opacity-[0.14] [background-image:linear-gradient(rgba(0,0,0,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.04)_1px,transparent_1px)] dark:[background-image:linear-gradient(rgba(255,255,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:64px_64px]" />
+
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1.05 }}
         transition={{ duration: 2.2, ease: "easeInOut" }}
-        className="absolute left-1/2 top-1/2 h-[28rem] w-[28rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-400/10 blur-3xl"
+        className="absolute left-1/2 top-1/2 h-[28rem] w-[28rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-teal-400/5 dark:bg-teal-400/10 blur-3xl"
       />
 
       <div className="relative z-10 flex h-full w-full items-center justify-center px-6">
@@ -29,7 +35,7 @@ const HomeSplashScreen = () => {
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 8, ease: "linear", repeat: Infinity }}
-              className="absolute inset-0 rounded-[2rem] border border-white/10"
+              className="absolute inset-0 rounded-[2rem] border border-gray-200/60 dark:border-white/10"
               style={{
                 background:
                   "conic-gradient(from 180deg, rgba(20,184,166,0) 0deg, rgba(20,184,166,0.65) 120deg, rgba(14,165,233,0.55) 220deg, rgba(20,184,166,0) 360deg)",
@@ -40,7 +46,7 @@ const HomeSplashScreen = () => {
                 maskComposite: "exclude",
               }}
             />
-            <div className="absolute inset-[10px] rounded-[1.8rem] border border-white/10 bg-white/8 backdrop-blur-xl shadow-[0_0_60px_rgba(20,184,166,0.18)]" />
+            <div className="absolute inset-[10px] rounded-[1.8rem] border border-gray-200/40 dark:border-white/10 bg-white/60 dark:bg-white/8 backdrop-blur-xl shadow-[0_0_60px_rgba(20,184,166,0.1)] dark:shadow-[0_0_60px_rgba(20,184,166,0.18)]" />
             <motion.div
               animate={{ y: [0, -6, 0] }}
               transition={{
@@ -62,10 +68,10 @@ const HomeSplashScreen = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.22, duration: 0.65 }}
-            className="mt-8 flex items-center gap-3 rounded-full border border-white/10 bg-white/6 px-4 py-2 backdrop-blur-md"
+            className="mt-8 flex items-center gap-3 rounded-full border border-gray-200/60 dark:border-white/15 bg-gray-50/80 dark:bg-white/10 px-4 py-2 backdrop-blur-md"
           >
             <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_14px_rgba(74,222,128,0.9)]" />
-            <span className="font-inter text-[11px] font-semibold uppercase tracking-[0.28em] text-white/70">
+            <span className="font-inter text-[11px] font-semibold uppercase tracking-[0.28em] text-gray-600 dark:text-white/90">
               Smart Care Platform
             </span>
           </motion.div>
@@ -74,7 +80,7 @@ const HomeSplashScreen = () => {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.34, duration: 0.72 }}
-            className="mt-6 text-center font-manrope text-[42px] font-black tracking-[-0.04em] text-white md:text-[72px]"
+            className="mt-6 text-center font-manrope text-[42px] font-black tracking-[-0.04em] text-gray-900 dark:text-white md:text-[72px]"
           >
             MediLink
           </motion.h1>
@@ -83,23 +89,23 @@ const HomeSplashScreen = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.65 }}
-            className="mt-3 max-w-xl text-center font-inter text-[14px] font-medium leading-7 text-white/68 md:text-[16px]"
+            className="mt-3 max-w-xl text-center font-inter text-[14px] font-medium leading-7 text-gray-500 dark:text-white/68 md:text-[16px]"
           >
             Connected appointments, telemedicine, records, and care workflows in
             one modern healthcare experience.
           </motion.p>
 
           <div className="mt-10 flex w-full max-w-md flex-col gap-4">
-            <div className="relative h-[6px] overflow-hidden rounded-full bg-white/10">
+            <div className="relative h-[6px] overflow-hidden rounded-full bg-gray-200/60 dark:bg-white/10">
               <motion.div
                 initial={{ x: "-100%" }}
                 animate={{ x: "0%" }}
                 transition={{ duration: 2.15, ease: [0.22, 1, 0.36, 1] }}
-                className="absolute inset-y-0 left-0 w-full rounded-full bg-gradient-to-r from-teal-300 via-cyan-300 to-emerald-300 shadow-[0_0_20px_rgba(94,234,212,0.55)]"
+                className="absolute inset-y-0 left-0 w-full rounded-full bg-gradient-to-r from-teal-400 via-cyan-400 to-emerald-400 dark:from-teal-300 dark:via-cyan-300 dark:to-emerald-300 shadow-[0_0_20px_rgba(94,234,212,0.4)] dark:shadow-[0_0_20px_rgba(94,234,212,0.55)]"
               />
             </div>
 
-            <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.2em] text-white/45">
+            <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400 dark:text-white/45">
               <span>Initializing</span>
               <span>Experience Ready</span>
             </div>

@@ -1,6 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiLogIn, FiUserPlus, FiLogOut, FiUser, FiMenu, FiX, FiSun, FiMoon } from "react-icons/fi";
+import {
+  FiLogIn,
+  FiUserPlus,
+  FiLogOut,
+  FiUser,
+  FiMenu,
+  FiX,
+  FiSun,
+  FiMoon,
+} from "react-icons/fi";
 import Logo from "@/components/UI/Logo";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import customFetch from "@/utils/customFetch";
@@ -10,7 +19,6 @@ import Modal from "@/components/UI/Modal";
 
 const NavItems = [
   { title: "Home", path: "/" },
-  { title: "Appointments", path: "/appointments" },
   { title: "About", path: "/about" },
   { title: "Contact", path: "/contact" },
 ];
@@ -47,17 +55,26 @@ function NavComponent() {
 
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? "py-3" : "py-5"}`}>
-        <div className={`mx-4 sm:mx-6 lg:mx-10 rounded-2xl transition-all duration-500 px-4 sm:px-6 lg:px-8 ${
-          isScrolled
-            ? "glass shadow-xl shadow-tertiary/5 dark:bg-slate-900/80 dark:border-white/10 dark:shadow-slate-900/20"
-            : "bg-transparent"
-        }`}>
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? "py-3" : "py-5"}`}
+      >
+        <div
+          className={`mx-4 sm:mx-6 lg:mx-10 rounded-2xl transition-all duration-500 px-4 sm:px-6 lg:px-8 ${
+            isScrolled
+              ? "glass shadow-xl shadow-tertiary/5 dark:bg-slate-900/80 dark:border-white/10 dark:shadow-slate-900/20"
+              : "bg-transparent"
+          }`}
+        >
           <div className="flex items-center justify-between h-14">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3 group flex-shrink-0">
+            <Link
+              to="/"
+              className="flex items-center gap-3 group flex-shrink-0"
+            >
               <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
-                <span className="text-white font-black text-base font-manrope">M</span>
+                <span className="text-white font-black text-base font-manrope">
+                  M
+                </span>
               </div>
               <span className="font-bold text-lg text-tertiary dark:text-white font-manrope tracking-tight hidden sm:block">
                 Medi<span className="text-primary">Link</span>
@@ -89,7 +106,11 @@ function NavComponent() {
                 aria-label="Toggle Dark Mode"
                 className="w-10 h-10 rounded-full flex items-center justify-center bg-white/50 dark:bg-slate-800 border border-white/60 dark:border-slate-700 text-tertiary dark:text-yellow-400 hover:bg-white/80 dark:hover:bg-slate-700 transition-colors"
               >
-                {theme === "dark" ? <FiSun className="w-4 h-4" /> : <FiMoon className="w-4 h-4" />}
+                {theme === "dark" ? (
+                  <FiSun className="w-4 h-4" />
+                ) : (
+                  <FiMoon className="w-4 h-4" />
+                )}
               </button>
 
               {currentUser ? (
@@ -131,13 +152,21 @@ function NavComponent() {
                 onClick={toggleTheme}
                 className="w-9 h-9 rounded-xl bg-white/80 dark:bg-slate-800 flex items-center justify-center text-tertiary dark:text-yellow-400 hover:text-primary dark:hover:text-yellow-300 transition-colors"
               >
-                {theme === "dark" ? <FiSun className="w-5 h-5" /> : <FiMoon className="w-5 h-5" />}
+                {theme === "dark" ? (
+                  <FiSun className="w-5 h-5" />
+                ) : (
+                  <FiMoon className="w-5 h-5" />
+                )}
               </button>
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="w-9 h-9 rounded-xl bg-white/80 dark:bg-slate-800 flex items-center justify-center text-tertiary dark:text-slate-200 hover:text-primary dark:hover:text-white transition-colors border border-transparent dark:border-slate-700"
               >
-                {isMobileMenuOpen ? <FiX className="w-5 h-5" /> : <FiMenu className="w-5 h-5" />}
+                {isMobileMenuOpen ? (
+                  <FiX className="w-5 h-5" />
+                ) : (
+                  <FiMenu className="w-5 h-5" />
+                )}
               </button>
             </div>
           </div>
@@ -178,7 +207,10 @@ function NavComponent() {
                       </button>
                     </Link>
                     <button
-                      onClick={() => { setIsLogoutModalOpen(true); setIsMobileMenuOpen(false); }}
+                      onClick={() => {
+                        setIsLogoutModalOpen(true);
+                        setIsMobileMenuOpen(false);
+                      }}
                       className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold bg-tertiary text-white font-inter"
                     >
                       <FiLogOut className="w-4 h-4" />
@@ -207,7 +239,11 @@ function NavComponent() {
       </header>
 
       {/* Logout Confirmation Modal */}
-      <Modal isOpen={isLogoutModalOpen} onClose={() => setIsLogoutModalOpen(false)} title="Confirm Logout">
+      <Modal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        title="Confirm Logout"
+      >
         <div className="space-y-5">
           <p className="text-neutral font-inter text-base">
             Are you sure you want to log out of MediLink Cloud?
